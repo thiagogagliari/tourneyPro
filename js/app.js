@@ -576,7 +576,7 @@ class TournamentManager {
         <div class="card">
           <div class="player-photo-container">
             <img src="${
-              player.photo || "https://via.placeholder.com/60"
+              player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" alt="${
           player.name
         }" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
@@ -688,7 +688,7 @@ class TournamentManager {
         const club = this.data.clubs.find((c) => c.id == coach.clubId);
         return `
         <div class="card">
-          <img src="${coach.photo || "https://via.placeholder.com/60"}" alt="${
+          <img src="${coach.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" alt="${
           coach.name
         }" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
           <h3>${coach.name}</h3>
@@ -932,11 +932,7 @@ class TournamentManager {
             <div class="event-details">
               <div class="event-type">${event.type}</div>
               <div class="event-player">
-                ${
-                  player?.photo
-                    ? `<img src="${player.photo}" class="event-player-photo" alt="${event.player}">`
-                    : ""
-                }
+                <img src="${player?.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" class="event-player-photo" alt="${event.player}">
                 <span class="player-name">${event.player}</span>
               </div>
             </div>
@@ -2042,7 +2038,7 @@ class TournamentManager {
 
     // Preencher dados do modal
     document.getElementById("profile-photo").src =
-      player.photo || "https://via.placeholder.com/120";
+      player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif";
     document.getElementById("profile-name").textContent = player.name;
     document.getElementById("profile-position").textContent = player.position;
     document.getElementById("profile-club-logo").src =
@@ -2371,7 +2367,7 @@ class TournamentManager {
       })">
         <div class="squad-player-header">
           <img src="${
-            player.photo || "https://via.placeholder.com/60"
+            player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
           }" class="squad-player-photo" alt="${player.name}">
           <div class="squad-player-info">
             <h4>${player.name}</h4>
@@ -2516,7 +2512,7 @@ class TournamentManager {
         })">
           <div class="top-player-info">
             <img src="${
-              scorer.player.photo || "https://via.placeholder.com/40"
+              scorer.player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="top-player-photo" alt="${scorer.player.name}">
             <div>
               <div class="top-player-name">${scorer.player.name}</div>
@@ -2547,7 +2543,7 @@ class TournamentManager {
         })">
           <div class="top-player-info">
             <img src="${
-              assist.player.photo || "https://via.placeholder.com/40"
+              assist.player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="top-player-photo" alt="${assist.player.name}">
             <div>
               <div class="top-player-name">${assist.player.name}</div>
@@ -2880,7 +2876,7 @@ class TournamentManager {
         })">
           <div class="tournament-player-info">
             <img src="${
-              scorer.player.photo || "https://via.placeholder.com/40"
+              scorer.player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="tournament-player-photo" alt="${scorer.player.name}">
             <div class="tournament-player-details">
               <div class="tournament-player-name">${scorer.player.name}</div>
@@ -2915,7 +2911,7 @@ class TournamentManager {
         })">
           <div class="tournament-player-info">
             <img src="${
-              assist.player.photo || "https://via.placeholder.com/40"
+              assist.player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="tournament-player-photo" alt="${assist.player.name}">
             <div class="tournament-player-details">
               <div class="tournament-player-name">${assist.player.name}</div>
