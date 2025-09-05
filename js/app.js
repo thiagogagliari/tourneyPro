@@ -160,13 +160,16 @@ class TournamentManager {
     // Se não há currentUser, retorna array vazio
     if (!this.currentUser) return [];
     
-    // Filtra por userId do usuário atual
+    // Filtra por userId do usuário atual, mas se não encontrar nada, retorna todos os dados
     const filtered = this.data[type].filter(
       (item) => item.userId === this.currentUser.id
     );
     
-    console.log(`getUserData(${type}): ${filtered.length} itens para usuário ${this.currentUser.id}`);
-    return filtered;
+    // Se não há dados filtrados por usuário, retorna todos (para compatibilidade)
+    const result = filtered.length > 0 ? filtered : this.data[type];
+    
+    console.log(`getUserData(${type}): ${result.length} itens (${filtered.length} do usuário ${this.currentUser.id})`);
+    return result;
   }
 
   updateStats() {
