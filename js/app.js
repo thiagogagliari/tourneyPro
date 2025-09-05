@@ -3,13 +3,13 @@ class TournamentManager {
   constructor() {
     this.currentUser = null;
     this.data = {
-      users: cloudStorage.loadData("users"),
-      tournaments: cloudStorage.loadData("tournaments"),
-      clubs: cloudStorage.loadData("clubs"),
-      players: cloudStorage.loadData("players"),
-      coaches: cloudStorage.loadData("coaches"),
-      matches: cloudStorage.loadData("matches"),
-      rounds: cloudStorage.loadData("rounds"),
+      users: cloudStorage.loadDataSync("users"),
+      tournaments: cloudStorage.loadDataSync("tournaments"),
+      clubs: cloudStorage.loadDataSync("clubs"),
+      players: cloudStorage.loadDataSync("players"),
+      coaches: cloudStorage.loadDataSync("coaches"),
+      matches: cloudStorage.loadDataSync("matches"),
+      rounds: cloudStorage.loadDataSync("rounds"),
     };
     this.init();
   }
@@ -3043,6 +3043,23 @@ class TournamentManager {
     }
   }
 
+  // Carregar dados da nuvem
+  async loadCloudData() {
+    if (cloudStorage.firebaseReady && cloudStorage.currentUser) {
+      this.data.users = await cloudStorage.loadData("users");
+      this.data.tournaments = await cloudStorage.loadData("tournaments");
+      this.data.clubs = await cloudStorage.loadData("clubs");
+      this.data.players = await cloudStorage.loadData("players");
+      this.data.coaches = await cloudStorage.loadData("coaches");
+      this.data.matches = await cloudStorage.loadData("matches");
+      this.data.rounds = await cloudStorage.loadData("rounds");
+      
+      // Atualizar interface
+      this.updateStats();
+      this.loadDashboardData();
+    }
+  }
+
   // Mobile Menu Functions
   toggleMobileMenu() {
     const sidebar = document.getElementById("sidebar");
@@ -3065,6 +3082,8 @@ class TournamentManager {
       try {
         if (await this.login(email, password)) {
           document.getElementById("login-form").reset();
+          // Recarregar dados da nuvem
+          await this.loadCloudData();
         } else {
           alert("Email ou senha incorretos!");
         }

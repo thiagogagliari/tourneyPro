@@ -64,8 +64,25 @@ class CloudStorage {
     }
   }
 
-  // Carregar dados (localStorage primeiro)
-  loadData(key) {
+  // Carregar dados (localStorage primeiro, nuvem se logado)
+  async loadData(key) {
+    // Se logado, tenta carregar da nuvem primeiro
+    if (this.firebaseReady && this.currentUser) {
+      const cloudData = await this.loadFromCloud(key);
+      if (cloudData) {
+        // Salva no localStorage para cache
+        localStorage.setItem(key, JSON.stringify(cloudData));
+        return cloudData;
+      }
+    }
+    
+    // Fallback para localStorage
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : [];
+  }
+
+  // Carregar dados síncronos (apenas localStorage)
+  loadDataSync(key) {
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : [];
   }
@@ -75,6 +92,7 @@ class CloudStorage {
     if (!this.firebaseReady || !this.currentUser) return;
 
     try {
+      console.log(`Salvando ${key} na nuvem:`, data.length, "itens");
       await this.db
         .collection("users")
         .doc(this.currentUser.uid)
@@ -84,6 +102,7 @@ class CloudStorage {
           data: data,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
         });
+      console.log(`${key} salvo com sucesso na nuvem`);
     } catch (error) {
       console.log("Erro ao salvar na nuvem:", error);
     }
@@ -94,6 +113,7 @@ class CloudStorage {
     if (!this.firebaseReady || !this.currentUser) return null;
 
     try {
+      console.log(`Carregando ${key} da nuvem...`);
       const doc = await this.db
         .collection("users")
         .doc(this.currentUser.uid)
@@ -101,7 +121,14 @@ class CloudStorage {
         .doc(key)
         .get();
 
-      return doc.exists ? doc.data().data : null;
+      if (doc.exists) {
+        const data = doc.data().data;
+        console.log(`${key} carregado da nuvem:`, data.length, "itens");
+        return data;
+      } else {
+        console.log(`${key} não encontrado na nuvem`);
+        return null;
+      }
     } catch (error) {
       console.log("Erro ao carregar da nuvem:", error);
       return null;
@@ -136,7 +163,7 @@ class CloudStorage {
 
     const keys = [
       "tournaments",
-      "clubs",
+      "clubs", 
       "players",
       "matches",
       "rounds",
@@ -146,7 +173,7 @@ class CloudStorage {
 
     for (const key of keys) {
       const cloudData = await this.loadFromCloud(key);
-      if (cloudData) {
+      if (cloudData && cloudData.length > 0) {
         localStorage.setItem(key, JSON.stringify(cloudData));
       }
     }
