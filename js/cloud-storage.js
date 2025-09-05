@@ -64,25 +64,8 @@ class CloudStorage {
     }
   }
 
-  // Carregar dados (localStorage primeiro, nuvem se logado)
-  async loadData(key) {
-    // Se logado, tenta carregar da nuvem primeiro
-    if (this.firebaseReady && this.currentUser) {
-      const cloudData = await this.loadFromCloud(key);
-      if (cloudData) {
-        // Salva no localStorage para cache
-        localStorage.setItem(key, JSON.stringify(cloudData));
-        return cloudData;
-      }
-    }
-    
-    // Fallback para localStorage
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : [];
-  }
-
-  // Carregar dados síncronos (apenas localStorage)
-  loadDataSync(key) {
+  // Carregar dados (apenas localStorage)
+  loadData(key) {
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : [];
   }

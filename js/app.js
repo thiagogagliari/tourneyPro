@@ -3,13 +3,13 @@ class TournamentManager {
   constructor() {
     this.currentUser = null;
     this.data = {
-      users: cloudStorage.loadDataSync("users"),
-      tournaments: cloudStorage.loadDataSync("tournaments"),
-      clubs: cloudStorage.loadDataSync("clubs"),
-      players: cloudStorage.loadDataSync("players"),
-      coaches: cloudStorage.loadDataSync("coaches"),
-      matches: cloudStorage.loadDataSync("matches"),
-      rounds: cloudStorage.loadDataSync("rounds"),
+      users: cloudStorage.loadData("users"),
+      tournaments: cloudStorage.loadData("tournaments"),
+      clubs: cloudStorage.loadData("clubs"),
+      players: cloudStorage.loadData("players"),
+      coaches: cloudStorage.loadData("coaches"),
+      matches: cloudStorage.loadData("matches"),
+      rounds: cloudStorage.loadData("rounds"),
     };
     this.init();
   }
@@ -36,6 +36,9 @@ class TournamentManager {
     if (cloudStorage.firebaseReady) {
       const result = await cloudStorage.signIn(email, password);
       if (result.success) {
+        // Aguardar carregamento dos dados da nuvem
+        await this.loadCloudData();
+        
         // Criar ou encontrar usuário local
         let user = this.data.users.find((u) => u.email === email);
         if (!user) {
@@ -3046,17 +3049,53 @@ class TournamentManager {
   // Carregar dados da nuvem
   async loadCloudData() {
     if (cloudStorage.firebaseReady && cloudStorage.currentUser) {
-      this.data.users = await cloudStorage.loadData("users");
-      this.data.tournaments = await cloudStorage.loadData("tournaments");
-      this.data.clubs = await cloudStorage.loadData("clubs");
-      this.data.players = await cloudStorage.loadData("players");
-      this.data.coaches = await cloudStorage.loadData("coaches");
-      this.data.matches = await cloudStorage.loadData("matches");
-      this.data.rounds = await cloudStorage.loadData("rounds");
+      console.log("Carregando todos os dados da nuvem...");
       
-      // Atualizar interface
-      this.updateStats();
-      this.loadDashboardData();
+      // Carregar cada tipo de dado
+      const cloudUsers = await cloudStorage.loadFromCloud("users");
+      const cloudTournaments = await cloudStorage.loadFromCloud("tournaments");
+      const cloudClubs = await cloudStorage.loadFromCloud("clubs");
+      const cloudPlayers = await cloudStorage.loadFromCloud("players");
+      const cloudCoaches = await cloudStorage.loadFromCloud("coaches");
+      const cloudMatches = await cloudStorage.loadFromCloud("matches");
+      const cloudRounds = await cloudStorage.loadFromCloud("rounds");
+      
+      // Atualizar dados se existirem na nuvem
+      if (cloudUsers) {
+        this.data.users = cloudUsers;
+        localStorage.setItem("users", JSON.stringify(cloudUsers));
+      }
+      if (cloudTournaments) {
+        this.data.tournaments = cloudTournaments;
+        localStorage.setItem("tournaments", JSON.stringify(cloudTournaments));
+      }
+      if (cloudClubs) {
+        this.data.clubs = cloudClubs;
+        localStorage.setItem("clubs", JSON.stringify(cloudClubs));
+      }
+      if (cloudPlayers) {
+        this.data.players = cloudPlayers;
+        localStorage.setItem("players", JSON.stringify(cloudPlayers));
+      }
+      if (cloudCoaches) {
+        this.data.coaches = cloudCoaches;
+        localStorage.setItem("coaches", JSON.stringify(cloudCoaches));
+      }
+      if (cloudMatches) {
+        this.data.matches = cloudMatches;
+        localStorage.setItem("matches", JSON.stringify(cloudMatches));
+      }
+      if (cloudRounds) {
+        this.data.rounds = cloudRounds;
+        localStorage.setItem("rounds", JSON.stringify(cloudRounds));
+      }
+      
+      console.log("Dados carregados da nuvem:", {
+        tournaments: this.data.tournaments.length,
+        clubs: this.data.clubs.length,
+        players: this.data.players.length,
+        matches: this.data.matches.length
+      });
     }
   }
 
@@ -3082,8 +3121,6 @@ class TournamentManager {
       try {
         if (await this.login(email, password)) {
           document.getElementById("login-form").reset();
-          // Recarregar dados da nuvem
-          await this.loadCloudData();
         } else {
           alert("Email ou senha incorretos!");
         }
