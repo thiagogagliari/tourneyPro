@@ -31,9 +31,33 @@ class TournamentManager {
     }
   }
 
-  login(username, password) {
+  async login(email, password) {
+    // Tentar login no Firebase primeiro
+    if (cloudStorage.firebaseReady) {
+      const result = await cloudStorage.signIn(email, password);
+      if (result.success) {
+        // Criar ou encontrar usuário local
+        let user = this.data.users.find((u) => u.email === email);
+        if (!user) {
+          user = {
+            id: Date.now(),
+            email,
+            username: email.split('@')[0],
+            createdAt: new Date().toISOString(),
+          };
+          this.data.users.push(user);
+          this.saveData("users");
+        }
+        this.currentUser = user;
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        this.showDashboard();
+        return true;
+      }
+    }
+    
+    // Fallback para sistema local
     const user = this.data.users.find(
-      (u) => u.username === username && u.password === password
+      (u) => (u.email === email || u.username === email) && u.password === password
     );
 
     if (user) {
@@ -45,15 +69,35 @@ class TournamentManager {
     return false;
   }
 
-  register(username, password) {
-    const existingUser = this.data.users.find((u) => u.username === username);
+  async register(email, password) {
+    // Tentar registro no Firebase primeiro
+    if (cloudStorage.firebaseReady) {
+      const result = await cloudStorage.signUp(email, password);
+      if (result.success) {
+        const newUser = {
+          id: Date.now(),
+          email,
+          username: email.split('@')[0],
+          createdAt: new Date().toISOString(),
+        };
+        this.data.users.push(newUser);
+        cloudStorage.saveData("users", this.data.users);
+        return true;
+      } else {
+        throw new Error(result.error);
+      }
+    }
+    
+    // Fallback para sistema local
+    const existingUser = this.data.users.find((u) => u.email === email || u.username === email);
     if (existingUser) {
       return false;
     }
 
     const newUser = {
       id: Date.now(),
-      username,
+      email,
+      username: email.split('@')[0],
       password,
       createdAt: new Date().toISOString(),
     };
@@ -63,7 +107,8 @@ class TournamentManager {
     return true;
   }
 
-  logout() {
+  async logout() {
+    await cloudStorage.signOut();
     this.currentUser = null;
     localStorage.removeItem("currentUser");
     this.showLogin();
@@ -81,7 +126,7 @@ class TournamentManager {
     document.getElementById("login-screen").classList.remove("active");
     document.getElementById("dashboard-screen").classList.add("active");
     document.getElementById("user-name").textContent =
-      this.currentUser.username;
+      this.currentUser.username || this.currentUser.email?.split('@')[0] || 'Usuário';
     this.updateStats();
     this.loadDashboardData();
   }
@@ -3001,37 +3046,50 @@ class TournamentManager {
   // Event Listeners
   setupEventListeners() {
     // Login
-    document.getElementById("login-form").addEventListener("submit", (e) => {
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      if (this.login(username, password)) {
-        document.getElementById("login-form").reset();
-      } else {
-        alert("Usuário ou senha incorretos!");
+      try {
+        if (await this.login(email, password)) {
+          document.getElementById("login-form").reset();
+        } else {
+          alert("Email ou senha incorretos!");
+        }
+      } catch (error) {
+        alert("Erro no login: " + error.message);
       }
     });
 
-    document.getElementById("register-btn").addEventListener("click", () => {
-      const username = document.getElementById("username").value;
+    document.getElementById("register-btn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      if (!username || !password) {
+      if (!email || !password) {
         alert("Preencha todos os campos!");
         return;
       }
 
-      if (this.register(username, password)) {
-        alert("Conta criada com sucesso! Faça login.");
-        document.getElementById("login-form").reset();
-      } else {
-        alert("Nome de usuário já existe!");
+      if (password.length < 6) {
+        alert("A senha deve ter pelo menos 6 caracteres!");
+        return;
+      }
+
+      try {
+        if (await this.register(email, password)) {
+          alert("Conta criada com sucesso! Faça login.");
+          document.getElementById("login-form").reset();
+        } else {
+          alert("Email já existe!");
+        }
+      } catch (error) {
+        alert("Erro no cadastro: " + error.message);
       }
     });
 
-    document.getElementById("logout-btn").addEventListener("click", () => {
-      this.logout();
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await this.logout();
     });
 
     // Theme toggle
