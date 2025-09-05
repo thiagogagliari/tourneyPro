@@ -20,7 +20,11 @@
 1. Menu lateral > "Authentication"
 2. Aba "Sign-in method"
 3. Ative "Email/senha"
-4. Salvar
+4. Aba "Settings"
+5. Seção "Authorized domains"
+6. Clique "Add domain"
+7. Adicione: `meutorneiopro.vercel.app`
+8. Salvar
 
 ## 4. Registrar App Web
 
@@ -54,3 +58,19 @@ this.firebaseConfig = {
 ## ✅ Pronto!
 
 Agora seus dados ficam salvos na nuvem e sincronizam automaticamente!
+
+## 🔧 Problemas Comuns
+
+### Erro: "Domain not authorized"
+**Solução:**
+1. Firebase Console > Authentication > Settings
+2. Aba "Authorized domains"
+3. Adicione seu domínio (ex: `meutorneiopro.vercel.app`)
+4. Aguarde alguns minutos para propagar
+
+### Dados não aparecem
+**Verificar:**
+1. Console do navegador (F12) para erros
+2. Configuração do Firebase está correta
+3. Regras do Firestore em modo teste
+4. Usuário está logado no Firebase
