@@ -157,9 +157,16 @@ class TournamentManager {
   }
 
   getUserData(type) {
-    return this.data[type].filter(
+    // Se não há currentUser, retorna array vazio
+    if (!this.currentUser) return [];
+    
+    // Filtra por userId do usuário atual
+    const filtered = this.data[type].filter(
       (item) => item.userId === this.currentUser.id
     );
+    
+    console.log(`getUserData(${type}): ${filtered.length} itens para usuário ${this.currentUser.id}`);
+    return filtered;
   }
 
   updateStats() {
@@ -3532,40 +3539,5 @@ function showLogin() {
   document.getElementById("login-screen").classList.add("active");
 }
 
-function loadSampleData() {
-  if (typeof sampleData !== "undefined") {
-    Object.keys(sampleData).forEach((key) => {
-      localStorage.setItem(key, JSON.stringify(sampleData[key]));
-    });
-    alert("Dados de exemplo carregados! Faça login com: admin / 123456");
-    location.reload();
-  }
-}
-
 // Inicializar aplicação
 const app = new TournamentManager();
-
-// Adicionar botão para carregar dados de exemplo
-document.addEventListener("DOMContentLoaded", () => {
-  const landingScreen = document.getElementById("landing-screen");
-  if (landingScreen) {
-    const sampleDataBtn = document.createElement("button");
-    sampleDataBtn.textContent = "Carregar Dados de Exemplo";
-    sampleDataBtn.className = "sample-data-btn";
-    sampleDataBtn.onclick = loadSampleData;
-    sampleDataBtn.style.cssText = `
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      z-index: 1000;
-    `;
-    document.body.appendChild(sampleDataBtn);
-  }
-});
