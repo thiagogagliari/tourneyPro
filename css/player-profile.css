@@ -1,0 +1,422 @@
+/* Player Profile - Estilo SofaScore */
+.player-profile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.player-profile-content {
+    background: var(--bg-primary);
+    max-width: 900px;
+    margin: 20px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.player-header {
+    background: linear-gradient(135deg, var(--primary-color), #667eea);
+    padding: 30px;
+    color: white;
+    position: relative;
+}
+
+.player-header-content {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.player-photo-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.player-basic-info h2 {
+    font-size: 2.2rem;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.player-position-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.player-club-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+}
+
+.player-club-logo {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+}
+
+.player-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.player-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.player-body {
+    padding: 30px;
+}
+
+.player-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.player-info-card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.player-info-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.player-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.player-detail-item:last-child {
+    border-bottom: none;
+}
+
+.player-detail-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.player-detail-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.player-stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.stat-box {
+    background: var(--bg-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border-left: 4px solid var(--primary-color);
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.player-matches-history {
+    margin-top: 30px;
+}
+
+.matches-timeline {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.match-timeline-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.match-timeline-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.match-date {
+    min-width: 80px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.match-teams {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 0 20px;
+}
+
+.match-team-logos {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.match-team-logo {
+    width: 25px;
+    height: 25px;
+    border-radius: 4px;
+}
+
+.match-vs {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.match-result {
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 60px;
+    text-align: center;
+}
+
+.match-events {
+    display: flex;
+    gap: 8px;
+}
+
+.event-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.event-goal {
+    background: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+}
+
+.event-assist {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+}
+
+.event-yellow {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f39c12;
+}
+
+.event-red {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.no-matches {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Bandeiras e Nacionalidade */
+.nationality-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flag-icon {
+    width: 20px;
+    height: 15px;
+    border-radius: 2px;
+    object-fit: cover;
+    border: 1px solid var(--border-light);
+}
+
+/* Histórico de Clubes */
+.club-history-section {
+    margin-top: 30px;
+}
+
+.club-history-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.club-history-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border-left: 4px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.club-history-item.current-season {
+    border-left-color: var(--primary-color);
+    background: linear-gradient(90deg, rgba(var(--primary-color-rgb), 0.1), var(--bg-secondary));
+}
+
+.club-history-item:hover {
+    background: var(--border-light);
+}
+
+.club-history-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.club-history-info {
+    flex: 1;
+}
+
+.club-history-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.club-history-period {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.current-season-badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.season-stats {
+    display: flex;
+    gap: 15px;
+    margin-left: auto;
+    font-size: 0.9rem;
+}
+
+.season-stat {
+    text-align: center;
+}
+
+.season-stat-number {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.season-stat-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .player-profile-content {
+        margin: 10px;
+        max-width: none;
+    }
+    
+    .player-header {
+        padding: 20px;
+    }
+    
+    .player-header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .player-photo-large {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .player-basic-info h2 {
+        font-size: 1.8rem;
+    }
+    
+    .player-body {
+        padding: 20px;
+    }
+    
+    .player-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .player-stats-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .match-timeline-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .match-teams {
+        margin: 0;
+        width: 100%;
+    }
+}

@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TourneyPro - Organizador de Torneios</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/player-profile.css" />
+    <link rel="stylesheet" href="css/club-profile.css" />
+    <link rel="stylesheet" href="css/tournament-profile.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Página Inicial -->
+    <div id="landing-screen" class="screen active">
+      <div class="landing-page">
+        <div class="landing-header">
+          <h1><i class="fas fa-trophy"></i> Meu Torneio Pro</h1>
+          <p>
+            A plataforma completa para organizar torneios de futebol virtual
+          </p>
+
+          <div class="hero-features">
+            <div class="feature-card">
+              <i class="fas fa-trophy"></i>
+              <h3>Gestão Completa</h3>
+              <p>
+                Organize torneios, clubes, jogadores e partidas em um só lugar
+              </p>
+            </div>
+            <div class="feature-card">
+              <i class="fas fa-chart-line"></i>
+              <h3>Estatísticas Avançadas</h3>
+              <p>
+                Classificação automática, artilharia e histórico de resultados
+              </p>
+            </div>
+            <div class="feature-card">
+              <i class="fas fa-mobile-alt"></i>
+              <h3>Interface Moderna</h3>
+              <p>Design responsivo e intuitivo para desktop e mobile</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pricing-section">
+          <h2>Escolha seu Plano</h2>
+          <div class="pricing-plans">
+            <div class="plan-card">
+              <div class="plan-name">Básico</div>
+              <div class="plan-price">R$ 29</div>
+              <div class="plan-period">por mês</div>
+              <ul class="plan-features">
+                <li><i class="fas fa-check"></i> Até 2 torneios</li>
+                <li><i class="fas fa-check"></i> Até 8 clubes por torneio</li>
+                <li><i class="fas fa-check"></i> Até 50 jogadores</li>
+                <li><i class="fas fa-check"></i> Estatísticas básicas</li>
+                <li><i class="fas fa-check"></i> Suporte por email</li>
+              </ul>
+              <button class="plan-btn" onclick="showLogin()">
+                Começar Agora
+              </button>
+            </div>
+
+            <div class="plan-card popular">
+              <div class="plan-name">Profissional</div>
+              <div class="plan-price">R$ 59</div>
+              <div class="plan-period">por mês</div>
+              <ul class="plan-features">
+                <li><i class="fas fa-check"></i> Torneios ilimitados</li>
+                <li><i class="fas fa-check"></i> Até 16 clubes por torneio</li>
+                <li><i class="fas fa-check"></i> Até 200 jogadores</li>
+                <li><i class="fas fa-check"></i> Estatísticas avançadas</li>
+                <li><i class="fas fa-check"></i> Exportação de dados</li>
+                <li><i class="fas fa-check"></i> Suporte prioritário</li>
+              </ul>
+              <button class="plan-btn" onclick="showLogin()">
+                Começar Agora
+              </button>
+            </div>
+
+            <div class="plan-card">
+              <div class="plan-name">Enterprise</div>
+              <div class="plan-price">R$ 99</div>
+              <div class="plan-period">por mês</div>
+              <ul class="plan-features">
+                <li><i class="fas fa-check"></i> Recursos ilimitados</li>
+                <li><i class="fas fa-check"></i> Clubes ilimitados</li>
+                <li><i class="fas fa-check"></i> Jogadores ilimitados</li>
+                <li><i class="fas fa-check"></i> API personalizada</li>
+                <li><i class="fas fa-check"></i> Backup automático</li>
+                <li><i class="fas fa-check"></i> Suporte 24/7</li>
+              </ul>
+              <button class="plan-btn" onclick="showLogin()">
+                Começar Agora
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-section">
+          <h2>Pronto para começar?</h2>
+          <p>Experimente gratuitamente por 7 dias, sem compromisso</p>
+          <div class="cta-buttons">
+            <a href="#" class="btn-cta primary" onclick="showLogin()"
+              >Começar Teste Grátis</a
+            >
+            <a href="#" class="btn-cta secondary" onclick="showLogin()"
+              >Fazer Login</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tela de Login -->
+    <div id="login-screen" class="screen">
+      <div class="login-container">
+        <div class="login-header">
+          <i class="fas fa-trophy"></i>
+          <h1>TourneyPro</h1>
+          <p>Organize seus torneios de futebol virtual</p>
+        </div>
+        <form id="login-form">
+          <input
+            type="text"
+            id="username"
+            placeholder="Nome de usuário"
+            required
+          />
+          <input type="password" id="password" placeholder="Senha" required />
+          <button type="submit">Entrar</button>
+          <button type="button" id="register-btn">Criar Conta</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="dashboard-screen" class="screen">
+      <nav class="navbar">
+        <div class="nav-brand">
+          <i class="fas fa-trophy"></i>
+          <span>TourneyPro</span>
+        </div>
+        <div class="nav-user">
+          <button id="theme-toggle" title="Alternar tema">
+            <i class="fas fa-moon"></i>
+          </button>
+          <span id="user-name">Usuário</span>
+          <button id="logout-btn"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </nav>
+
+      <div class="sidebar">
+        <ul class="menu">
+          <li>
+            <a href="#" data-screen="dashboard" class="active"
+              ><i class="fas fa-home"></i> Dashboard</a
+            >
+          </li>
+          <li>
+            <a href="#" data-screen="tournaments"
+              ><i class="fas fa-trophy"></i> Torneios</a
+            >
+          </li>
+          <li>
+            <a href="#" data-screen="clubs"
+              ><i class="fas fa-shield-alt"></i> Clubes</a
+            >
+          </li>
+          <li>
+            <a href="#" data-screen="players"
+              ><i class="fas fa-users"></i> Jogadores</a
+            >
+          </li>
+          <li>
+            <a href="#" data-screen="coaches"
+              ><i class="fas fa-user-tie"></i> Treinadores</a
+            >
+          </li>
+          <li>
+            <a href="#" data-screen="rounds"
+              ><i class="fas fa-calendar-alt"></i> Rodadas</a
+            >
+          </li>
+          <li>
+            <a href="#" data-screen="matches"
+              ><i class="fas fa-futbol"></i> Partidas</a
+            >
+          </li>
+
+          <li>
+            <a href="#" data-screen="scorers"
+              ><i class="fas fa-bullseye"></i> Artilharia</a
+            >
+          </li>
+          <li>
+            <a href="#" data-screen="statistics"
+              ><i class="fas fa-chart-bar"></i> Estatísticas</a
+            >
+          </li>
+        </ul>
+      </div>
+
+      <main class="main-content">
+        <!-- Dashboard Home -->
+        <div id="dashboard-content" class="content-section active">
+          <h2 style="color: #fff">Dashboard</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <i class="fas fa-trophy"></i>
+              <div>
+                <h3 id="total-tournaments">0</h3>
+                <p>Torneios</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-shield-alt"></i>
+              <div>
+                <h3 id="total-clubs">0</h3>
+                <p>Clubes</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-users"></i>
+              <div>
+                <h3 id="total-players">0</h3>
+                <p>Jogadores</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-user-tie"></i>
+              <div>
+                <h3 id="total-coaches">0</h3>
+                <p>Treinadores</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-futbol"></i>
+              <div>
+                <h3 id="total-matches">0</h3>
+                <p>Partidas</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-bullseye"></i>
+              <div>
+                <h3 id="total-goals">0</h3>
+                <p>Gols</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Torneios -->
+        <div id="tournaments-content" class="content-section">
+          <div class="section-header">
+            <h2>Torneios</h2>
+            <button class="btn-primary" id="add-tournament-btn">
+              <i class="fas fa-plus"></i> Novo Torneio
+            </button>
+          </div>
+          <div class="search-bar">
+            <input
+              type="text"
+              id="tournaments-search"
+              placeholder="Buscar torneios..."
+              class="search-input"
+            />
+            <i class="fas fa-search search-icon"></i>
+          </div>
+          <div id="tournaments-list" class="cards-grid"></div>
+        </div>
+
+        <!-- Clubes -->
+        <div id="clubs-content" class="content-section">
+          <div class="section-header">
+            <h2>Clubes</h2>
+            <button class="btn-primary" id="add-club-btn">
+              <i class="fas fa-plus"></i> Novo Clube
+            </button>
+          </div>
+          <div class="search-bar">
+            <input
+              type="text"
+              id="clubs-search"
+              placeholder="Buscar clubes..."
+              class="search-input"
+            />
+            <i class="fas fa-search search-icon"></i>
+          </div>
+          <div id="clubs-list" class="cards-grid"></div>
+        </div>
+
+        <!-- Jogadores -->
+        <div id="players-content" class="content-section">
+          <div class="section-header">
+            <h2>Jogadores</h2>
+            <button class="btn-primary" id="add-player-btn">
+              <i class="fas fa-plus"></i> Novo Jogador
+            </button>
+          </div>
+          <div class="filters-bar">
+            <select id="club-filter">
+              <option value="">Todos os clubes</option>
+            </select>
+            <div class="search-bar">
+              <input
+                type="text"
+                id="players-search"
+                placeholder="Buscar jogadores..."
+                class="search-input"
+              />
+              <i class="fas fa-search search-icon"></i>
+            </div>
+          </div>
+          <div id="players-list" class="cards-grid"></div>
+        </div>
+
+        <!-- Treinadores -->
+        <div id="coaches-content" class="content-section">
+          <div class="section-header">
+            <h2>Treinadores</h2>
+            <button class="btn-primary" id="add-coach-btn">
+              <i class="fas fa-plus"></i> Novo Treinador
+            </button>
+          </div>
+          <div class="filters-bar">
+            <select id="coaches-club-filter">
+              <option value="">Todos os clubes</option>
+            </select>
+            <div class="search-bar">
+              <input
+                type="text"
+                id="coaches-search"
+                placeholder="Buscar treinadores..."
+                class="search-input"
+              />
+              <i class="fas fa-search search-icon"></i>
+            </div>
+          </div>
+          <div id="coaches-list" class="cards-grid"></div>
+        </div>
+
+        <!-- Rodadas -->
+        <div id="rounds-content" class="content-section">
+          <div class="section-header">
+            <h2>Rodadas</h2>
+            <select id="tournament-rounds-filter">
+              <option value="">Selecione um torneio</option>
+            </select>
+          </div>
+          <div id="rounds-container"></div>
+        </div>
+
+        <!-- Partidas -->
+        <div id="matches-content" class="content-section">
+          <div class="section-header">
+            <h2>Partidas</h2>
+            <button class="btn-primary" id="add-match-btn">
+              <i class="fas fa-plus"></i> Nova Partida
+            </button>
+          </div>
+          <div class="search-bar">
+            <input
+              type="text"
+              id="matches-search"
+              placeholder="Buscar partidas..."
+              class="search-input"
+            />
+            <i class="fas fa-search search-icon"></i>
+          </div>
+          <div id="matches-list"></div>
+        </div>
+
+        <!-- Artilharia -->
+        <div id="scorers-content" class="content-section">
+          <div class="section-header">
+            <h2>Artilharia</h2>
+            <select id="tournament-scorers-filter">
+              <option value="">Selecione um torneio</option>
+            </select>
+          </div>
+          <div id="scorers-table"></div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div id="statistics-content" class="content-section">
+          <div class="section-header">
+            <h2>Estatísticas dos Jogadores</h2>
+            <select id="tournament-statistics-filter">
+              <option value="">Selecione um torneio</option>
+            </select>
+          </div>
+          <div id="statistics-container"></div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal para Torneio -->
+    <div id="tournament-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Novo Torneio</h3>
+        <form id="tournament-form">
+          <input
+            type="text"
+            id="tournament-name"
+            placeholder="Nome do torneio"
+            required
+          />
+          <input
+            type="url"
+            id="tournament-logo"
+            placeholder="URL da logo do torneio"
+          />
+          <select id="tournament-game" required>
+            <option value="">Selecione o jogo</option>
+            <option value="efootball">eFootball</option>
+            <option value="fifa">FIFA</option>
+          </select>
+          <select id="tournament-type" required>
+            <option value="">Selecione o tipo</option>
+            <option value="champions">Liga dos Campeões (36 clubes)</option>
+            <option value="national">Liga Nacional (20 clubes)</option>
+          </select>
+          <input type="date" id="tournament-start" required />
+          <textarea
+            id="tournament-description"
+            placeholder="Descrição do torneio"
+          ></textarea>
+
+          <button type="submit">Criar Torneio</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal para Clube -->
+    <div id="club-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Novo Clube</h3>
+        <form id="club-form">
+          <input
+            type="text"
+            id="club-name"
+            placeholder="Nome do clube"
+            required
+          />
+          <input type="text" id="club-country" placeholder="País" required />
+          <input type="url" id="club-logo" placeholder="URL do escudo" />
+          <select id="club-tournament">
+            <option value="">Selecione o torneio</option>
+          </select>
+          <button type="submit">Criar Clube</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal para Jogador -->
+    <div id="player-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Novo Jogador</h3>
+        <form id="player-form">
+          <input
+            type="text"
+            id="player-name"
+            placeholder="Nome do jogador"
+            required
+          />
+          <input
+            type="date"
+            id="player-birthdate"
+            placeholder="Data de nascimento"
+            required
+          />
+          <select id="player-position" required>
+            <option value="">Posição</option>
+            <option value="GOL">Goleiro</option>
+            <option value="ZAG">Zagueiro</option>
+            <option value="LAT">Lateral</option>
+            <option value="VOL">Volante</option>
+            <option value="MEI">Meia</option>
+            <option value="ATA">Atacante</option>
+          </select>
+          <input
+            type="text"
+            id="player-nationality"
+            placeholder="Nacionalidade"
+            required
+          />
+          <input
+            type="number"
+            id="player-number"
+            placeholder="Número da camisa"
+            min="1"
+            max="99"
+          />
+          <input
+            type="number"
+            id="player-height"
+            placeholder="Altura (cm)"
+            min="150"
+            max="220"
+            step="1"
+          />
+          <input type="url" id="player-photo" placeholder="URL da foto" />
+          <select id="player-club" required>
+            <option value="">Selecione o clube</option>
+          </select>
+          <button type="submit">Adicionar Jogador</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal para Treinador -->
+    <div id="coach-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Novo Treinador</h3>
+        <form id="coach-form">
+          <input
+            type="text"
+            id="coach-name"
+            placeholder="Nome do treinador"
+            required
+          />
+          <input
+            type="date"
+            id="coach-birthdate"
+            placeholder="Data de nascimento"
+            required
+          />
+          <input
+            type="text"
+            id="coach-nationality"
+            placeholder="Nacionalidade"
+            required
+          />
+          <input
+            type="number"
+            id="coach-experience"
+            placeholder="Anos de experiência"
+            min="0"
+            max="50"
+          />
+          <select id="coach-formation">
+            <option value="">Formação Preferida</option>
+            <option value="4-4-2">4-4-2</option>
+            <option value="4-3-3">4-3-3</option>
+            <option value="4-2-3-1">4-2-3-1</option>
+            <option value="3-5-2">3-5-2</option>
+            <option value="5-3-2">5-3-2</option>
+            <option value="4-5-1">4-5-1</option>
+            <option value="3-4-3">3-4-3</option>
+            <option value="4-1-4-1">4-1-4-1</option>
+          </select>
+          <input type="url" id="coach-photo" placeholder="URL da foto" />
+          <select id="coach-club" required>
+            <option value="">Selecione o clube</option>
+          </select>
+          <button type="submit">Adicionar Treinador</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal para Rodada -->
+    <div id="round-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Nova Rodada</h3>
+        <form id="round-form">
+          <input
+            type="number"
+            id="round-number"
+            placeholder="Número da rodada"
+            min="1"
+            required
+          />
+          <input type="date" id="round-date" required />
+          <div id="round-matches"></div>
+          <button type="button" id="generate-matches-btn">Gerar Jogos</button>
+          <button type="submit">Salvar Rodada</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal para Partida -->
+    <div id="match-modal" class="modal">
+      <div class="modal-content large">
+        <span class="close">&times;</span>
+        <h3>Nova Partida</h3>
+        <form id="match-form">
+          <div class="match-teams">
+            <div class="team-section">
+              <label>Time da Casa</label>
+              <select id="home-team" required>
+                <option value="">Selecione o time</option>
+              </select>
+            </div>
+            <div class="vs">x</div>
+            <div class="team-section">
+              <label>Time Visitante</label>
+              <select id="away-team" required>
+                <option value="">Selecione o time</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="match-details">
+            <input
+              type="number"
+              id="home-score"
+              placeholder="Gols casa"
+              min="0"
+            />
+            <input
+              type="number"
+              id="away-score"
+              placeholder="Gols visitante"
+              min="0"
+            />
+            <input
+              type="number"
+              id="match-round"
+              placeholder="Rodada"
+              min="1"
+              required
+            />
+            <input type="datetime-local" id="match-date" required />
+            <select id="match-tournament" required>
+              <option value="">Selecione o torneio</option>
+            </select>
+          </div>
+
+          <div
+            class="match-events"
+            id="match-events-section"
+            style="display: none"
+          >
+            <h4>Eventos da Partida</h4>
+            <div id="events-container"></div>
+            <button type="button" id="add-event-btn">Adicionar Evento</button>
+
+            <div class="match-motm-section">
+              <h4>Melhor Jogador da Partida</h4>
+              <div class="motm-fields">
+                <select id="motm-player">
+                  <option value="">Selecione o melhor jogador</option>
+                </select>
+                <input
+                  type="number"
+                  id="motm-rating"
+                  placeholder="Nota (1-10)"
+                  min="1"
+                  max="10"
+                  step="0.1"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="match-status">
+            <label>
+              <input type="checkbox" id="match-played" /> Partida já foi
+              realizada
+            </label>
+          </div>
+
+          <button type="submit">Salvar Partida</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal do Perfil do Torneio -->
+    <div id="tournament-profile-modal" class="tournament-profile-modal">
+      <div class="tournament-profile-content">
+        <div class="tournament-header">
+          <button
+            class="tournament-close"
+            onclick="app.closeTournamentProfile()"
+          >
+            &times;
+          </button>
+          <div class="tournament-header-content">
+            <img
+              id="tournament-profile-logo"
+              class="tournament-logo-large"
+              src=""
+              alt="Torneio"
+            />
+            <div class="tournament-basic-info">
+              <h1 id="tournament-profile-name">Nome do Torneio</h1>
+              <div id="tournament-profile-game" class="tournament-game-badge">
+                Jogo
+              </div>
+              <div class="tournament-dates">
+                <span id="tournament-profile-dates">Datas do torneio</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tournament-body">
+          <div class="tournament-tabs">
+            <button
+              class="tournament-tab active"
+              onclick="app.showTournamentTab('standings')"
+            >
+              Classificação
+            </button>
+            <button
+              class="tournament-tab"
+              onclick="app.showTournamentTab('matches')"
+            >
+              Partidas
+            </button>
+            <button
+              class="tournament-tab"
+              onclick="app.showTournamentTab('statistics')"
+            >
+              Estatísticas
+            </button>
+            <button
+              class="tournament-tab"
+              onclick="app.showTournamentTab('clubs')"
+            >
+              Clubes
+            </button>
+          </div>
+
+          <!-- Classificação -->
+          <div id="tournament-standings" class="tournament-tab-content active">
+            <div class="standings-container">
+              <table class="standings-table" id="tournament-standings-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Clube</th>
+                    <th>J</th>
+                    <th>V</th>
+                    <th>E</th>
+                    <th>D</th>
+                    <th>GP</th>
+                    <th>GC</th>
+                    <th>SG</th>
+                    <th>Pts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="10" class="no-data">
+                      Nenhum dado de classificação encontrado
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Partidas -->
+          <div id="tournament-matches" class="tournament-tab-content">
+            <div class="matches-container" id="tournament-matches-container">
+              <div class="no-data">Nenhuma partida encontrada</div>
+            </div>
+          </div>
+
+          <!-- Estatísticas -->
+          <div id="tournament-statistics" class="tournament-tab-content">
+            <div class="tournament-statistics-grid">
+              <div class="tournament-stats-card">
+                <h3>Artilheiros - Temporada ${new Date().getFullYear()}</h3>
+                <div
+                  class="tournament-top-scorers"
+                  id="tournament-top-scorers-list"
+                >
+                  <div class="no-data">Nenhum artilheiro encontrado</div>
+                </div>
+              </div>
+
+              <div class="tournament-stats-card">
+                <h3>Assistências - Temporada ${new Date().getFullYear()}</h3>
+                <div
+                  class="tournament-top-assists"
+                  id="tournament-top-assists-list"
+                >
+                  <div class="no-data">Nenhuma assistência encontrada</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clubes -->
+          <div id="tournament-clubs" class="tournament-tab-content">
+            <div class="tournament-clubs-grid" id="tournament-clubs-list">
+              <div class="no-data">Nenhum clube encontrado</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal do Perfil do Clube -->
+    <div id="club-profile-modal" class="club-profile-modal">
+      <div class="club-profile-content">
+        <div class="club-header">
+          <button class="club-close" onclick="app.closeClubProfile()">
+            &times;
+          </button>
+          <div class="club-header-content">
+            <img
+              id="club-profile-logo"
+              class="club-logo-large"
+              src=""
+              alt="Clube"
+            />
+            <div class="club-basic-info">
+              <h1 id="club-profile-name">Nome do Clube</h1>
+              <div id="club-profile-country" class="club-country-badge">
+                País
+              </div>
+              <div class="club-tournament-info">
+                <span id="club-profile-tournament">Torneio</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="club-body">
+          <div class="club-tabs">
+            <button
+              class="club-tab active"
+              onclick="app.showClubTab('overview')"
+            >
+              Visão Geral
+            </button>
+            <button class="club-tab" onclick="app.showClubTab('squad')">
+              Elenco
+            </button>
+            <button class="club-tab" onclick="app.showClubTab('matches')">
+              Partidas
+            </button>
+            <button class="club-tab" onclick="app.showClubTab('statistics')">
+              Estatísticas
+            </button>
+          </div>
+
+          <!-- Visão Geral -->
+          <div id="club-overview" class="club-tab-content active">
+            <div class="club-overview-grid">
+              <div class="club-stats-card">
+                <h3>Estatísticas Gerais</h3>
+                <div class="club-stats-summary">
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-total-matches">
+                      0
+                    </div>
+                    <div class="club-stat-label">Jogos</div>
+                  </div>
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-wins">0</div>
+                    <div class="club-stat-label">Vitórias</div>
+                  </div>
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-draws">0</div>
+                    <div class="club-stat-label">Empates</div>
+                  </div>
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-losses">0</div>
+                    <div class="club-stat-label">Derrotas</div>
+                  </div>
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-goals-for">0</div>
+                    <div class="club-stat-label">Gols Pró</div>
+                  </div>
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-goals-against">
+                      0
+                    </div>
+                    <div class="club-stat-label">Gols Contra</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="club-stats-card">
+                <h3>Informações do Elenco</h3>
+                <div class="club-stats-summary">
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-total-players">
+                      0
+                    </div>
+                    <div class="club-stat-label">Jogadores</div>
+                  </div>
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-avg-age">0</div>
+                    <div class="club-stat-label">Idade Média</div>
+                  </div>
+                  <div class="club-stat-box">
+                    <div class="club-stat-number" id="club-foreign-players">
+                      0
+                    </div>
+                    <div class="club-stat-label">Estrangeiros</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Elenco -->
+          <div id="club-squad" class="club-tab-content">
+            <div class="squad-grid" id="club-squad-list">
+              <div class="no-data">Nenhum jogador encontrado</div>
+            </div>
+          </div>
+
+          <!-- Partidas -->
+          <div id="club-matches" class="club-tab-content">
+            <div class="matches-timeline" id="club-matches-list">
+              <div class="no-data">Nenhuma partida encontrada</div>
+            </div>
+          </div>
+
+          <!-- Estatísticas -->
+          <div id="club-statistics" class="club-tab-content">
+            <div class="club-statistics-grid">
+              <div class="club-stats-card">
+                <h3>Artilheiros - Temporada ${new Date().getFullYear()}</h3>
+                <div class="top-scorers-list" id="club-top-scorers">
+                  <div class="no-data">Nenhum artilheiro encontrado</div>
+                </div>
+              </div>
+
+              <div class="club-stats-card">
+                <h3>Assistências - Temporada ${new Date().getFullYear()}</h3>
+                <div class="top-assists-list" id="club-top-assists">
+                  <div class="no-data">Nenhuma assistência encontrada</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal do Perfil do Jogador -->
+    <div id="player-profile-modal" class="player-profile-modal">
+      <div class="player-profile-content">
+        <div class="player-header">
+          <button class="player-close" onclick="app.closePlayerProfile()">
+            &times;
+          </button>
+          <div class="player-header-content">
+            <img
+              id="profile-photo"
+              class="player-photo-large"
+              src=""
+              alt="Jogador"
+            />
+            <div class="player-basic-info">
+              <h2 id="profile-name">Nome do Jogador</h2>
+              <div id="profile-position" class="player-position-badge">
+                Posição
+              </div>
+              <div class="player-club-info">
+                <img
+                  id="profile-club-logo"
+                  class="player-club-logo"
+                  src=""
+                  alt="Clube"
+                />
+                <span id="profile-club-name">Nome do Clube</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="player-body">
+          <div class="player-stats-grid">
+            <div class="player-info-card">
+              <h3>Informações Pessoais</h3>
+              <div class="player-detail-item">
+                <span class="player-detail-label">Idade</span>
+                <span class="player-detail-value" id="profile-age">-</span>
+              </div>
+              <div class="player-detail-item">
+                <span class="player-detail-label">Data de Nascimento</span>
+                <span class="player-detail-value" id="profile-birthdate"
+                  >-</span
+                >
+              </div>
+              <div class="player-detail-item">
+                <span class="player-detail-label">Nacionalidade</span>
+                <span
+                  class="player-detail-value nationality-flag"
+                  id="profile-nationality"
+                >
+                  <img
+                    class="flag-icon"
+                    id="profile-nationality-flag"
+                    src=""
+                    alt="Bandeira"
+                  />
+                  <span id="profile-nationality-text">-</span>
+                </span>
+              </div>
+              <div class="player-detail-item">
+                <span class="player-detail-label">Altura</span>
+                <span class="player-detail-value" id="profile-height">-</span>
+              </div>
+              <div class="player-detail-item">
+                <span class="player-detail-label">Número</span>
+                <span class="player-detail-value" id="profile-number">-</span>
+              </div>
+            </div>
+
+            <div class="player-info-card">
+              <h3>Estatísticas da Temporada ${new Date().getFullYear()}</h3>
+              <div class="player-stats-summary">
+                <div class="stat-box">
+                  <div class="stat-number" id="profile-matches">0</div>
+                  <div class="stat-label">Jogos</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="profile-goals">0</div>
+                  <div class="stat-label">Gols</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="profile-assists">0</div>
+                  <div class="stat-label">Assistências</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="profile-yellow-cards">0</div>
+                  <div class="stat-label">Cartões Amarelos</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="profile-red-cards">0</div>
+                  <div class="stat-label">Cartões Vermelhos</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="profile-rating">-</div>
+                  <div class="stat-label">Nota Média</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="club-history-section">
+            <div class="player-info-card">
+              <h3>Histórico de Clubes</h3>
+              <div class="club-history-timeline" id="profile-club-history">
+                <div class="no-matches">Nenhum histórico encontrado</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="player-matches-history">
+            <div class="player-info-card">
+              <h3>Histórico de Partidas - Temporada Atual</h3>
+              <div class="matches-timeline" id="profile-matches-timeline">
+                <div class="no-matches">Nenhuma partida encontrada</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Detalhes da Partida -->
+    <div id="match-details-modal" class="match-details-modal">
+      <div class="match-details-content">
+        <div class="match-details-header">
+          <button class="match-details-close" onclick="app.closeMatchDetails()">
+            &times;
+          </button>
+          <div class="match-header-info">
+            <div class="match-teams-header">
+              <div class="team-header home">
+                <img
+                  id="match-detail-home-logo"
+                  class="team-logo-header"
+                  src=""
+                  alt="Casa"
+                />
+                <h2 id="match-detail-home-name">Time Casa</h2>
+              </div>
+              <div class="match-score-header">
+                <div id="match-detail-score" class="final-score">0 - 0</div>
+                <div class="match-status-header">Finalizada</div>
+              </div>
+              <div class="team-header away">
+                <img
+                  id="match-detail-away-logo"
+                  class="team-logo-header"
+                  src=""
+                  alt="Visitante"
+                />
+                <h2 id="match-detail-away-name">Time Visitante</h2>
+              </div>
+            </div>
+            <div class="match-info-header">
+              <div id="match-detail-date" class="match-date-info">
+                Data da partida
+              </div>
+              <div class="match-competition-info">
+                <span id="match-detail-tournament">Torneio</span> •
+                <span id="match-detail-round">Rodada</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="match-details-body">
+          <div class="match-events-section">
+            <h3>Eventos da Partida</h3>
+            <div class="match-events-timeline" id="match-events-timeline">
+              <div class="no-events">Nenhum evento registrado</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="js/cloud-storage.js"></script>
+    <script src="data/sample-data.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
