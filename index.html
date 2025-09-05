@@ -142,6 +142,9 @@
     <div id="dashboard-screen" class="screen">
       <nav class="navbar">
         <div class="nav-brand">
+          <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
           <i class="fas fa-trophy"></i>
           <span>TourneyPro</span>
         </div>
@@ -154,7 +157,8 @@
         </div>
       </nav>
 
-      <div class="sidebar">
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
         <ul class="menu">
           <li>
             <a href="#" data-screen="dashboard" class="active"

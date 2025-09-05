@@ -3043,6 +3043,17 @@ class TournamentManager {
     }
   }
 
+  // Mobile Menu Functions
+  toggleMobileMenu() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("active");
+  }
+
+  closeMobileMenu() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.remove("active");
+  }
+
   // Event Listeners
   setupEventListeners() {
     // Login
@@ -3103,6 +3114,8 @@ class TournamentManager {
         e.preventDefault();
         const screen = e.target.closest("a").dataset.screen;
         this.showSection(screen);
+        // Fechar menu mobile após clicar
+        this.closeMobileMenu();
       });
     });
 
@@ -3163,6 +3176,15 @@ class TournamentManager {
       .addEventListener("change", () => {
         this.loadRounds();
       });
+
+    // Mobile menu
+    document.getElementById("mobile-menu-toggle").addEventListener("click", () => {
+      this.toggleMobileMenu();
+    });
+
+    document.getElementById("sidebar-overlay").addEventListener("click", () => {
+      this.closeMobileMenu();
+    });
 
     document.getElementById("match-played").addEventListener("change", (e) => {
       const eventsSection = document.getElementById("match-events-section");
