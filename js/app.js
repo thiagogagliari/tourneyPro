@@ -586,7 +586,7 @@ class TournamentManager {
           </div>
           <h3>${player.name}</h3>
           <p><strong>Posição:</strong> ${player.position}</p>
-          <p><strong>Idade:</strong> ${player.age || "N/A"} anos</p>
+          <p><strong>Idade:</strong> ${this.calculateAge(player.birthdate) || "N/A"} anos</p>
           <p><strong>Nacionalidade:</strong> 
             <span class="nationality-flag">
               <img src="${this.getCountryFlag(
@@ -1896,6 +1896,19 @@ class TournamentManager {
     this.loadRounds();
   }
 
+  // Função para calcular idade corretamente
+  calculateAge(birthdate) {
+    if (!birthdate) return null;
+    const today = new Date();
+    const birth = new Date(birthdate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
   // Função para formatar data corretamente (evita problema de fuso horário)
   formatDate(dateString, format = 'dd/mm/yyyy') {
     if (!dateString) return '-';
@@ -2333,7 +2346,7 @@ class TournamentManager {
     const avgAge =
       clubPlayers.length > 0
         ? Math.round(
-            clubPlayers.reduce((sum, p) => sum + (p.age || 0), 0) /
+            clubPlayers.reduce((sum, p) => sum + (this.calculateAge(p.birthdate) || 0), 0) /
               clubPlayers.length
           )
         : 0;
@@ -2377,7 +2390,7 @@ class TournamentManager {
         <div class="squad-player-details">
           <div class="squad-player-detail">
             <span>Idade</span>
-            <span>${player.age || "-"}</span>
+            <span>${this.calculateAge(player.birthdate) || "-"}</span>
           </div>
           <div class="squad-player-detail">
             <span>Número</span>
@@ -3403,9 +3416,7 @@ class TournamentManager {
     document.getElementById("player-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const birthdate = document.getElementById("player-birthdate").value;
-      const age = birthdate
-        ? new Date().getFullYear() - new Date(birthdate).getFullYear()
-        : null;
+      const age = this.calculateAge(birthdate);
 
       const data = {
         name: document.getElementById("player-name").value,
