@@ -1897,6 +1897,26 @@ class TournamentManager {
     this.loadRounds();
   }
 
+  // Função para formatar data corretamente (evita problema de fuso horário)
+  formatDate(dateString, format = 'dd/mm/yyyy') {
+    if (!dateString) return '-';
+    
+    // Criar data local sem conversão de fuso horário
+    const parts = dateString.split('-');
+    const date = new Date(parts[0], parts[1] - 1, parts[2]);
+    
+    if (format === 'dd Mês yyyy') {
+      const months = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ];
+      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
+    
+    // Formato padrão dd/mm/yyyy
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+  }
+
   // Função para obter bandeira do país
   getCountryFlag(country) {
     const flags = {
@@ -2030,7 +2050,7 @@ class TournamentManager {
       ? `${player.age} anos`
       : "-";
     document.getElementById("profile-birthdate").textContent = player.birthdate
-      ? new Date(player.birthdate).toLocaleDateString("pt-BR")
+      ? this.formatDate(player.birthdate, 'dd Mês yyyy')
       : "-";
     // Nacionalidade com bandeira
     const nationalityFlag = document.getElementById("profile-nationality-flag");
