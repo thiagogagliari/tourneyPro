@@ -996,6 +996,13 @@ class TournamentManager {
       document.getElementById("match-events-section").style.display = "block";
       document.getElementById("home-score").required = true;
       document.getElementById("away-score").required = true;
+      
+      // Carregar dados do MOTM
+      this.updateMotmPlayers();
+      if (match.motm) {
+        document.getElementById("motm-player").value = match.motm.playerId;
+        document.getElementById("motm-rating").value = match.motm.rating;
+      }
     }
 
     document.getElementById("match-modal").style.display = "block";
@@ -1878,6 +1885,45 @@ class TournamentManager {
             `<option value="${p.name}" data-player-id="${p.id}">${p.name} (${p.position})</option>`
         )
         .join("");
+  }
+
+  updateMotmPlayers() {
+    const homeTeamId = document.getElementById("home-team").value;
+    const awayTeamId = document.getElementById("away-team").value;
+    const motmSelect = document.getElementById("motm-player");
+
+    if (!homeTeamId || !awayTeamId) {
+      motmSelect.innerHTML = '<option value="">Selecione os times primeiro</option>';
+      return;
+    }
+
+    const homePlayers = this.getUserData("players").filter(
+      (p) => p.clubId == homeTeamId
+    );
+    const awayPlayers = this.getUserData("players").filter(
+      (p) => p.clubId == awayTeamId
+    );
+
+    const homeTeam = this.data.clubs.find((c) => c.id == homeTeamId);
+    const awayTeam = this.data.clubs.find((c) => c.id == awayTeamId);
+
+    motmSelect.innerHTML = '<option value="">Selecione o melhor jogador</option>';
+    
+    if (homePlayers.length > 0) {
+      motmSelect.innerHTML += `<optgroup label="${homeTeam?.name || 'Time Casa'}">`;
+      homePlayers.forEach(player => {
+        motmSelect.innerHTML += `<option value="${player.id}">${player.name} (${player.position})</option>`;
+      });
+      motmSelect.innerHTML += '</optgroup>';
+    }
+    
+    if (awayPlayers.length > 0) {
+      motmSelect.innerHTML += `<optgroup label="${awayTeam?.name || 'Time Visitante'}">`;
+      awayPlayers.forEach(player => {
+        motmSelect.innerHTML += `<option value="${player.id}">${player.name} (${player.position})</option>`;
+      });
+      motmSelect.innerHTML += '</optgroup>';
+    }
   }
 
   createRound(data) {
@@ -3298,6 +3344,7 @@ class TournamentManager {
         eventsSection.style.display = "block";
         homeScore.required = true;
         awayScore.required = true;
+        this.updateMotmPlayers();
       } else {
         eventsSection.style.display = "none";
         homeScore.required = false;
@@ -3306,6 +3353,14 @@ class TournamentManager {
         awayScore.value = "";
         document.getElementById("events-container").innerHTML = "";
       }
+    });
+
+    document.getElementById("home-team").addEventListener("change", () => {
+      this.updateMotmPlayers();
+    });
+
+    document.getElementById("away-team").addEventListener("change", () => {
+      this.updateMotmPlayers();
     });
   }
 
@@ -3498,6 +3553,16 @@ class TournamentManager {
           document.getElementById("match-tournament").value
         ),
       };
+
+      // Adicionar dados do melhor jogador da partida
+      const motmPlayerId = document.getElementById("motm-player").value;
+      const motmRating = document.getElementById("motm-rating").value;
+      if (motmPlayerId && motmRating) {
+        data.motm = {
+          playerId: parseInt(motmPlayerId),
+          rating: parseFloat(motmRating)
+        };
+      }
 
       // Processar eventos
       const events = [];
