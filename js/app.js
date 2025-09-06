@@ -587,7 +587,7 @@ class TournamentManager {
         }" class="player-club-badge">
           </div>
           <h3>${player.name}</h3>
-          <p><strong>Posição:</strong> ${player.position}</p>
+          <p><strong>Posição:</strong> <span class="position-badge ${player.position.toLowerCase()}">${player.position}</span></p>
           <p><strong>Idade:</strong> ${this.calculateAge(player.birthdate) || "N/A"} anos</p>
           <p><strong>Nacionalidade:</strong> 
             <span class="nationality-flag">
@@ -1245,7 +1245,7 @@ class TournamentManager {
                 <td>${index + 1}</td>
                 <td><strong>${stats.name}</strong></td>
                 <td>${stats.club}</td>
-                <td><span class="position-badge">${stats.position}</span></td>
+                <td><span class="position-badge ${stats.position.toLowerCase()}">${stats.position}</span></td>
                 <td>${stats.matches}</td>
                 <td><strong style="color: #4CAF50;">${stats.goals}</strong></td>
                 <td><strong style="color: #2196F3;">${
@@ -2107,7 +2107,9 @@ class TournamentManager {
     document.getElementById("profile-photo").src =
       player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif";
     document.getElementById("profile-name").textContent = player.name;
-    document.getElementById("profile-position").textContent = player.position;
+    const positionElement = document.getElementById("profile-position");
+    positionElement.textContent = player.position;
+    positionElement.className = `player-position-badge position-badge ${player.position.toLowerCase()}`;
     document.getElementById("profile-club-logo").src =
       club?.logo || "https://via.placeholder.com/30";
     document.getElementById("profile-club-name").textContent =
@@ -2426,7 +2428,15 @@ class TournamentManager {
       return;
     }
 
-    container.innerHTML = players
+    // Ordenar por posição: atacantes, meias, defensores, goleiros
+    const positionOrder = { 'Atacante': 1, 'Meia': 2, 'Volante': 3, 'Lateral': 4, 'Zagueiro': 5, 'Goleiro': 6 };
+    const sortedPlayers = players.sort((a, b) => {
+      const orderA = positionOrder[a.position] || 7;
+      const orderB = positionOrder[b.position] || 7;
+      return orderA - orderB;
+    });
+
+    container.innerHTML = sortedPlayers
       .map(
         (player) => `
       <div class="squad-player-card" onclick="app.showPlayerProfile(${

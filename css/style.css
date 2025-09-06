@@ -5073,3 +5073,25 @@ body {
     background: var(--card-bg);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+/* Position Badge Colors */
+.position-badge.atacante {
+    background: #dc3545 !important;
+    color: white;
+}
+
+.position-badge.meia {
+    background: #28a745 !important;
+    color: white;
+}
+
+.position-badge.volante,
+.position-badge.lateral,
+.position-badge.zagueiro {
+    background: #17a2b8 !important;
+    color: white;
+}
+
+.position-badge.goleiro {
+    background: #fd7e14 !important;
+    color: white;
+}
