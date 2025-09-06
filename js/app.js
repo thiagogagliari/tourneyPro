@@ -438,6 +438,7 @@ class TournamentManager {
 
     const container = document.getElementById("clubs-list");
     container.innerHTML = clubs
+      .sort((a, b) => a.name.localeCompare(b.name))
       .map((club) => {
         const tournament = this.data.tournaments.find(
           (t) => t.id == club.tournamentId
@@ -570,6 +571,7 @@ class TournamentManager {
 
     const container = document.getElementById("players-list");
     container.innerHTML = players
+      .sort((a, b) => a.name.localeCompare(b.name))
       .map((player) => {
         const club = this.data.clubs.find((c) => c.id == player.clubId);
         return `
@@ -684,13 +686,19 @@ class TournamentManager {
 
     const container = document.getElementById("coaches-list");
     container.innerHTML = coaches
+      .sort((a, b) => a.name.localeCompare(b.name))
       .map((coach) => {
         const club = this.data.clubs.find((c) => c.id == coach.clubId);
         return `
         <div class="card">
-          <img src="${coach.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" alt="${
+          <div class="coach-photo-container">
+            <img src="${coach.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" alt="${
           coach.name
         }" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+            <img src="${club?.logo || "https://via.placeholder.com/24"}" alt="${
+          club?.name || "Clube"
+        }" class="coach-club-badge">
+          </div>
           <h3>${coach.name}</h3>
           <p><strong>Nacionalidade:</strong> ${coach.nationality}</p>
           <p><strong>Experiência:</strong> ${coach.experience || "N/A"} anos</p>
