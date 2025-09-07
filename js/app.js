@@ -38,14 +38,14 @@ class TournamentManager {
       if (result.success) {
         // Aguardar carregamento dos dados da nuvem
         await this.loadCloudData();
-        
+
         // Criar ou encontrar usuário local
         let user = this.data.users.find((u) => u.email === email);
         if (!user) {
           user = {
             id: Date.now(),
             email,
-            username: email.split('@')[0],
+            username: email.split("@")[0],
             createdAt: new Date().toISOString(),
           };
           this.data.users.push(user);
@@ -57,10 +57,11 @@ class TournamentManager {
         return true;
       }
     }
-    
+
     // Fallback para sistema local
     const user = this.data.users.find(
-      (u) => (u.email === email || u.username === email) && u.password === password
+      (u) =>
+        (u.email === email || u.username === email) && u.password === password
     );
 
     if (user) {
@@ -80,7 +81,7 @@ class TournamentManager {
         const newUser = {
           id: Date.now(),
           email,
-          username: email.split('@')[0],
+          username: email.split("@")[0],
           createdAt: new Date().toISOString(),
         };
         this.data.users.push(newUser);
@@ -90,9 +91,11 @@ class TournamentManager {
         throw new Error(result.error);
       }
     }
-    
+
     // Fallback para sistema local
-    const existingUser = this.data.users.find((u) => u.email === email || u.username === email);
+    const existingUser = this.data.users.find(
+      (u) => u.email === email || u.username === email
+    );
     if (existingUser) {
       return false;
     }
@@ -100,7 +103,7 @@ class TournamentManager {
     const newUser = {
       id: Date.now(),
       email,
-      username: email.split('@')[0],
+      username: email.split("@")[0],
       password,
       createdAt: new Date().toISOString(),
     };
@@ -129,7 +132,9 @@ class TournamentManager {
     document.getElementById("login-screen").classList.remove("active");
     document.getElementById("dashboard-screen").classList.add("active");
     document.getElementById("user-name").textContent =
-      this.currentUser.username || this.currentUser.email?.split('@')[0] || 'Usuário';
+      this.currentUser.username ||
+      this.currentUser.email?.split("@")[0] ||
+      "Usuário";
     this.updateStats();
     this.loadDashboardData();
   }
@@ -164,16 +169,18 @@ class TournamentManager {
   getUserData(type) {
     // Se não há currentUser, retorna array vazio
     if (!this.currentUser) return [];
-    
+
     // Filtra por userId do usuário atual, mas se não encontrar nada, retorna todos os dados
     const filtered = this.data[type].filter(
       (item) => item.userId === this.currentUser.id
     );
-    
+
     // Se não há dados filtrados por usuário, retorna todos (para compatibilidade)
     const result = filtered.length > 0 ? filtered : this.data[type];
-    
-    console.log(`getUserData(${type}): ${result.length} itens (${filtered.length} do usuário ${this.currentUser.id})`);
+
+    console.log(
+      `getUserData(${type}): ${result.length} itens (${filtered.length} do usuário ${this.currentUser.id})`
+    );
     return result;
   }
 
@@ -583,7 +590,8 @@ class TournamentManager {
         <div class="card">
           <div class="player-photo-container">
             <img src="${
-              player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+              player.photo ||
+              "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" alt="${
           player.name
         }" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
@@ -592,8 +600,12 @@ class TournamentManager {
         }" class="player-club-badge">
           </div>
           <h3>${player.name}</h3>
-          <p><strong>Posição:</strong> <span class="position-badge ${player.position.toLowerCase()}">${player.position}</span></p>
-          <p><strong>Idade:</strong> ${this.calculateAge(player.birthdate) || "N/A"} anos</p>
+          <p><strong>Posição:</strong> <span class="position-badge ${player.position.toLowerCase()}">${
+          player.position
+        }</span></p>
+          <p><strong>Idade:</strong> ${
+            this.calculateAge(player.birthdate) || "N/A"
+          } anos</p>
           <p><strong>Nacionalidade:</strong> 
             <span class="nationality-flag">
               <img src="${this.getCountryFlag(
@@ -697,7 +709,10 @@ class TournamentManager {
         return `
         <div class="card">
           <div class="coach-photo-container">
-            <img src="${coach.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" alt="${
+            <img src="${
+              coach.photo ||
+              "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+            }" alt="${
           coach.name
         }" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
             <img src="${club?.logo || "https://via.placeholder.com/24"}" alt="${
@@ -945,7 +960,10 @@ class TournamentManager {
             <div class="event-details">
               <div class="event-type">${event.type}</div>
               <div class="event-player">
-                <img src="${player?.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" class="event-player-photo" alt="${event.player}">
+                <img src="${
+                  player?.photo ||
+                  "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+                }" class="event-player-photo" alt="${event.player}">
                 <span class="player-name">${event.player}</span>
               </div>
             </div>
@@ -1001,7 +1019,7 @@ class TournamentManager {
       document.getElementById("match-events-section").style.display = "block";
       document.getElementById("home-score").required = true;
       document.getElementById("away-score").required = true;
-      
+
       // Carregar dados do MOTM
       this.updateMotmPlayers();
       if (match.motm) {
@@ -1250,7 +1268,9 @@ class TournamentManager {
                 <td>${index + 1}</td>
                 <td><strong>${stats.name}</strong></td>
                 <td>${stats.club}</td>
-                <td><span class="position-badge ${stats.position.toLowerCase()}">${stats.position}</span></td>
+                <td><span class="position-badge ${stats.position.toLowerCase()}">${
+                  stats.position
+                }</span></td>
                 <td>${stats.matches}</td>
                 <td><strong style="color: #4CAF50;">${stats.goals}</strong></td>
                 <td><strong style="color: #2196F3;">${
@@ -1898,7 +1918,8 @@ class TournamentManager {
     const motmSelect = document.getElementById("motm-player");
 
     if (!homeTeamId || !awayTeamId) {
-      motmSelect.innerHTML = '<option value="">Selecione os times primeiro</option>';
+      motmSelect.innerHTML =
+        '<option value="">Selecione os times primeiro</option>';
       return;
     }
 
@@ -1912,22 +1933,27 @@ class TournamentManager {
     const homeTeam = this.data.clubs.find((c) => c.id == homeTeamId);
     const awayTeam = this.data.clubs.find((c) => c.id == awayTeamId);
 
-    motmSelect.innerHTML = '<option value="">Selecione o melhor jogador</option>';
-    
+    motmSelect.innerHTML =
+      '<option value="">Selecione o melhor jogador</option>';
+
     if (homePlayers.length > 0) {
-      motmSelect.innerHTML += `<optgroup label="${homeTeam?.name || 'Time Casa'}">`;
-      homePlayers.forEach(player => {
+      motmSelect.innerHTML += `<optgroup label="${
+        homeTeam?.name || "Time Casa"
+      }">`;
+      homePlayers.forEach((player) => {
         motmSelect.innerHTML += `<option value="${player.id}">${player.name} (${player.position})</option>`;
       });
-      motmSelect.innerHTML += '</optgroup>';
+      motmSelect.innerHTML += "</optgroup>";
     }
-    
+
     if (awayPlayers.length > 0) {
-      motmSelect.innerHTML += `<optgroup label="${awayTeam?.name || 'Time Visitante'}">`;
-      awayPlayers.forEach(player => {
+      motmSelect.innerHTML += `<optgroup label="${
+        awayTeam?.name || "Time Visitante"
+      }">`;
+      awayPlayers.forEach((player) => {
         motmSelect.innerHTML += `<option value="${player.id}">${player.name} (${player.position})</option>`;
       });
-      motmSelect.innerHTML += '</optgroup>';
+      motmSelect.innerHTML += "</optgroup>";
     }
   }
 
@@ -1962,30 +1988,49 @@ class TournamentManager {
     const birth = new Date(birthdate);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
       age--;
     }
     return age;
   }
 
   // Função para formatar data corretamente (evita problema de fuso horário)
-  formatDate(dateString, format = 'dd/mm/yyyy') {
-    if (!dateString) return '-';
-    
+  formatDate(dateString, format = "dd/mm/yyyy") {
+    if (!dateString) return "-";
+
     // Criar data local sem conversão de fuso horário
-    const parts = dateString.split('-');
+    const parts = dateString.split("-");
     const date = new Date(parts[0], parts[1] - 1, parts[2]);
-    
-    if (format === 'dd Mês yyyy') {
+
+    if (format === "dd Mês yyyy") {
       const months = [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
       ];
-      return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+      return `${date.getDate()} ${
+        months[date.getMonth()]
+      } ${date.getFullYear()}`;
     }
-    
+
     // Formato padrão dd/mm/yyyy
-    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    return `${date.getDate().toString().padStart(2, "0")}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${date.getFullYear()}`;
   }
 
   // Função para obter bandeira do país
@@ -2041,6 +2086,9 @@ class TournamentManager {
       Ucrânia: "https://flagcdn.com/w20/ua.png",
       Eslováquia: "https://flagcdn.com/w20/sk.png",
       "DR Congo": "https://flagcdn.com/w20/cd.png",
+      Geórgia: "https://flagcdn.com/w20/ge.png",
+      Romênia: "https://flagcdn.com/w20/ro.png",
+      Hungria: "https://flagcdn.com/w20/hu.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
@@ -2110,7 +2158,8 @@ class TournamentManager {
 
     // Preencher dados do modal
     document.getElementById("profile-photo").src =
-      player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif";
+      player.photo ||
+      "https://static.flashscore.com/res/image/empty-face-man-share.gif";
     document.getElementById("profile-name").textContent = player.name;
     const positionElement = document.getElementById("profile-position");
     positionElement.textContent = player.position;
@@ -2123,7 +2172,7 @@ class TournamentManager {
       ? `${player.age} anos`
       : "-";
     document.getElementById("profile-birthdate").textContent = player.birthdate
-      ? this.formatDate(player.birthdate, 'dd Mês yyyy')
+      ? this.formatDate(player.birthdate, "dd Mês yyyy")
       : "-";
     // Nacionalidade com bandeira
     const nationalityFlag = document.getElementById("profile-nationality-flag");
@@ -2407,8 +2456,10 @@ class TournamentManager {
     const avgAge =
       clubPlayers.length > 0
         ? Math.round(
-            clubPlayers.reduce((sum, p) => sum + (this.calculateAge(p.birthdate) || 0), 0) /
-              clubPlayers.length
+            clubPlayers.reduce(
+              (sum, p) => sum + (this.calculateAge(p.birthdate) || 0),
+              0
+            ) / clubPlayers.length
           )
         : 0;
     document.getElementById("club-avg-age").textContent = avgAge;
@@ -2434,7 +2485,14 @@ class TournamentManager {
     }
 
     // Ordenar por posição: atacantes, meias, defensores, goleiros
-    const positionOrder = { 'Atacante': 1, 'Meia': 2, 'Volante': 3, 'Lateral': 4, 'Zagueiro': 5, 'Goleiro': 6 };
+    const positionOrder = {
+      Atacante: 1,
+      Meia: 2,
+      Volante: 3,
+      Lateral: 4,
+      Zagueiro: 5,
+      Goleiro: 6,
+    };
     const sortedPlayers = players.sort((a, b) => {
       const orderA = positionOrder[a.position] || 7;
       const orderB = positionOrder[b.position] || 7;
@@ -2449,7 +2507,8 @@ class TournamentManager {
       })">
         <div class="squad-player-header">
           <img src="${
-            player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+            player.photo ||
+            "https://static.flashscore.com/res/image/empty-face-man-share.gif"
           }" class="squad-player-photo" alt="${player.name}">
           <div class="squad-player-info">
             <h4>${player.name}</h4>
@@ -2594,7 +2653,8 @@ class TournamentManager {
         })">
           <div class="top-player-info">
             <img src="${
-              scorer.player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+              scorer.player.photo ||
+              "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="top-player-photo" alt="${scorer.player.name}">
             <div>
               <div class="top-player-name">${scorer.player.name}</div>
@@ -2625,7 +2685,8 @@ class TournamentManager {
         })">
           <div class="top-player-info">
             <img src="${
-              assist.player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+              assist.player.photo ||
+              "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="top-player-photo" alt="${assist.player.name}">
             <div>
               <div class="top-player-name">${assist.player.name}</div>
@@ -2958,7 +3019,8 @@ class TournamentManager {
         })">
           <div class="tournament-player-info">
             <img src="${
-              scorer.player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+              scorer.player.photo ||
+              "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="tournament-player-photo" alt="${scorer.player.name}">
             <div class="tournament-player-details">
               <div class="tournament-player-name">${scorer.player.name}</div>
@@ -2993,7 +3055,8 @@ class TournamentManager {
         })">
           <div class="tournament-player-info">
             <img src="${
-              assist.player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+              assist.player.photo ||
+              "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="tournament-player-photo" alt="${assist.player.name}">
             <div class="tournament-player-details">
               <div class="tournament-player-name">${assist.player.name}</div>
@@ -3158,7 +3221,7 @@ class TournamentManager {
   async loadCloudData() {
     if (cloudStorage.firebaseReady && cloudStorage.currentUser) {
       console.log("Carregando todos os dados da nuvem...");
-      
+
       try {
         // Carregar cada tipo de dado
         this.data.users = await cloudStorage.loadData("users");
@@ -3168,12 +3231,12 @@ class TournamentManager {
         this.data.coaches = await cloudStorage.loadData("coaches");
         this.data.matches = await cloudStorage.loadData("matches");
         this.data.rounds = await cloudStorage.loadData("rounds");
-        
+
         console.log("Dados carregados da nuvem:", {
           tournaments: this.data.tournaments.length,
           clubs: this.data.clubs.length,
           players: this.data.players.length,
-          matches: this.data.matches.length
+          matches: this.data.matches.length,
         });
       } catch (error) {
         console.error("Erro ao carregar dados da nuvem:", error);
@@ -3195,51 +3258,57 @@ class TournamentManager {
   // Event Listeners
   setupEventListeners() {
     // Login
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    document
+      .getElementById("login-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
-      try {
-        if (await this.login(email, password)) {
-          document.getElementById("login-form").reset();
-        } else {
-          alert("Email ou senha incorretos!");
+        try {
+          if (await this.login(email, password)) {
+            document.getElementById("login-form").reset();
+          } else {
+            alert("Email ou senha incorretos!");
+          }
+        } catch (error) {
+          alert("Erro no login: " + error.message);
         }
-      } catch (error) {
-        alert("Erro no login: " + error.message);
-      }
-    });
+      });
 
-    document.getElementById("register-btn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    document
+      .getElementById("register-btn")
+      .addEventListener("click", async () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
-      if (!email || !password) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      if (password.length < 6) {
-        alert("A senha deve ter pelo menos 6 caracteres!");
-        return;
-      }
-
-      try {
-        if (await this.register(email, password)) {
-          alert("Conta criada com sucesso! Faça login.");
-          document.getElementById("login-form").reset();
-        } else {
-          alert("Email já existe!");
+        if (!email || !password) {
+          alert("Preencha todos os campos!");
+          return;
         }
-      } catch (error) {
-        alert("Erro no cadastro: " + error.message);
-      }
-    });
 
-    document.getElementById("logout-btn").addEventListener("click", async () => {
-      await this.logout();
-    });
+        if (password.length < 6) {
+          alert("A senha deve ter pelo menos 6 caracteres!");
+          return;
+        }
+
+        try {
+          if (await this.register(email, password)) {
+            alert("Conta criada com sucesso! Faça login.");
+            document.getElementById("login-form").reset();
+          } else {
+            alert("Email já existe!");
+          }
+        } catch (error) {
+          alert("Erro no cadastro: " + error.message);
+        }
+      });
+
+    document
+      .getElementById("logout-btn")
+      .addEventListener("click", async () => {
+        await this.logout();
+      });
 
     // Theme toggle
     document.getElementById("theme-toggle").addEventListener("click", () => {
@@ -3316,9 +3385,11 @@ class TournamentManager {
       });
 
     // Mobile menu
-    document.getElementById("mobile-menu-toggle").addEventListener("click", () => {
-      this.toggleMobileMenu();
-    });
+    document
+      .getElementById("mobile-menu-toggle")
+      .addEventListener("click", () => {
+        this.toggleMobileMenu();
+      });
 
     document.getElementById("sidebar-overlay").addEventListener("click", () => {
       this.closeMobileMenu();
@@ -3549,7 +3620,7 @@ class TournamentManager {
       if (motmPlayerId && motmRating) {
         data.motm = {
           playerId: parseInt(motmPlayerId),
-          rating: parseFloat(motmRating)
+          rating: parseFloat(motmRating),
         };
       }
 
