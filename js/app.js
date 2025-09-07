@@ -159,10 +159,16 @@ class TournamentManager {
   // Dados
   async saveData(type) {
     try {
+      console.log(`Tentando salvar ${type}:`, {
+        firebaseReady: cloudStorage.firebaseReady,
+        currentUser: !!cloudStorage.currentUser,
+        dataLength: this.data[type].length
+      });
       await cloudStorage.saveData(type, this.data[type]);
+      console.log(`${type} salvo com sucesso`);
     } catch (error) {
       console.error(`Erro ao salvar ${type}:`, error);
-      alert(`Erro ao salvar dados. Verifique sua conexão.`);
+      alert(`Erro ao salvar ${type}: ${error.message}`);
     }
   }
 
@@ -354,6 +360,70 @@ class TournamentManager {
     }
   }
 
+  async updateClub(clubId, data) {
+    const clubIndex = this.data.clubs.findIndex((c) => c.id == clubId);
+    if (clubIndex !== -1) {
+      this.data.clubs[clubIndex] = {
+        ...this.data.clubs[clubIndex],
+        ...data,
+      };
+      await this.saveData("clubs");
+      this.loadClubs();
+
+      document.querySelector("#club-modal h3").textContent = "Novo Clube";
+    }
+  }
+
+  async updatePlayer(playerId, data) {
+    const playerIndex = this.data.players.findIndex((p) => p.id == playerId);
+    if (playerIndex !== -1) {
+      this.data.players[playerIndex] = {
+        ...this.data.players[playerIndex],
+        ...data,
+      };
+      await this.saveData("players");
+      this.loadPlayers();
+
+      document.querySelector("#player-modal h3").textContent = "Novo Jogador";
+    }
+  }
+
+  async updateCoach(coachId, data) {
+    const coachIndex = this.data.coaches.findIndex((c) => c.id == coachId);
+    if (coachIndex !== -1) {
+      this.data.coaches[coachIndex] = {
+        ...this.data.coaches[coachIndex],
+        ...data,
+      };
+      await this.saveData("coaches");
+      this.loadCoaches();
+
+      document.querySelector("#coach-modal h3").textContent = "Novo Treinador";
+    }
+  }
+
+  async updateMatch(matchId, data) {
+    const matchIndex = this.data.matches.findIndex((m) => m.id == matchId);
+    if (matchIndex !== -1) {
+      const updatedMatch = {
+        ...this.data.matches[matchIndex],
+        ...data,
+        id: parseInt(matchId),
+        status:
+          data.homeScore !== undefined && data.awayScore !== undefined
+            ? "finished"
+            : "scheduled",
+      };
+
+      this.data.matches[matchIndex] = updatedMatch;
+      await this.saveData("matches");
+      this.loadMatches();
+      this.updateStats();
+
+      document.querySelector("#match-modal h3").textContent = "Nova Partida";
+    }
+  }
+
   deleteTournament(tournamentId) {
     const tournament = this.data.tournaments.find((t) => t.id === tournamentId);
     if (!tournament) return;
@@ -516,19 +586,7 @@ class TournamentManager {
     document.querySelector("#club-modal h3").textContent = "Editar Clube";
   }
 
-  updateClub(clubId, data) {
-    const clubIndex = this.data.clubs.findIndex((c) => c.id == clubId);
-    if (clubIndex !== -1) {
-      this.data.clubs[clubIndex] = {
-        ...this.data.clubs[clubIndex],
-        ...data,
-      };
-      this.saveData("clubs");
-      this.loadClubs();
 
-      document.querySelector("#club-modal h3").textContent = "Novo Clube";
-    }
-  }
 
   updateClubSelects() {
     const clubs = this.getUserData("clubs");
@@ -666,19 +724,7 @@ class TournamentManager {
     document.querySelector("#player-modal h3").textContent = "Editar Jogador";
   }
 
-  updatePlayer(playerId, data) {
-    const playerIndex = this.data.players.findIndex((p) => p.id == playerId);
-    if (playerIndex !== -1) {
-      this.data.players[playerIndex] = {
-        ...this.data.players[playerIndex],
-        ...data,
-      };
-      this.saveData("players");
-      this.loadPlayers();
 
-      document.querySelector("#player-modal h3").textContent = "Novo Jogador";
-    }
-  }
 
   // Treinadores
   loadCoaches() {
@@ -767,19 +813,7 @@ class TournamentManager {
     document.querySelector("#coach-modal h3").textContent = "Editar Treinador";
   }
 
-  updateCoach(coachId, data) {
-    const coachIndex = this.data.coaches.findIndex((c) => c.id == coachId);
-    if (coachIndex !== -1) {
-      this.data.coaches[coachIndex] = {
-        ...this.data.coaches[coachIndex],
-        ...data,
-      };
-      this.saveData("coaches");
-      this.loadCoaches();
 
-      document.querySelector("#coach-modal h3").textContent = "Novo Treinador";
-    }
-  }
 
   // Partidas
   loadMatches() {
@@ -1036,27 +1070,7 @@ class TournamentManager {
     document.querySelector("#match-modal h3").textContent = "Editar Partida";
   }
 
-  updateMatch(matchId, data) {
-    const matchIndex = this.data.matches.findIndex((m) => m.id == matchId);
-    if (matchIndex !== -1) {
-      const updatedMatch = {
-        ...this.data.matches[matchIndex],
-        ...data,
-        id: parseInt(matchId),
-        status:
-          data.homeScore !== undefined && data.awayScore !== undefined
-            ? "finished"
-            : "scheduled",
-      };
 
-      this.data.matches[matchIndex] = updatedMatch;
-      this.saveData("matches");
-      this.loadMatches();
-      this.updateStats();
-
-      document.querySelector("#match-modal h3").textContent = "Nova Partida";
-    }
-  }
 
   deleteMatch(matchId) {
     const match = this.data.matches.find((m) => m.id === matchId);
@@ -3489,7 +3503,7 @@ class TournamentManager {
     // Tournament form
     document
       .getElementById("tournament-form")
-      .addEventListener("submit", (e) => {
+      .addEventListener("submit", async (e) => {
         e.preventDefault();
         const data = {
           name: document.getElementById("tournament-name").value,
@@ -3502,10 +3516,10 @@ class TournamentManager {
 
         const editId = e.target.dataset.editId;
         if (editId) {
-          this.updateTournament(parseInt(editId), data);
+          await this.updateTournament(parseInt(editId), data);
           delete e.target.dataset.editId;
         } else {
-          this.createTournament(data);
+          await this.createTournament(data);
         }
 
         document.getElementById("tournament-modal").style.display = "none";
@@ -3513,7 +3527,7 @@ class TournamentManager {
       });
 
     // Club form
-    document.getElementById("club-form").addEventListener("submit", (e) => {
+    document.getElementById("club-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const data = {
         name: document.getElementById("club-name").value,
@@ -3525,10 +3539,10 @@ class TournamentManager {
 
       const editId = e.target.dataset.editId;
       if (editId) {
-        this.updateClub(parseInt(editId), data);
+        await this.updateClub(parseInt(editId), data);
         delete e.target.dataset.editId;
       } else {
-        this.createClub(data);
+        await this.createClub(data);
       }
 
       document.getElementById("club-modal").style.display = "none";
@@ -3536,7 +3550,7 @@ class TournamentManager {
     });
 
     // Player form
-    document.getElementById("player-form").addEventListener("submit", (e) => {
+    document.getElementById("player-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const birthdate = document.getElementById("player-birthdate").value;
       const age = this.calculateAge(birthdate);
@@ -3557,10 +3571,10 @@ class TournamentManager {
 
       const editId = e.target.dataset.editId;
       if (editId) {
-        this.updatePlayer(parseInt(editId), data);
+        await this.updatePlayer(parseInt(editId), data);
         delete e.target.dataset.editId;
       } else {
-        this.createPlayer(data);
+        await this.createPlayer(data);
       }
 
       document.getElementById("player-modal").style.display = "none";
@@ -3568,7 +3582,7 @@ class TournamentManager {
     });
 
     // Coach form
-    document.getElementById("coach-form").addEventListener("submit", (e) => {
+    document.getElementById("coach-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const data = {
         name: document.getElementById("coach-name").value,
@@ -3583,10 +3597,10 @@ class TournamentManager {
 
       const editId = e.target.dataset.editId;
       if (editId) {
-        this.updateCoach(parseInt(editId), data);
+        await this.updateCoach(parseInt(editId), data);
         delete e.target.dataset.editId;
       } else {
-        this.createCoach(data);
+        await this.createCoach(data);
       }
 
       document.getElementById("coach-modal").style.display = "none";
@@ -3594,7 +3608,7 @@ class TournamentManager {
     });
 
     // Match form
-    document.getElementById("match-form").addEventListener("submit", (e) => {
+    document.getElementById("match-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
 
@@ -3654,10 +3668,10 @@ class TournamentManager {
 
       const editId = e.target.dataset.editId;
       if (editId) {
-        this.updateMatch(parseInt(editId), data);
+        await this.updateMatch(parseInt(editId), data);
         delete e.target.dataset.editId;
       } else {
-        this.createMatch(data);
+        await this.createMatch(data);
       }
 
       document.getElementById("match-modal").style.display = "none";
@@ -3666,7 +3680,7 @@ class TournamentManager {
     });
 
     // Round form
-    document.getElementById("round-form").addEventListener("submit", (e) => {
+    document.getElementById("round-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = {
@@ -3688,7 +3702,7 @@ class TournamentManager {
         }
       });
 
-      this.createRound(data);
+      await this.createRound(data);
       document.getElementById("round-modal").style.display = "none";
       e.target.reset();
       document.getElementById("round-matches").innerHTML = "";
