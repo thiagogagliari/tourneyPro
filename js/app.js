@@ -821,13 +821,6 @@ class TournamentManager {
     document.getElementById("coach-experience").value = coach.experience || "";
     document.getElementById("coach-formation").value = coach.formation || "";
     document.getElementById("coach-photo").value = coach.photo || "";
-    
-    // Selecionar múltiplos clubes
-    const clubSelect = document.getElementById("coach-club");
-    const coachClubs = coach.clubIds || (coach.clubId ? [coach.clubId] : []);
-    Array.from(clubSelect.options).forEach(option => {
-      option.selected = coachClubs.includes(parseInt(option.value));
-    });
 
     document.getElementById("coach-modal").style.display = "block";
 
