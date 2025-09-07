@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/player-profile.css" />
     <link rel="stylesheet" href="css/club-profile.css" />
     <link rel="stylesheet" href="css/tournament-profile.css" />
+    <link rel="stylesheet" href="css/coach-profile.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -1124,6 +1125,158 @@
             <div class="match-events-timeline" id="match-events-timeline">
               <div class="no-events">Nenhum evento registrado</div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal do Perfil do Treinador -->
+    <div id="coach-profile-modal" class="coach-profile-modal">
+      <div class="coach-profile-content">
+        <div class="coach-header">
+          <button class="coach-close" onclick="app.closeCoachProfile()">&times;</button>
+          <div class="coach-header-content">
+            <img id="coach-profile-photo" class="coach-photo-large" src="" alt="Treinador" />
+            <div class="coach-basic-info">
+              <h2 id="coach-profile-name">Nome do Treinador</h2>
+              <div class="coach-info-details">
+                <div class="coach-detail-item">
+                  <span>Idade:</span> <span id="coach-profile-age">-</span>
+                </div>
+                <div class="coach-detail-item">
+                  <span>Nascimento:</span> <span id="coach-profile-birthdate">-</span>
+                </div>
+                <div class="coach-detail-item">
+                  <span>Nacionalidade:</span>
+                  <span class="nationality-flag">
+                    <img class="flag-icon" id="coach-profile-nationality-flag" src="" alt="Bandeira" />
+                    <span id="coach-profile-nationality-text">-</span>
+                  </span>
+                </div>
+                <div class="coach-detail-item">
+                  <span>Experiência:</span> <span id="coach-profile-experience">-</span>
+                </div>
+                <div class="coach-detail-item">
+                  <span>Formação:</span> <span id="coach-profile-formation">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="coach-body">
+          <div class="coach-stats-grid">
+            <div class="coach-info-card">
+              <h3>Estatísticas da Temporada</h3>
+              <div class="coach-stats-summary">
+                <div class="stat-box">
+                  <div class="stat-number" id="coach-profile-matches">0</div>
+                  <div class="stat-label">Jogos</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="coach-profile-wins">0</div>
+                  <div class="stat-label">Vitórias</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="coach-profile-draws">0</div>
+                  <div class="stat-label">Empates</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="coach-profile-losses">0</div>
+                  <div class="stat-label">Derrotas</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-number" id="coach-profile-winrate">-</div>
+                  <div class="stat-label">% Vitórias</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="coach-history-section">
+            <div class="coach-info-card">
+              <h3>Histórico de Clubes</h3>
+              <div class="club-history-timeline" id="coach-profile-club-history">
+                <div class="no-matches">Nenhum histórico encontrado</div>
+              </div>
+            </div>
+          </div>
+          <div class="coach-matches-history">
+            <div class="coach-info-card">
+              <h3>Histórico de Partidas</h3>
+              <div class="matches-timeline" id="coach-profile-matches-timeline">
+                <div class="no-matches">Nenhuma partida encontrada</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Histórico de Confrontos -->
+    <div id="match-history-modal" class="match-history-modal">
+      <div class="match-history-content">
+        <div class="history-header">
+          <button class="history-close" onclick="app.closeMatchHistory()">&times;</button>
+          <div class="history-teams">
+            <div class="history-team">
+              <img id="history-club1-logo" src="" alt="Clube 1" />
+              <h2 id="history-club1-name">Clube 1</h2>
+            </div>
+            <div class="history-vs">vs</div>
+            <div class="history-team">
+              <img id="history-club2-logo" src="" alt="Clube 2" />
+              <h2 id="history-club2-name">Clube 2</h2>
+            </div>
+          </div>
+          <div class="history-stats">
+            <div class="history-stat">
+              <div class="stat-number" id="history-total-matches">0</div>
+              <div class="stat-label">Jogos</div>
+            </div>
+            <div class="history-stat">
+              <div class="stat-number" id="history-club1-wins">0</div>
+              <div class="stat-label">Vitórias</div>
+            </div>
+            <div class="history-stat">
+              <div class="stat-number" id="history-draws">0</div>
+              <div class="stat-label">Empates</div>
+            </div>
+            <div class="history-stat">
+              <div class="stat-number" id="history-club2-wins">0</div>
+              <div class="stat-label">Vitórias</div>
+            </div>
+            <div class="history-stat">
+              <div class="stat-number" id="history-club1-goals">0</div>
+              <div class="stat-label">Gols</div>
+            </div>
+            <div class="history-stat">
+              <div class="stat-number" id="history-club2-goals">0</div>
+              <div class="stat-label">Gols</div>
+            </div>
+          </div>
+        </div>
+        <div class="history-body">
+          <h3>Histórico de Partidas</h3>
+          <div class="history-matches" id="history-matches-list">
+            <div class="no-data">Nenhum confronto encontrado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Opções de Histórico -->
+    <div id="history-options-modal" class="history-options-modal">
+      <div class="history-options-content">
+        <div class="options-header">
+          <button class="options-close" onclick="app.closeHistoryOptions()">&times;</button>
+          <div class="options-club">
+            <img id="history-options-club-logo" src="" alt="Clube" />
+            <h3>Histórico de <span id="history-options-club-name">Clube</span></h3>
+          </div>
+        </div>
+        <div class="options-body">
+          <p>Selecione o adversário para ver o histórico de confrontos:</p>
+          <div class="history-options-list" id="history-options-list">
+            <div class="no-data">Nenhum adversário encontrado</div>
           </div>
         </div>
       </div>

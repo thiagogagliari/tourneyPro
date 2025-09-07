@@ -782,10 +782,15 @@ class TournamentManager {
           <p><strong>Nacionalidade:</strong> ${coach.nationality}</p>
           <p><strong>Experiência:</strong> ${coach.experience || "N/A"} anos</p>
           <p><strong>Formação:</strong> ${coach.formation || "N/A"}</p>
-          <p><strong>Clube:</strong> ${club ? club.name : "Sem clube"}</p>
-          <button class="btn-edit" onclick="app.editCoach(${
-            coach.id
-          })">Editar</button>
+          <p><strong>Clubes:</strong> ${this.getCoachClubs(coach.id).map(c => c.name).join(", ") || "Sem clube"}</p>
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-primary" onclick="app.showCoachProfile(${
+              coach.id
+            })" style="flex: 1;">Ver Perfil</button>
+            <button class="btn-edit" onclick="app.editCoach(${
+              coach.id
+            })">Editar</button>
+          </div>
         </div>
       `;
       })
@@ -2427,6 +2432,175 @@ class TournamentManager {
     document.getElementById("player-profile-modal").style.display = "none";
   }
 
+  // Perfil do Treinador
+  showCoachProfile(coachId) {
+    const coach = this.data.coaches.find((c) => c.id === coachId);
+    if (!coach) return;
+
+    const clubs = this.getUserData("clubs").filter((c) => c.id == coach.clubId);
+    const matches = this.getUserData("matches").filter((m) => m.status === "finished");
+
+    // Calcular estatísticas do treinador
+    const coachStats = {
+      matches: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      matchHistory: [],
+    };
+
+    clubs.forEach(club => {
+      const clubMatches = matches.filter(m => 
+        m.homeTeamId == club.id || m.awayTeamId == club.id
+      );
+      
+      clubMatches.forEach(match => {
+        coachStats.matches++;
+        const isHome = match.homeTeamId == club.id;
+        const clubScore = isHome ? match.homeScore : match.awayScore;
+        const opponentScore = isHome ? match.awayScore : match.homeScore;
+        
+        const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
+        const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
+        
+        let result = 'draw';
+        if (clubScore > opponentScore) {
+          coachStats.wins++;
+          result = 'win';
+        } else if (clubScore < opponentScore) {
+          coachStats.losses++;
+          result = 'loss';
+        } else {
+          coachStats.draws++;
+        }
+        
+        coachStats.matchHistory.push({
+          date: match.date,
+          homeTeam,
+          awayTeam,
+          score: `${match.homeScore} - ${match.awayScore}`,
+          result,
+          club
+        });
+      });
+    });
+
+    // Preencher dados do modal
+    document.getElementById("coach-profile-photo").src = coach.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif";
+    document.getElementById("coach-profile-name").textContent = coach.name;
+    document.getElementById("coach-profile-age").textContent = this.calculateAge(coach.birthdate) ? `${this.calculateAge(coach.birthdate)} anos` : "-";
+    document.getElementById("coach-profile-birthdate").textContent = coach.birthdate ? this.formatDate(coach.birthdate, "dd Mês yyyy") : "-";
+    
+    const nationalityFlag = document.getElementById("coach-profile-nationality-flag");
+    const nationalityText = document.getElementById("coach-profile-nationality-text");
+    if (coach.nationality) {
+      nationalityFlag.src = this.getCountryFlag(coach.nationality);
+      nationalityFlag.style.display = "inline";
+      nationalityText.textContent = coach.nationality;
+    } else {
+      nationalityFlag.style.display = "none";
+      nationalityText.textContent = "-";
+    }
+    
+    document.getElementById("coach-profile-experience").textContent = coach.experience ? `${coach.experience} anos` : "-";
+    document.getElementById("coach-profile-formation").textContent = coach.formation || "-";
+
+    // Estatísticas
+    document.getElementById("coach-profile-matches").textContent = coachStats.matches;
+    document.getElementById("coach-profile-wins").textContent = coachStats.wins;
+    document.getElementById("coach-profile-draws").textContent = coachStats.draws;
+    document.getElementById("coach-profile-losses").textContent = coachStats.losses;
+    document.getElementById("coach-profile-winrate").textContent = coachStats.matches > 0 ? ((coachStats.wins / coachStats.matches) * 100).toFixed(1) + "%" : "-";
+
+    this.loadCoachClubHistory(coach, clubs);
+    this.loadCoachMatches(coachStats.matchHistory);
+
+    document.getElementById("coach-profile-modal").style.display = "block";
+  }
+
+  loadCoachClubHistory(coach, clubs) {
+    const container = document.getElementById("coach-profile-club-history");
+    const currentYear = new Date().getFullYear();
+
+    if (clubs.length === 0) {
+      container.innerHTML = '<div class="no-matches">Nenhum histórico encontrado</div>';
+      return;
+    }
+
+    container.innerHTML = clubs.map(club => {
+      const clubMatches = this.getUserData("matches").filter(m => 
+        (m.homeTeamId == club.id || m.awayTeamId == club.id) && m.status === "finished"
+      );
+      
+      let wins = 0, draws = 0, losses = 0;
+      clubMatches.forEach(match => {
+        const isHome = match.homeTeamId == club.id;
+        const clubScore = isHome ? match.homeScore : match.awayScore;
+        const opponentScore = isHome ? match.awayScore : match.homeScore;
+        
+        if (clubScore > opponentScore) wins++;
+        else if (clubScore === opponentScore) draws++;
+        else losses++;
+      });
+      
+      return `
+        <div class="club-history-item current-season">
+          <img src="${club.logo || "https://via.placeholder.com/40"}" class="club-history-logo" alt="${club.name}">
+          <div class="club-history-info">
+            <div class="club-history-name">
+              ${club.name}
+              <span class="current-season-badge">Atual</span>
+            </div>
+            <div class="club-history-period">${currentYear}</div>
+          </div>
+          <div class="season-stats">
+            <div class="season-stat">
+              <div class="season-stat-number">${clubMatches.length}</div>
+              <div class="season-stat-label">Jogos</div>
+            </div>
+            <div class="season-stat">
+              <div class="season-stat-number">${wins}</div>
+              <div class="season-stat-label">Vitórias</div>
+            </div>
+            <div class="season-stat">
+              <div class="season-stat-number">${draws}</div>
+              <div class="season-stat-label">Empates</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  loadCoachMatches(matchHistory) {
+    const timeline = document.getElementById("coach-profile-matches-timeline");
+    if (matchHistory.length === 0) {
+      timeline.innerHTML = '<div class="no-matches">Nenhuma partida encontrada</div>';
+      return;
+    }
+
+    timeline.innerHTML = matchHistory.map(match => `
+      <div class="match-timeline-item">
+        <div class="match-date">${new Date(match.date).toLocaleDateString("pt-BR")}</div>
+        <div class="match-teams">
+          <div class="match-team-logos">
+            <img src="${match.homeTeam?.logo || "https://via.placeholder.com/25"}" class="match-team-logo" alt="${match.homeTeam?.name}">
+            <span class="match-vs">vs</span>
+            <img src="${match.awayTeam?.logo || "https://via.placeholder.com/25"}" class="match-team-logo" alt="${match.awayTeam?.name}">
+          </div>
+        </div>
+        <div class="match-result">${match.score}</div>
+        <div class="match-result-badge ${match.result}">
+          ${match.result === 'win' ? 'V' : match.result === 'draw' ? 'E' : 'D'}
+        </div>
+      </div>
+    `).join("");
+  }
+
+  closeCoachProfile() {
+    document.getElementById("coach-profile-modal").style.display = "none";
+  }
+
   // Perfil do Clube
   showClubProfile(clubId) {
     const club = this.data.clubs.find((c) => c.id === clubId);
@@ -2890,13 +3064,16 @@ class TournamentManager {
           index + 1
         }</div></td>
           <td>
-            <div class="team-info" onclick="app.showClubProfile(${
-              team.club.id
-            })">
+            <div class="team-info">
               <img src="${
                 team.club.logo || "https://via.placeholder.com/30"
-              }" class="team-logo" alt="${team.club.name}">
-              <span class="team-name">${team.club.name}</span>
+              }" class="team-logo" alt="${team.club.name}" onclick="app.showClubProfile(${
+              team.club.id
+            })">
+              <span class="team-name" onclick="app.showClubProfile(${
+              team.club.id
+            })">${team.club.name}</span>
+              <button class="btn-history" onclick="event.stopPropagation(); app.showTeamHistoryOptions(${team.club.id}, ${tournamentId})" title="Ver histórico">📊</button>
             </div>
           </td>
           <td class="stat-number">${team.matches}</td>
@@ -3200,6 +3377,131 @@ class TournamentManager {
 
   closeTournamentProfile() {
     document.getElementById("tournament-profile-modal").style.display = "none";
+  }
+
+  // Histórico de Confrontos
+  showMatchHistory(club1Id, club2Id) {
+    const club1 = this.data.clubs.find(c => c.id == club1Id);
+    const club2 = this.data.clubs.find(c => c.id == club2Id);
+    
+    if (!club1 || !club2) return;
+    
+    const matches = this.getUserData("matches").filter(m => 
+      m.status === "finished" && 
+      ((m.homeTeamId == club1Id && m.awayTeamId == club2Id) || 
+       (m.homeTeamId == club2Id && m.awayTeamId == club1Id))
+    );
+    
+    // Calcular estatísticas do confronto
+    let club1Wins = 0, club2Wins = 0, draws = 0;
+    let club1Goals = 0, club2Goals = 0;
+    
+    matches.forEach(match => {
+      const club1IsHome = match.homeTeamId == club1Id;
+      const club1Score = club1IsHome ? match.homeScore : match.awayScore;
+      const club2Score = club1IsHome ? match.awayScore : match.homeScore;
+      
+      club1Goals += club1Score;
+      club2Goals += club2Score;
+      
+      if (club1Score > club2Score) club1Wins++;
+      else if (club2Score > club1Score) club2Wins++;
+      else draws++;
+    });
+    
+    // Preencher modal
+    document.getElementById("history-club1-logo").src = club1.logo || "https://via.placeholder.com/60";
+    document.getElementById("history-club1-name").textContent = club1.name;
+    document.getElementById("history-club2-logo").src = club2.logo || "https://via.placeholder.com/60";
+    document.getElementById("history-club2-name").textContent = club2.name;
+    
+    document.getElementById("history-total-matches").textContent = matches.length;
+    document.getElementById("history-club1-wins").textContent = club1Wins;
+    document.getElementById("history-draws").textContent = draws;
+    document.getElementById("history-club2-wins").textContent = club2Wins;
+    document.getElementById("history-club1-goals").textContent = club1Goals;
+    document.getElementById("history-club2-goals").textContent = club2Goals;
+    
+    // Carregar lista de partidas
+    const container = document.getElementById("history-matches-list");
+    if (matches.length === 0) {
+      container.innerHTML = '<div class="no-data">Nenhum confronto encontrado</div>';
+    } else {
+      container.innerHTML = matches.sort((a, b) => new Date(b.date) - new Date(a.date)).map(match => {
+        const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
+        const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
+        const tournament = this.data.tournaments.find(t => t.id == match.tournamentId);
+        
+        return `
+          <div class="history-match-item" onclick="app.showMatchDetails(${match.id})">
+            <div class="history-match-date">${new Date(match.date).toLocaleDateString("pt-BR")}</div>
+            <div class="history-match-teams">
+              <div class="history-match-team">
+                <img src="${homeTeam?.logo || "https://via.placeholder.com/30"}" alt="${homeTeam?.name}">
+                <span>${homeTeam?.name}</span>
+              </div>
+              <div class="history-match-score">${match.homeScore} - ${match.awayScore}</div>
+              <div class="history-match-team">
+                <span>${awayTeam?.name}</span>
+                <img src="${awayTeam?.logo || "https://via.placeholder.com/30"}" alt="${awayTeam?.name}">
+              </div>
+            </div>
+            <div class="history-match-tournament">${tournament?.name || "Torneio"}</div>
+          </div>
+        `;
+      }).join("");
+    }
+    
+    document.getElementById("match-history-modal").style.display = "block";
+  }
+  
+  closeMatchHistory() {
+    document.getElementById("match-history-modal").style.display = "none";
+  }
+  
+  showTeamHistoryOptions(clubId, tournamentId) {
+    const club = this.data.clubs.find(c => c.id == clubId);
+    const otherClubs = this.getUserData("clubs").filter(c => 
+      c.tournamentId == tournamentId && c.id != clubId
+    );
+    
+    if (otherClubs.length === 0) {
+      alert("Não há outros clubes neste torneio para comparar.");
+      return;
+    }
+    
+    document.getElementById("history-options-club-name").textContent = club.name;
+    document.getElementById("history-options-club-logo").src = club.logo || "https://via.placeholder.com/40";
+    
+    const container = document.getElementById("history-options-list");
+    container.innerHTML = otherClubs.map(otherClub => {
+      const matches = this.getUserData("matches").filter(m => 
+        m.status === "finished" && 
+        ((m.homeTeamId == clubId && m.awayTeamId == otherClub.id) || 
+         (m.homeTeamId == otherClub.id && m.awayTeamId == clubId))
+      );
+      
+      return `
+        <div class="history-option-item" onclick="app.showMatchHistory(${clubId}, ${otherClub.id}); app.closeHistoryOptions();">
+          <img src="${otherClub.logo || "https://via.placeholder.com/30"}" alt="${otherClub.name}">
+          <span class="opponent-name">${otherClub.name}</span>
+          <span class="matches-count">${matches.length} jogos</span>
+        </div>
+      `;
+    }).join("");
+    
+    document.getElementById("history-options-modal").style.display = "block";
+  }
+  
+  closeHistoryOptions() {
+    document.getElementById("history-options-modal").style.display = "none";
+  }
+  
+  getCoachClubs(coachId) {
+    return this.getUserData("clubs").filter(club => {
+      const clubCoaches = club.coaches || [];
+      return clubCoaches.includes(coachId) || club.coachId == coachId;
+    });
   }
 
   // Theme
@@ -3513,6 +3815,15 @@ class TournamentManager {
       }
       if (e.target.classList.contains("match-details-modal")) {
         this.closeMatchDetails();
+      }
+      if (e.target.classList.contains("coach-profile-modal")) {
+        this.closeCoachProfile();
+      }
+      if (e.target.classList.contains("match-history-modal")) {
+        this.closeMatchHistory();
+      }
+      if (e.target.classList.contains("history-options-modal")) {
+        this.closeHistoryOptions();
       }
     });
 

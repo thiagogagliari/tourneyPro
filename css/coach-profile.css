@@ -1,0 +1,459 @@
+/* Modal do Perfil do Treinador */
+.coach-profile-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.coach-profile-content {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  margin: 2% auto;
+  padding: 0;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.coach-header {
+  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  padding: 30px;
+  border-radius: 15px 15px 0 0;
+  position: relative;
+}
+
+.coach-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.coach-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.coach-header-content {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.coach-photo-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.coach-basic-info h2 {
+  color: white;
+  margin: 0 0 20px 0;
+  font-size: 2.2em;
+  font-weight: 700;
+}
+
+.coach-info-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.coach-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.coach-detail-item span:first-child {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.coach-detail-item span:last-child {
+  color: white;
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+.coach-body {
+  padding: 30px;
+}
+
+.coach-stats-grid {
+  display: grid;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.coach-info-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.coach-info-card h3 {
+  color: white;
+  margin: 0 0 20px 0;
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+.coach-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 20px;
+}
+
+.coach-history-section,
+.coach-matches-history {
+  margin-top: 30px;
+}
+
+/* Histórico de Confrontos */
+.match-history-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.match-history-content {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  margin: 2% auto;
+  padding: 0;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.history-header {
+  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  padding: 30px;
+  border-radius: 15px 15px 0 0;
+  position: relative;
+}
+
+.history-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.history-teams {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.history-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.history-team img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.history-team h2 {
+  color: white;
+  margin: 0;
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.history-vs {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+  text-align: center;
+}
+
+.history-stat {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.history-body {
+  padding: 30px;
+}
+
+.history-body h3 {
+  color: white;
+  margin: 0 0 20px 0;
+  font-size: 1.3em;
+}
+
+.history-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.history-match-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.history-match-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.history-match-date {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9em;
+  margin-bottom: 10px;
+}
+
+.history-match-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.history-match-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+}
+
+.history-match-team img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.history-match-score {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: white;
+}
+
+.history-match-tournament {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9em;
+}
+
+/* Opções de Histórico */
+.history-options-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.history-options-content {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  margin: 10% auto;
+  padding: 0;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.options-header {
+  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  padding: 25px;
+  border-radius: 15px 15px 0 0;
+  position: relative;
+}
+
+.options-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.options-club {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.options-club img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.options-club h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.3em;
+}
+
+.options-body {
+  padding: 25px;
+}
+
+.options-body p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 20px 0;
+}
+
+.history-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-option-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history-option-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.history-option-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.opponent-name {
+  color: white;
+  font-weight: 600;
+  flex: 1;
+}
+
+.matches-count {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9em;
+}
+
+.btn-history {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+}
+
+.btn-history:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .coach-header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .coach-info-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .history-teams {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .history-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
