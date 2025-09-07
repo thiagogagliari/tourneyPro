@@ -3962,10 +3962,6 @@ class TournamentManager {
       .getElementById("coach-form")
       .addEventListener("submit", async (e) => {
         e.preventDefault();
-        const clubSelect = document.getElementById("coach-club");
-        const selectedClubs = Array.from(clubSelect.selectedOptions)
-          .map(option => parseInt(option.value))
-          .filter(id => !isNaN(id));
         
         const data = {
           name: document.getElementById("coach-name").value,
@@ -3975,7 +3971,6 @@ class TournamentManager {
             parseInt(document.getElementById("coach-experience").value) || null,
           formation: document.getElementById("coach-formation").value,
           photo: document.getElementById("coach-photo").value,
-          clubIds: selectedClubs,
         };
 
         const editId = e.target.dataset.editId;
