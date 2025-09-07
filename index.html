@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/club-profile.css" />
     <link rel="stylesheet" href="css/tournament-profile.css" />
     <link rel="stylesheet" href="css/coach-profile.css" />
+    <link rel="stylesheet" href="css/match-coaches.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -566,9 +567,6 @@
             <option value="4-1-4-1">4-1-4-1</option>
           </select>
           <input type="url" id="coach-photo" placeholder="URL da foto" />
-          <select id="coach-club" required>
-            <option value="">Selecione o clube</option>
-          </select>
           <button type="submit">Adicionar Treinador</button>
         </form>
       </div>
@@ -641,6 +639,21 @@
             <select id="match-tournament" required>
               <option value="">Selecione o torneio</option>
             </select>
+          </div>
+
+          <div class="match-coaches">
+            <div class="coach-section">
+              <label>Treinador Casa</label>
+              <select id="home-coach">
+                <option value="">Selecione o treinador</option>
+              </select>
+            </div>
+            <div class="coach-section">
+              <label>Treinador Visitante</label>
+              <select id="away-coach">
+                <option value="">Selecione o treinador</option>
+              </select>
+            </div>
           </div>
 
           <div

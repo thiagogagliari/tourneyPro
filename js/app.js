@@ -821,7 +821,13 @@ class TournamentManager {
     document.getElementById("coach-experience").value = coach.experience || "";
     document.getElementById("coach-formation").value = coach.formation || "";
     document.getElementById("coach-photo").value = coach.photo || "";
-    document.getElementById("coach-club").value = coach.clubId;
+    
+    // Selecionar múltiplos clubes
+    const clubSelect = document.getElementById("coach-club");
+    const coachClubs = coach.clubIds || (coach.clubId ? [coach.clubId] : []);
+    Array.from(clubSelect.options).forEach(option => {
+      option.selected = coachClubs.includes(parseInt(option.value));
+    });
 
     document.getElementById("coach-modal").style.display = "block";
 
@@ -3497,11 +3503,32 @@ class TournamentManager {
     document.getElementById("history-options-modal").style.display = "none";
   }
   
-  getCoachClubs(coachId) {
-    return this.getUserData("clubs").filter(club => {
-      const clubCoaches = club.coaches || [];
-      return clubCoaches.includes(coachId) || club.coachId == coachId;
+  updateCoachSelects() {
+    const coaches = this.getUserData("coaches");
+    const selects = ["home-coach", "away-coach"];
+
+    selects.forEach((selectId) => {
+      const select = document.getElementById(selectId);
+      if (select) {
+        const currentValue = select.value;
+        select.innerHTML =
+          '<option value="">Selecione o treinador</option>' +
+          coaches
+            .map((c) => `<option value="${c.id}">${c.name}</option>`)
+            .join("");
+        select.value = currentValue;
+      }
     });
+  }
+
+  getCoachClubs(coachId) {
+    return this.getUserData("matches")
+      .filter(m => m.homeCoachId == coachId || m.awayCoachId == coachId)
+      .map(m => {
+        const clubId = m.homeCoachId == coachId ? m.homeTeamId : m.awayTeamId;
+        return this.data.clubs.find(c => c.id == clubId);
+      })
+      .filter((club, index, arr) => club && arr.findIndex(c => c.id === club.id) === index);
   }
 
   // Theme
@@ -3766,6 +3793,11 @@ class TournamentManager {
     document.getElementById("away-team").addEventListener("change", () => {
       this.updateMotmPlayers();
     });
+
+    // Atualizar selects de treinadores quando modal abrir
+    document.getElementById("add-match-btn").addEventListener("click", () => {
+      this.updateCoachSelects();
+    });
   }
 
   setupModalListeners() {
@@ -3930,6 +3962,11 @@ class TournamentManager {
       .getElementById("coach-form")
       .addEventListener("submit", async (e) => {
         e.preventDefault();
+        const clubSelect = document.getElementById("coach-club");
+        const selectedClubs = Array.from(clubSelect.selectedOptions)
+          .map(option => parseInt(option.value))
+          .filter(id => !isNaN(id));
+        
         const data = {
           name: document.getElementById("coach-name").value,
           birthdate: document.getElementById("coach-birthdate").value,
@@ -3938,7 +3975,7 @@ class TournamentManager {
             parseInt(document.getElementById("coach-experience").value) || null,
           formation: document.getElementById("coach-formation").value,
           photo: document.getElementById("coach-photo").value,
-          clubId: parseInt(document.getElementById("coach-club").value) || null,
+          clubIds: selectedClubs,
         };
 
         const editId = e.target.dataset.editId;
