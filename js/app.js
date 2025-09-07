@@ -774,15 +774,13 @@ class TournamentManager {
             }" alt="${
           coach.name
         }" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
-            <img src="${club?.logo || "https://via.placeholder.com/24"}" alt="${
-          club?.name || "Clube"
-        }" class="coach-club-badge">
+            ${club?.logo ? `<img src="${club.logo}" alt="${club.name}" class="coach-club-badge">` : ''}
           </div>
           <h3>${coach.name}</h3>
           <p><strong>Nacionalidade:</strong> ${coach.nationality}</p>
           <p><strong>Experiência:</strong> ${coach.experience || "N/A"} anos</p>
           <p><strong>Formação:</strong> ${coach.formation || "N/A"}</p>
-          <p><strong>Clubes:</strong> ${this.getCoachClubs(coach.id).map(c => c.name).join(", ") || "Sem clube"}</p>
+          <p><strong>Clubes:</strong> ${this.getCoachClubs(coach.id).map(c => c.name).join(", ") || "Livre"}</p>
           <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="app.showCoachProfile(${
               coach.id
