@@ -18,21 +18,25 @@ class TournamentManager {
     this.loadTheme();
     this.setupEventListeners();
     
-    // Aguardar Firebase estar pronto antes de verificar autenticação
-    if (cloudStorage.firebaseReady) {
-      await this.checkAuth();
-    } else {
-      // Se Firebase não estiver pronto, aguardar um pouco e tentar novamente
-      setTimeout(async () => {
-        await this.checkAuth();
-      }, 1000);
+    // Aguardar Firebase estar pronto
+    await this.waitForFirebase();
+    await this.checkAuth();
+  }
+
+  // Aguardar Firebase estar pronto
+  async waitForFirebase() {
+    let attempts = 0;
+    while (!cloudStorage.firebaseReady && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
     }
+    console.log('Firebase ready:', cloudStorage.firebaseReady);
   }
 
   // Autenticação
   async checkAuth() {
     const savedUser = localStorage.getItem("currentUser");
-    if (savedUser) {
+    if (savedUser && cloudStorage.currentUser) {
       this.currentUser = JSON.parse(savedUser);
       await this.showDashboard();
     } else {
@@ -144,10 +148,10 @@ class TournamentManager {
       this.currentUser.username ||
       this.currentUser.email?.split("@")[0] ||
       "Usuário";
-    
+
     // Carregar dados da nuvem antes de atualizar a interface
     await this.loadCloudData();
-    
+
     this.updateStats();
     this.loadDashboardData();
   }
