@@ -54,6 +54,23 @@ class CloudStorage {
     return data || [];
   }
 
+  // Remover campos undefined de um objeto
+  cleanData(obj) {
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.cleanData(item));
+    }
+    if (obj && typeof obj === 'object') {
+      const cleaned = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (value !== undefined) {
+          cleaned[key] = this.cleanData(value);
+        }
+      }
+      return cleaned;
+    }
+    return obj;
+  }
+
   // Salvar na nuvem
   async saveToCloud(key, data) {
     if (!this.firebaseReady || !this.currentUser) {
@@ -61,14 +78,16 @@ class CloudStorage {
     }
 
     try {
-      console.log(`Salvando ${key} na nuvem:`, data.length, "itens");
+      // Limpar dados removendo undefined
+      const cleanedData = this.cleanData(data);
+      console.log(`Salvando ${key} na nuvem:`, cleanedData.length, "itens");
       await this.db
         .collection("users")
         .doc(this.currentUser.uid)
         .collection("data")
         .doc(key)
         .set({
-          data: data,
+          data: cleanedData,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
         });
       console.log(`${key} salvo com sucesso na nuvem`);

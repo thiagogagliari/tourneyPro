@@ -3615,18 +3615,18 @@ class TournamentManager {
       const data = {
         homeTeamId: parseInt(document.getElementById("home-team").value),
         awayTeamId: parseInt(document.getElementById("away-team").value),
-        homeScore: document.getElementById("home-score").value
-          ? parseInt(document.getElementById("home-score").value)
-          : undefined,
-        awayScore: document.getElementById("away-score").value
-          ? parseInt(document.getElementById("away-score").value)
-          : undefined,
         round: parseInt(document.getElementById("match-round").value),
         date: document.getElementById("match-date").value,
         tournamentId: parseInt(
           document.getElementById("match-tournament").value
         ),
       };
+
+      // Adicionar scores apenas se preenchidos
+      const homeScore = document.getElementById("home-score").value;
+      const awayScore = document.getElementById("away-score").value;
+      if (homeScore) data.homeScore = parseInt(homeScore);
+      if (awayScore) data.awayScore = parseInt(awayScore);
 
       // Adicionar dados do melhor jogador da partida
       const motmPlayerId = document.getElementById("motm-player").value;
