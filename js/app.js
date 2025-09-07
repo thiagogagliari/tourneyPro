@@ -162,7 +162,7 @@ class TournamentManager {
       console.log(`Tentando salvar ${type}:`, {
         firebaseReady: cloudStorage.firebaseReady,
         currentUser: !!cloudStorage.currentUser,
-        dataLength: this.data[type].length
+        dataLength: this.data[type].length,
       });
       await cloudStorage.saveData(type, this.data[type]);
       console.log(`${type} salvo com sucesso`);
@@ -586,8 +586,6 @@ class TournamentManager {
     document.querySelector("#club-modal h3").textContent = "Editar Clube";
   }
 
-
-
   updateClubSelects() {
     const clubs = this.getUserData("clubs");
     const selects = [
@@ -724,8 +722,6 @@ class TournamentManager {
     document.querySelector("#player-modal h3").textContent = "Editar Jogador";
   }
 
-
-
   // Treinadores
   loadCoaches() {
     let coaches = this.getUserData("coaches");
@@ -812,8 +808,6 @@ class TournamentManager {
 
     document.querySelector("#coach-modal h3").textContent = "Editar Treinador";
   }
-
-
 
   // Partidas
   loadMatches() {
@@ -1069,8 +1063,6 @@ class TournamentManager {
 
     document.querySelector("#match-modal h3").textContent = "Editar Partida";
   }
-
-
 
   deleteMatch(matchId) {
     const match = this.data.matches.find((m) => m.id === matchId);
@@ -2103,6 +2095,25 @@ class TournamentManager {
       Geórgia: "https://flagcdn.com/w20/ge.png",
       Romênia: "https://flagcdn.com/w20/ro.png",
       Hungria: "https://flagcdn.com/w20/hu.png",
+      Israel: "https://flagcdn.com/w20/il.png",
+      Grécia: "https://flagcdn.com/w20/gr.png",
+      Bulgária: "https://flagcdn.com/w20/bg.png",
+      Suíça: "https://flagcdn.com/w20/ch.png",
+      Áustria: "https://flagcdn.com/w20/at.png",
+      Irlanda: "https://flagcdn.com/w20/ie.png",
+      "País de Gales": "https://flagcdn.com/w20/gb-wls.png",
+      Islândia: "https://flagcdn.com/w20/is.png",
+      Lituânia: "https://flagcdn.com/w20/lt.png",
+      Letônia: "https://flagcdn.com/w20/lv.png",
+      Estônia: "https://flagcdn.com/w20/ee.png",
+      Chipre: "https://flagcdn.com/w20/cy.png",
+      Malta: "https://flagcdn.com/w20/mt.png",
+      Luxemburgo: "https://flagcdn.com/w20/lu.png",
+      Andorra: "https://flagcdn.com/w20/ad.png",
+      Mônaco: "https://flagcdn.com/w20/mc.png",
+      Liechtenstein: "https://flagcdn.com/w20/li.png",
+      "San Marino": "https://flagcdn.com/w20/sm.png",
+      Vaticano: "https://flagcdn.com/w20/va.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
@@ -3527,186 +3538,197 @@ class TournamentManager {
       });
 
     // Club form
-    document.getElementById("club-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const data = {
-        name: document.getElementById("club-name").value,
-        country: document.getElementById("club-country").value,
-        logo: document.getElementById("club-logo").value,
-        tournamentId:
-          parseInt(document.getElementById("club-tournament").value) || null,
-      };
+    document
+      .getElementById("club-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = {
+          name: document.getElementById("club-name").value,
+          country: document.getElementById("club-country").value,
+          logo: document.getElementById("club-logo").value,
+          tournamentId:
+            parseInt(document.getElementById("club-tournament").value) || null,
+        };
 
-      const editId = e.target.dataset.editId;
-      if (editId) {
-        await this.updateClub(parseInt(editId), data);
-        delete e.target.dataset.editId;
-      } else {
-        await this.createClub(data);
-      }
+        const editId = e.target.dataset.editId;
+        if (editId) {
+          await this.updateClub(parseInt(editId), data);
+          delete e.target.dataset.editId;
+        } else {
+          await this.createClub(data);
+        }
 
-      document.getElementById("club-modal").style.display = "none";
-      e.target.reset();
-    });
+        document.getElementById("club-modal").style.display = "none";
+        e.target.reset();
+      });
 
     // Player form
-    document.getElementById("player-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const birthdate = document.getElementById("player-birthdate").value;
-      const age = this.calculateAge(birthdate);
+    document
+      .getElementById("player-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const birthdate = document.getElementById("player-birthdate").value;
+        const age = this.calculateAge(birthdate);
 
-      const data = {
-        name: document.getElementById("player-name").value,
-        birthdate: birthdate,
-        age: age,
-        position: document.getElementById("player-position").value,
-        nationality: document.getElementById("player-nationality").value,
-        number:
-          parseInt(document.getElementById("player-number").value) || null,
-        height:
-          parseInt(document.getElementById("player-height").value) || null,
-        photo: document.getElementById("player-photo").value,
-        clubId: parseInt(document.getElementById("player-club").value) || null,
-      };
+        const data = {
+          name: document.getElementById("player-name").value,
+          birthdate: birthdate,
+          age: age,
+          position: document.getElementById("player-position").value,
+          nationality: document.getElementById("player-nationality").value,
+          number:
+            parseInt(document.getElementById("player-number").value) || null,
+          height:
+            parseInt(document.getElementById("player-height").value) || null,
+          photo: document.getElementById("player-photo").value,
+          clubId:
+            parseInt(document.getElementById("player-club").value) || null,
+        };
 
-      const editId = e.target.dataset.editId;
-      if (editId) {
-        await this.updatePlayer(parseInt(editId), data);
-        delete e.target.dataset.editId;
-      } else {
-        await this.createPlayer(data);
-      }
+        const editId = e.target.dataset.editId;
+        if (editId) {
+          await this.updatePlayer(parseInt(editId), data);
+          delete e.target.dataset.editId;
+        } else {
+          await this.createPlayer(data);
+        }
 
-      document.getElementById("player-modal").style.display = "none";
-      e.target.reset();
-    });
+        document.getElementById("player-modal").style.display = "none";
+        e.target.reset();
+      });
 
     // Coach form
-    document.getElementById("coach-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const data = {
-        name: document.getElementById("coach-name").value,
-        birthdate: document.getElementById("coach-birthdate").value,
-        nationality: document.getElementById("coach-nationality").value,
-        experience:
-          parseInt(document.getElementById("coach-experience").value) || null,
-        formation: document.getElementById("coach-formation").value,
-        photo: document.getElementById("coach-photo").value,
-        clubId: parseInt(document.getElementById("coach-club").value) || null,
-      };
+    document
+      .getElementById("coach-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = {
+          name: document.getElementById("coach-name").value,
+          birthdate: document.getElementById("coach-birthdate").value,
+          nationality: document.getElementById("coach-nationality").value,
+          experience:
+            parseInt(document.getElementById("coach-experience").value) || null,
+          formation: document.getElementById("coach-formation").value,
+          photo: document.getElementById("coach-photo").value,
+          clubId: parseInt(document.getElementById("coach-club").value) || null,
+        };
 
-      const editId = e.target.dataset.editId;
-      if (editId) {
-        await this.updateCoach(parseInt(editId), data);
-        delete e.target.dataset.editId;
-      } else {
-        await this.createCoach(data);
-      }
+        const editId = e.target.dataset.editId;
+        if (editId) {
+          await this.updateCoach(parseInt(editId), data);
+          delete e.target.dataset.editId;
+        } else {
+          await this.createCoach(data);
+        }
 
-      document.getElementById("coach-modal").style.display = "none";
-      e.target.reset();
-    });
+        document.getElementById("coach-modal").style.display = "none";
+        e.target.reset();
+      });
 
     // Match form
-    document.getElementById("match-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
+    document
+      .getElementById("match-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
 
-      const data = {
-        homeTeamId: parseInt(document.getElementById("home-team").value),
-        awayTeamId: parseInt(document.getElementById("away-team").value),
-        round: parseInt(document.getElementById("match-round").value),
-        date: document.getElementById("match-date").value,
-        tournamentId: parseInt(
-          document.getElementById("match-tournament").value
-        ),
-      };
-
-      // Adicionar scores apenas se preenchidos
-      const homeScore = document.getElementById("home-score").value;
-      const awayScore = document.getElementById("away-score").value;
-      if (homeScore) data.homeScore = parseInt(homeScore);
-      if (awayScore) data.awayScore = parseInt(awayScore);
-
-      // Adicionar dados do melhor jogador da partida
-      const motmPlayerId = document.getElementById("motm-player").value;
-      const motmRating = document.getElementById("motm-rating").value;
-      if (motmPlayerId && motmRating) {
-        data.motm = {
-          playerId: parseInt(motmPlayerId),
-          rating: parseFloat(motmRating),
+        const data = {
+          homeTeamId: parseInt(document.getElementById("home-team").value),
+          awayTeamId: parseInt(document.getElementById("away-team").value),
+          round: parseInt(document.getElementById("match-round").value),
+          date: document.getElementById("match-date").value,
+          tournamentId: parseInt(
+            document.getElementById("match-tournament").value
+          ),
         };
-      }
 
-      // Processar eventos
-      const events = [];
-      const eventItems = document.querySelectorAll(".event-item");
-      eventItems.forEach((item, index) => {
-        const minute = formData.get(`event_minute_${index}`);
-        const type = formData.get(`event_type_${index}`);
-        const playerSelect = item.querySelector(
-          `select[name="event_player_${index}"]`
-        );
-        const team = formData.get(`event_team_${index}`);
+        // Adicionar scores apenas se preenchidos
+        const homeScore = document.getElementById("home-score").value;
+        const awayScore = document.getElementById("away-score").value;
+        if (homeScore) data.homeScore = parseInt(homeScore);
+        if (awayScore) data.awayScore = parseInt(awayScore);
 
-        if (minute && type && playerSelect.value && team) {
-          const selectedPlayerOption =
-            playerSelect.options[playerSelect.selectedIndex];
-          events.push({
-            minute: parseInt(minute),
-            type: type,
-            player: playerSelect.value,
-            playerId: selectedPlayerOption.dataset.playerId || null,
-            team: team,
-          });
+        // Adicionar dados do melhor jogador da partida
+        const motmPlayerId = document.getElementById("motm-player").value;
+        const motmRating = document.getElementById("motm-rating").value;
+        if (motmPlayerId && motmRating) {
+          data.motm = {
+            playerId: parseInt(motmPlayerId),
+            rating: parseFloat(motmRating),
+          };
         }
+
+        // Processar eventos
+        const events = [];
+        const eventItems = document.querySelectorAll(".event-item");
+        eventItems.forEach((item, index) => {
+          const minute = formData.get(`event_minute_${index}`);
+          const type = formData.get(`event_type_${index}`);
+          const playerSelect = item.querySelector(
+            `select[name="event_player_${index}"]`
+          );
+          const team = formData.get(`event_team_${index}`);
+
+          if (minute && type && playerSelect.value && team) {
+            const selectedPlayerOption =
+              playerSelect.options[playerSelect.selectedIndex];
+            events.push({
+              minute: parseInt(minute),
+              type: type,
+              player: playerSelect.value,
+              playerId: selectedPlayerOption.dataset.playerId || null,
+              team: team,
+            });
+          }
+        });
+
+        if (events.length > 0) {
+          data.events = events;
+        }
+
+        const editId = e.target.dataset.editId;
+        if (editId) {
+          await this.updateMatch(parseInt(editId), data);
+          delete e.target.dataset.editId;
+        } else {
+          await this.createMatch(data);
+        }
+
+        document.getElementById("match-modal").style.display = "none";
+        document.getElementById("events-container").innerHTML = "";
+        e.target.reset();
       });
-
-      if (events.length > 0) {
-        data.events = events;
-      }
-
-      const editId = e.target.dataset.editId;
-      if (editId) {
-        await this.updateMatch(parseInt(editId), data);
-        delete e.target.dataset.editId;
-      } else {
-        await this.createMatch(data);
-      }
-
-      document.getElementById("match-modal").style.display = "none";
-      document.getElementById("events-container").innerHTML = "";
-      e.target.reset();
-    });
 
     // Round form
-    document.getElementById("round-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const data = {
-        tournamentId: parseInt(e.target.dataset.tournamentId),
-        number: parseInt(formData.get("round-number")),
-        date: formData.get("round-date"),
-        matches: [],
-      };
+    document
+      .getElementById("round-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+          tournamentId: parseInt(e.target.dataset.tournamentId),
+          number: parseInt(formData.get("round-number")),
+          date: formData.get("round-date"),
+          matches: [],
+        };
 
-      const matchPairs = e.target.querySelectorAll(".match-pair");
-      matchPairs.forEach((pair) => {
-        const homeSelect = pair.querySelector("select[name^='homeTeam_']");
-        const awaySelect = pair.querySelector("select[name^='awayTeam_']");
-        if (homeSelect.value && awaySelect.value) {
-          data.matches.push({
-            homeTeamId: parseInt(homeSelect.value),
-            awayTeamId: parseInt(awaySelect.value),
-          });
-        }
+        const matchPairs = e.target.querySelectorAll(".match-pair");
+        matchPairs.forEach((pair) => {
+          const homeSelect = pair.querySelector("select[name^='homeTeam_']");
+          const awaySelect = pair.querySelector("select[name^='awayTeam_']");
+          if (homeSelect.value && awaySelect.value) {
+            data.matches.push({
+              homeTeamId: parseInt(homeSelect.value),
+              awayTeamId: parseInt(awaySelect.value),
+            });
+          }
+        });
+
+        await this.createRound(data);
+        document.getElementById("round-modal").style.display = "none";
+        e.target.reset();
+        document.getElementById("round-matches").innerHTML = "";
       });
-
-      await this.createRound(data);
-      document.getElementById("round-modal").style.display = "none";
-      e.target.reset();
-      document.getElementById("round-matches").innerHTML = "";
-    });
   }
 }
 
