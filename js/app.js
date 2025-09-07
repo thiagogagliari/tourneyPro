@@ -14,18 +14,27 @@ class TournamentManager {
     this.init();
   }
 
-  init() {
+  async init() {
     this.loadTheme();
     this.setupEventListeners();
-    this.checkAuth();
+    
+    // Aguardar Firebase estar pronto antes de verificar autenticação
+    if (cloudStorage.firebaseReady) {
+      await this.checkAuth();
+    } else {
+      // Se Firebase não estiver pronto, aguardar um pouco e tentar novamente
+      setTimeout(async () => {
+        await this.checkAuth();
+      }, 1000);
+    }
   }
 
   // Autenticação
-  checkAuth() {
+  async checkAuth() {
     const savedUser = localStorage.getItem("currentUser");
     if (savedUser) {
       this.currentUser = JSON.parse(savedUser);
-      this.showDashboard();
+      await this.showDashboard();
     } else {
       document.getElementById("landing-screen").classList.add("active");
     }
@@ -127,7 +136,7 @@ class TournamentManager {
     document.getElementById("dashboard-screen").classList.remove("active");
   }
 
-  showDashboard() {
+  async showDashboard() {
     document.getElementById("landing-screen").classList.remove("active");
     document.getElementById("login-screen").classList.remove("active");
     document.getElementById("dashboard-screen").classList.add("active");
@@ -135,6 +144,10 @@ class TournamentManager {
       this.currentUser.username ||
       this.currentUser.email?.split("@")[0] ||
       "Usuário";
+    
+    // Carregar dados da nuvem antes de atualizar a interface
+    await this.loadCloudData();
+    
     this.updateStats();
     this.loadDashboardData();
   }
