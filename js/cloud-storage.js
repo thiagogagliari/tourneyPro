@@ -1,13 +1,12 @@
-// Sistema híbrido: localStorage + Firebase
+// Sistema apenas Firebase (online)
 class CloudStorage {
   constructor() {
-    this.isOnline = navigator.onLine;
     this.currentUser = null;
     this.firebaseReady = false;
 
-    // Configuração do Firebase (substitua pelos seus dados)
+    // Configuração do Firebase
     this.firebaseConfig = {
-      apiKey: "AIzaSyD4fzDTkT8PYZzxzJL9pEaFUIx0V0H8gPk", // Substitua pela sua API Key
+      apiKey: "AIzaSyD4fzDTkT8PYZzxzJL9pEaFUIx0V0H8gPk",
       authDomain: "meu-torneio-pro.firebaseapp.com",
       projectId: "meu-torneio-pro",
       storageBucket: "meu-torneio-pro.firebasestorage.app",
@@ -16,12 +15,10 @@ class CloudStorage {
     };
 
     this.initFirebase();
-    this.setupEventListeners();
   }
 
   async initFirebase() {
     try {
-      // Verifica se Firebase está disponível
       if (typeof firebase !== "undefined") {
         firebase.initializeApp(this.firebaseConfig);
         this.db = firebase.firestore();
@@ -31,48 +28,37 @@ class CloudStorage {
         // Listener de autenticação
         this.auth.onAuthStateChanged((user) => {
           this.currentUser = user;
-          if (user && this.isOnline) {
-            this.syncToCloud();
-          }
         });
       }
     } catch (error) {
-      console.log("Firebase não disponível, usando apenas localStorage");
+      console.error("Erro ao inicializar Firebase:", error);
     }
   }
 
-  setupEventListeners() {
-    // Detecta quando fica online/offline
-    window.addEventListener("online", () => {
-      this.isOnline = true;
-      if (this.currentUser) this.syncToCloud();
-    });
 
-    window.addEventListener("offline", () => {
-      this.isOnline = false;
-    });
-  }
 
-  // Salvar dados (sempre localStorage + nuvem se possível)
-  saveData(key, data) {
-    // Sempre salva no localStorage
-    localStorage.setItem(key, JSON.stringify(data));
-
-    // Se online e logado, salva na nuvem
-    if (this.isOnline && this.currentUser && this.firebaseReady) {
-      this.saveToCloud(key, data);
+  // Salvar dados apenas no Firebase
+  async saveData(key, data) {
+    if (!this.firebaseReady || !this.currentUser) {
+      throw new Error("Usuário não logado ou Firebase não disponível");
     }
+    return await this.saveToCloud(key, data);
   }
 
-  // Carregar dados (apenas localStorage)
-  loadData(key) {
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : [];
+  // Carregar dados apenas do Firebase
+  async loadData(key) {
+    if (!this.firebaseReady || !this.currentUser) {
+      return [];
+    }
+    const data = await this.loadFromCloud(key);
+    return data || [];
   }
 
   // Salvar na nuvem
   async saveToCloud(key, data) {
-    if (!this.firebaseReady || !this.currentUser) return;
+    if (!this.firebaseReady || !this.currentUser) {
+      throw new Error("Firebase não disponível ou usuário não logado");
+    }
 
     try {
       console.log(`Salvando ${key} na nuvem:`, data.length, "itens");
@@ -87,7 +73,8 @@ class CloudStorage {
         });
       console.log(`${key} salvo com sucesso na nuvem`);
     } catch (error) {
-      console.log("Erro ao salvar na nuvem:", error);
+      console.error("Erro ao salvar na nuvem:", error);
+      throw error;
     }
   }
 
@@ -110,64 +97,22 @@ class CloudStorage {
         return data;
       } else {
         console.log(`${key} não encontrado na nuvem`);
-        return null;
+        return [];
       }
     } catch (error) {
-      console.log("Erro ao carregar da nuvem:", error);
-      return null;
+      console.error("Erro ao carregar da nuvem:", error);
+      throw error;
     }
   }
 
-  // Sincronizar todos os dados para a nuvem
-  async syncToCloud() {
-    if (!this.firebaseReady || !this.currentUser) return;
 
-    const keys = [
-      "tournaments",
-      "clubs",
-      "players",
-      "matches",
-      "rounds",
-      "coaches",
-      "users",
-    ];
-
-    for (const key of keys) {
-      const localData = this.loadData(key);
-      if (localData.length > 0) {
-        await this.saveToCloud(key, localData);
-      }
-    }
-  }
-
-  // Sincronizar da nuvem para localStorage
-  async syncFromCloud() {
-    if (!this.firebaseReady || !this.currentUser) return;
-
-    const keys = [
-      "tournaments",
-      "clubs", 
-      "players",
-      "matches",
-      "rounds",
-      "coaches",
-      "users",
-    ];
-
-    for (const key of keys) {
-      const cloudData = await this.loadFromCloud(key);
-      if (cloudData && cloudData.length > 0) {
-        localStorage.setItem(key, JSON.stringify(cloudData));
-      }
-    }
-  }
 
   // Autenticação
   async signIn(email, password) {
     if (!this.firebaseReady) {
       return {
         success: false,
-        error: "Modo offline - dados salvos localmente",
+        error: "Firebase não disponível",
       };
     }
 
@@ -176,8 +121,6 @@ class CloudStorage {
         email,
         password
       );
-      // Após login, sincroniza dados da nuvem
-      await this.syncFromCloud();
       return { success: true, user: result.user };
     } catch (error) {
       return { success: false, error: error.message };
@@ -188,7 +131,7 @@ class CloudStorage {
     if (!this.firebaseReady) {
       return {
         success: false,
-        error: "Modo offline - dados salvos localmente",
+        error: "Firebase não disponível",
       };
     }
 
@@ -213,10 +156,9 @@ class CloudStorage {
   // Status da conexão
   getStatus() {
     return {
-      online: this.isOnline,
       firebaseReady: this.firebaseReady,
       loggedIn: !!this.currentUser,
-      mode: this.currentUser ? "Nuvem" : "Local",
+      mode: "Firebase Online",
     };
   }
 }

@@ -3,13 +3,13 @@ class TournamentManager {
   constructor() {
     this.currentUser = null;
     this.data = {
-      users: cloudStorage.loadData("users"),
-      tournaments: cloudStorage.loadData("tournaments"),
-      clubs: cloudStorage.loadData("clubs"),
-      players: cloudStorage.loadData("players"),
-      coaches: cloudStorage.loadData("coaches"),
-      matches: cloudStorage.loadData("matches"),
-      rounds: cloudStorage.loadData("rounds"),
+      users: [],
+      tournaments: [],
+      clubs: [],
+      players: [],
+      coaches: [],
+      matches: [],
+      rounds: [],
     };
     this.init();
   }
@@ -152,8 +152,13 @@ class TournamentManager {
   }
 
   // Dados
-  saveData(type) {
-    cloudStorage.saveData(type, this.data[type]);
+  async saveData(type) {
+    try {
+      await cloudStorage.saveData(type, this.data[type]);
+    } catch (error) {
+      console.error(`Erro ao salvar ${type}:`, error);
+      alert(`Erro ao salvar dados. Verifique sua conexão.`);
+    }
   }
 
   getUserData(type) {
@@ -289,7 +294,7 @@ class TournamentManager {
     this.updateTournamentSelects();
   }
 
-  createTournament(data) {
+  async createTournament(data) {
     const tournament = {
       id: Date.now(),
       userId: this.currentUser.id,
@@ -299,7 +304,7 @@ class TournamentManager {
     };
 
     this.data.tournaments.push(tournament);
-    this.saveData("tournaments");
+    await this.saveData("tournaments");
     this.loadTournaments();
     this.updateStats();
   }
@@ -325,7 +330,7 @@ class TournamentManager {
       "Editar Torneio";
   }
 
-  updateTournament(tournamentId, data) {
+  async updateTournament(tournamentId, data) {
     const tournamentIndex = this.data.tournaments.findIndex(
       (t) => t.id == tournamentId
     );
@@ -334,7 +339,7 @@ class TournamentManager {
         ...this.data.tournaments[tournamentIndex],
         ...data,
       };
-      this.saveData("tournaments");
+      await this.saveData("tournaments");
       this.loadTournaments();
 
       document.querySelector("#tournament-modal h3").textContent =
@@ -473,7 +478,7 @@ class TournamentManager {
     this.updateClubSelects();
   }
 
-  createClub(data) {
+  async createClub(data) {
     const club = {
       id: Date.now(),
       userId: this.currentUser.id,
@@ -482,7 +487,7 @@ class TournamentManager {
     };
 
     this.data.clubs.push(club);
-    this.saveData("clubs");
+    await this.saveData("clubs");
     this.loadClubs();
     this.updateStats();
   }
@@ -614,7 +619,7 @@ class TournamentManager {
       .join("");
   }
 
-  createPlayer(data) {
+  async createPlayer(data) {
     const player = {
       id: Date.now(),
       userId: this.currentUser.id,
@@ -623,7 +628,7 @@ class TournamentManager {
     };
 
     this.data.players.push(player);
-    this.saveData("players");
+    await this.saveData("players");
     this.loadPlayers();
     this.updateStats();
   }
@@ -713,7 +718,7 @@ class TournamentManager {
       .join("");
   }
 
-  createCoach(data) {
+  async createCoach(data) {
     const coach = {
       id: Date.now(),
       userId: this.currentUser.id,
@@ -722,7 +727,7 @@ class TournamentManager {
     };
 
     this.data.coaches.push(coach);
-    this.saveData("coaches");
+    await this.saveData("coaches");
     this.loadCoaches();
     this.updateStats();
   }
@@ -956,7 +961,7 @@ class TournamentManager {
     document.getElementById("match-details-modal").style.display = "none";
   }
 
-  createMatch(data) {
+  async createMatch(data) {
     const match = {
       id: Date.now(),
       userId: this.currentUser.id,
@@ -969,7 +974,7 @@ class TournamentManager {
     };
 
     this.data.matches.push(match);
-    this.saveData("matches");
+    await this.saveData("matches");
     this.loadMatches();
     this.updateStats();
   }
@@ -1926,7 +1931,7 @@ class TournamentManager {
     }
   }
 
-  createRound(data) {
+  async createRound(data) {
     const round = {
       id: Date.now(),
       userId: this.currentUser.id,
@@ -1935,17 +1940,17 @@ class TournamentManager {
     };
 
     this.data.rounds.push(round);
-    this.saveData("rounds");
+    await this.saveData("rounds");
 
-    data.matches.forEach((match) => {
-      this.createMatch({
+    for (const match of data.matches) {
+      await this.createMatch({
         homeTeamId: match.homeTeamId,
         awayTeamId: match.awayTeamId,
         tournamentId: data.tournamentId,
         round: data.number,
         date: data.date + "T20:00:00",
       });
-    });
+    }
 
     this.loadRounds();
   }
@@ -3154,51 +3159,25 @@ class TournamentManager {
     if (cloudStorage.firebaseReady && cloudStorage.currentUser) {
       console.log("Carregando todos os dados da nuvem...");
       
-      // Carregar cada tipo de dado
-      const cloudUsers = await cloudStorage.loadFromCloud("users");
-      const cloudTournaments = await cloudStorage.loadFromCloud("tournaments");
-      const cloudClubs = await cloudStorage.loadFromCloud("clubs");
-      const cloudPlayers = await cloudStorage.loadFromCloud("players");
-      const cloudCoaches = await cloudStorage.loadFromCloud("coaches");
-      const cloudMatches = await cloudStorage.loadFromCloud("matches");
-      const cloudRounds = await cloudStorage.loadFromCloud("rounds");
-      
-      // Atualizar dados se existirem na nuvem
-      if (cloudUsers) {
-        this.data.users = cloudUsers;
-        localStorage.setItem("users", JSON.stringify(cloudUsers));
+      try {
+        // Carregar cada tipo de dado
+        this.data.users = await cloudStorage.loadData("users");
+        this.data.tournaments = await cloudStorage.loadData("tournaments");
+        this.data.clubs = await cloudStorage.loadData("clubs");
+        this.data.players = await cloudStorage.loadData("players");
+        this.data.coaches = await cloudStorage.loadData("coaches");
+        this.data.matches = await cloudStorage.loadData("matches");
+        this.data.rounds = await cloudStorage.loadData("rounds");
+        
+        console.log("Dados carregados da nuvem:", {
+          tournaments: this.data.tournaments.length,
+          clubs: this.data.clubs.length,
+          players: this.data.players.length,
+          matches: this.data.matches.length
+        });
+      } catch (error) {
+        console.error("Erro ao carregar dados da nuvem:", error);
       }
-      if (cloudTournaments) {
-        this.data.tournaments = cloudTournaments;
-        localStorage.setItem("tournaments", JSON.stringify(cloudTournaments));
-      }
-      if (cloudClubs) {
-        this.data.clubs = cloudClubs;
-        localStorage.setItem("clubs", JSON.stringify(cloudClubs));
-      }
-      if (cloudPlayers) {
-        this.data.players = cloudPlayers;
-        localStorage.setItem("players", JSON.stringify(cloudPlayers));
-      }
-      if (cloudCoaches) {
-        this.data.coaches = cloudCoaches;
-        localStorage.setItem("coaches", JSON.stringify(cloudCoaches));
-      }
-      if (cloudMatches) {
-        this.data.matches = cloudMatches;
-        localStorage.setItem("matches", JSON.stringify(cloudMatches));
-      }
-      if (cloudRounds) {
-        this.data.rounds = cloudRounds;
-        localStorage.setItem("rounds", JSON.stringify(cloudRounds));
-      }
-      
-      console.log("Dados carregados da nuvem:", {
-        tournaments: this.data.tournaments.length,
-        clubs: this.data.clubs.length,
-        players: this.data.players.length,
-        matches: this.data.matches.length
-      });
     }
   }
 
