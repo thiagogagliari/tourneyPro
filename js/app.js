@@ -2430,6 +2430,9 @@ class TournamentManager {
           ).toFixed(1)
         : "-";
 
+    this.loadPlayerClubHistory(player);
+    this.loadPlayerMatches(playerStats.matchHistory);
+
     document.getElementById("player-profile-modal").style.display = "block";
   }
 
