@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/coach-profile.css" />
     <link rel="stylesheet" href="css/match-coaches.css" />
     <link rel="stylesheet" href="css/motm-styles.css" />
+    <link rel="stylesheet" href="css/coach-h2h.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -1222,6 +1223,21 @@
               <h3>Histórico de Partidas</h3>
               <div class="matches-timeline" id="coach-profile-matches-timeline">
                 <div class="no-matches">Nenhuma partida encontrada</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="coach-head-to-head">
+            <div class="coach-info-card">
+              <h3>🥊 Head to Head</h3>
+              <div class="h2h-selector">
+                <select id="h2h-opponent-select">
+                  <option value="">Selecione um adversário</option>
+                </select>
+                <button class="btn-primary" onclick="app.loadCoachH2H()">Comparar</button>
+              </div>
+              <div class="h2h-results" id="coach-h2h-results">
+                <div class="no-data">Selecione um adversário para ver o confronto direto</div>
               </div>
             </div>
           </div>

@@ -17,7 +17,7 @@ class TournamentManager {
   async init() {
     this.loadTheme();
     this.setupEventListeners();
-    
+
     // Aguardar Firebase estar pronto
     await this.waitForFirebase();
     await this.checkAuth();
@@ -27,10 +27,10 @@ class TournamentManager {
   async waitForFirebase() {
     let attempts = 0;
     while (!cloudStorage.firebaseReady && attempts < 50) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       attempts++;
     }
-    console.log('Firebase ready:', cloudStorage.firebaseReady);
+    console.log("Firebase ready:", cloudStorage.firebaseReady);
   }
 
   // Autenticação
@@ -151,7 +151,7 @@ class TournamentManager {
 
     // Carregar dados da nuvem antes de atualizar a interface
     await this.loadCloudData();
-    
+
     // Preencher anos dinamicamente
     this.updateCurrentYear();
 
@@ -777,13 +777,21 @@ class TournamentManager {
             }" alt="${
           coach.name
         }" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
-            ${club?.logo ? `<img src="${club.logo}" alt="${club.name}" class="coach-club-badge">` : ''}
+            ${
+              club?.logo
+                ? `<img src="${club.logo}" alt="${club.name}" class="coach-club-badge">`
+                : ""
+            }
           </div>
           <h3>${coach.name}</h3>
           <p><strong>Nacionalidade:</strong> ${coach.nationality}</p>
           <p><strong>Experiência:</strong> ${coach.experience || "N/A"} anos</p>
           <p><strong>Formação:</strong> ${coach.formation || "N/A"}</p>
-          <p><strong>Clubes:</strong> ${this.getCoachClubs(coach.id).map(c => c.name).join(", ") || "Livre"}</p>
+          <p><strong>Clubes:</strong> ${
+            this.getCoachClubs(coach.id)
+              .map((c) => c.name)
+              .join(", ") || "Livre"
+          }</p>
           <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="app.showCoachProfile(${
               coach.id
@@ -950,7 +958,7 @@ class TournamentManager {
 
     // Carregar eventos
     this.loadMatchEvents(match);
-    
+
     // Carregar melhor jogador da partida
     this.loadMatchMotm(match);
 
@@ -1030,21 +1038,26 @@ class TournamentManager {
 
   loadMatchMotm(match) {
     const container = document.getElementById("match-motm-section");
-    
+
     if (!match.motm || !match.motm.playerId) {
       container.style.display = "none";
       return;
     }
-    
-    const player = this.data.players.find(p => p.id == match.motm.playerId);
-    const club = this.data.clubs.find(c => c.id == player?.clubId);
-    
+
+    const player = this.data.players.find((p) => p.id == match.motm.playerId);
+    const club = this.data.clubs.find((c) => c.id == player?.clubId);
+
     if (player) {
       container.style.display = "block";
       container.innerHTML = `
         <h3>⭐ Melhor Jogador da Partida</h3>
-        <div class="motm-player-card" onclick="app.showPlayerProfile(${player.id})">
-          <img src="${player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" class="motm-player-photo" alt="${player.name}">
+        <div class="motm-player-card" onclick="app.showPlayerProfile(${
+          player.id
+        })">
+          <img src="${
+            player.photo ||
+            "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+          }" class="motm-player-photo" alt="${player.name}">
           <div class="motm-player-info">
             <div class="motm-player-name">${player.name}</div>
             <div class="motm-player-club">${club?.name || "Sem clube"}</div>
@@ -1073,7 +1086,7 @@ class TournamentManager {
       createdAt: new Date().toISOString(),
     };
 
-    console.log('Partida criada:', match);
+    console.log("Partida criada:", match);
     this.data.matches.push(match);
     await this.saveData("matches");
     this.loadMatches();
@@ -1317,10 +1330,10 @@ class TournamentManager {
 
     // Calcular melhores jogadores da temporada (MOTM)
     const motmStats = {};
-    matches.forEach(match => {
+    matches.forEach((match) => {
       if (match.motm && match.motm.playerId) {
-        const player = players.find(p => p.id == match.motm.playerId);
-        const club = clubs.find(c => c.id == player?.clubId);
+        const player = players.find((p) => p.id == match.motm.playerId);
+        const club = clubs.find((c) => c.id == player?.clubId);
         if (player) {
           if (!motmStats[player.id]) {
             motmStats[player.id] = {
@@ -1328,20 +1341,24 @@ class TournamentManager {
               club: club?.name || "N/A",
               motmCount: 0,
               totalRating: 0,
-              avgRating: 0
+              avgRating: 0,
             };
           }
           motmStats[player.id].motmCount++;
           motmStats[player.id].totalRating += match.motm.rating;
-          motmStats[player.id].avgRating = (motmStats[player.id].totalRating / motmStats[player.id].motmCount).toFixed(1);
+          motmStats[player.id].avgRating = (
+            motmStats[player.id].totalRating / motmStats[player.id].motmCount
+          ).toFixed(1);
         }
       }
     });
-    
-    const topMotmPlayers = Object.values(motmStats).sort((a, b) => {
-      if (b.motmCount !== a.motmCount) return b.motmCount - a.motmCount;
-      return b.avgRating - a.avgRating;
-    }).slice(0, 10);
+
+    const topMotmPlayers = Object.values(motmStats)
+      .sort((a, b) => {
+        if (b.motmCount !== a.motmCount) return b.motmCount - a.motmCount;
+        return b.avgRating - a.avgRating;
+      })
+      .slice(0, 10);
 
     container.innerHTML = `
       <div class="statistics-sections">
@@ -1374,7 +1391,9 @@ class TournamentManager {
                     stats.position
                   }</span></td>
                   <td>${stats.matches}</td>
-                  <td><strong style="color: #4CAF50;">${stats.goals}</strong></td>
+                  <td><strong style="color: #4CAF50;">${
+                    stats.goals
+                  }</strong></td>
                   <td><strong style="color: #2196F3;">${
                     stats.assists
                   }</strong></td>
@@ -1389,7 +1408,9 @@ class TournamentManager {
           </table>
         </div>
         
-        ${topMotmPlayers.length > 0 ? `
+        ${
+          topMotmPlayers.length > 0
+            ? `
         <div class="statistics-table motm-table">
           <h3>⭐ Melhores Jogadores da Temporada</h3>
           <table>
@@ -1406,12 +1427,18 @@ class TournamentManager {
               ${topMotmPlayers
                 .map(
                   (stats, index) => `
-                <tr onclick="app.showPlayerProfile(${stats.player.id})" style="cursor: pointer;">
+                <tr onclick="app.showPlayerProfile(${
+                  stats.player.id
+                })" style="cursor: pointer;">
                   <td>${index + 1}</td>
                   <td><strong>${stats.player.name}</strong></td>
                   <td>${stats.club}</td>
-                  <td><strong style="color: #FFD700;">${stats.motmCount}</strong></td>
-                  <td><strong style="color: #FF6B35;">${stats.avgRating}</strong></td>
+                  <td><strong style="color: #FFD700;">${
+                    stats.motmCount
+                  }</strong></td>
+                  <td><strong style="color: #FF6B35;">${
+                    stats.avgRating
+                  }</strong></td>
                 </tr>
               `
                 )
@@ -1419,7 +1446,9 @@ class TournamentManager {
             </tbody>
           </table>
         </div>
-        ` : ""}
+        `
+            : ""
+        }
       </div>
     `;
   }
@@ -2243,6 +2272,44 @@ class TournamentManager {
       Liechtenstein: "https://flagcdn.com/w20/li.png",
       "San Marino": "https://flagcdn.com/w20/sm.png",
       Vaticano: "https://flagcdn.com/w20/va.png",
+      "Costa do Marfim": "https://flagcdn.com/w20/ci.png",
+      Senegal: "https://flagcdn.com/w20/sn.png",
+      Togo: "https://flagcdn.com/w20/tg.png",
+      Guiné: "https://flagcdn.com/w20/gn.png",
+      Zâmbia: "https://flagcdn.com/w20/zm.png",
+      Moçambique: "https://flagcdn.com/w20/mz.png",
+      Angola: "https://flagcdn.com/w20/ao.png",
+      Mali: "https://flagcdn.com/w20/ml.png",
+      Níger: "https://flagcdn.com/w20/ne.png",
+      Chade: "https://flagcdn.com/w20/td.png",
+      "Arábia Saudita": "https://flagcdn.com/w20/sa.png",
+      Irã: "https://flagcdn.com/w20/ir.png",
+      Iraque: "https://flagcdn.com/w20/iq.png",
+      Síria: "https://flagcdn.com/w20/sy.png",
+      Líbano: "https://flagcdn.com/w20/lb.png",
+      Jordânia: "https://flagcdn.com/w20/jo.png",
+      Kosovo: "https://flagcdn.com/w20/xk.png",
+      Albânia: "https://flagcdn.com/w20/al.png",
+      "Macedônia do Norte": "https://flagcdn.com/w20/mk.png",
+      Montenegro: "https://flagcdn.com/w20/me.png",
+      Bielorrússia: "https://flagcdn.com/w20/by.png",
+      Armênia: "https://flagcdn.com/w20/am.png",
+      Azerbaijão: "https://flagcdn.com/w20/az.png",
+      Cazaquistão: "https://flagcdn.com/w20/kz.png",
+      Uzbequistão: "https://flagcdn.com/w20/uz.png",
+      "Nova Zelândia": "https://flagcdn.com/w20/nz.png",
+      Fiji: "https://flagcdn.com/w20/fj.png",
+      Samoa: "https://flagcdn.com/w20/ws.png",
+      Indonésia: "https://flagcdn.com/w20/id.png",
+      Malásia: "https://flagcdn.com/w20/my.png",
+      Singapura: "https://flagcdn.com/w20/sg.png",
+      Tailândia: "https://flagcdn.com/w20/th.png",
+      Vietnã: "https://flagcdn.com/w20/vn.png",
+      Filipinas: "https://flagcdn.com/w20/ph.png",
+      Bangladesh: "https://flagcdn.com/w20/bd.png",
+      Paquistão: "https://flagcdn.com/w20/pk.png",
+      "Sri Lanka": "https://flagcdn.com/w20/lk.png",
+      Bolívia: "https://flagcdn.com/w20/bo.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
@@ -2544,8 +2611,10 @@ class TournamentManager {
     const coach = this.data.coaches.find((c) => c.id === coachId);
     if (!coach) return;
 
-    const matches = this.getUserData("matches").filter((m) => 
-      m.status === "finished" && (m.homeCoachId == coachId || m.awayCoachId == coachId)
+    const matches = this.getUserData("matches").filter(
+      (m) =>
+        m.status === "finished" &&
+        (m.homeCoachId == coachId || m.awayCoachId == coachId)
     );
 
     // Calcular estatísticas do treinador
@@ -2557,44 +2626,54 @@ class TournamentManager {
       matchHistory: [],
     };
 
-    matches.forEach(match => {
+    matches.forEach((match) => {
       const isHomeCoach = match.homeCoachId == coachId;
       const coachScore = isHomeCoach ? match.homeScore : match.awayScore;
       const opponentScore = isHomeCoach ? match.awayScore : match.homeScore;
-      
-      const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
-      const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
+
+      const homeTeam = this.data.clubs.find((c) => c.id == match.homeTeamId);
+      const awayTeam = this.data.clubs.find((c) => c.id == match.awayTeamId);
       const coachTeam = isHomeCoach ? homeTeam : awayTeam;
-      
-      let result = 'draw';
+
+      let result = "draw";
       if (coachScore > opponentScore) {
         coachStats.wins++;
-        result = 'win';
+        result = "win";
       } else if (coachScore < opponentScore) {
         coachStats.losses++;
-        result = 'loss';
+        result = "loss";
       } else {
         coachStats.draws++;
       }
-      
+
       coachStats.matchHistory.push({
         date: match.date,
         homeTeam,
         awayTeam,
         score: `${match.homeScore} - ${match.awayScore}`,
         result,
-        club: coachTeam
+        club: coachTeam,
       });
     });
 
     // Preencher dados do modal
-    document.getElementById("coach-profile-photo").src = coach.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif";
+    document.getElementById("coach-profile-photo").src =
+      coach.photo ||
+      "https://static.flashscore.com/res/image/empty-face-man-share.gif";
     document.getElementById("coach-profile-name").textContent = coach.name;
-    document.getElementById("coach-profile-age").textContent = this.calculateAge(coach.birthdate) ? `${this.calculateAge(coach.birthdate)} anos` : "-";
-    document.getElementById("coach-profile-birthdate").textContent = coach.birthdate ? this.formatDate(coach.birthdate, "dd Mês yyyy") : "-";
-    
-    const nationalityFlag = document.getElementById("coach-profile-nationality-flag");
-    const nationalityText = document.getElementById("coach-profile-nationality-text");
+    document.getElementById("coach-profile-age").textContent =
+      this.calculateAge(coach.birthdate)
+        ? `${this.calculateAge(coach.birthdate)} anos`
+        : "-";
+    document.getElementById("coach-profile-birthdate").textContent =
+      coach.birthdate ? this.formatDate(coach.birthdate, "dd Mês yyyy") : "-";
+
+    const nationalityFlag = document.getElementById(
+      "coach-profile-nationality-flag"
+    );
+    const nationalityText = document.getElementById(
+      "coach-profile-nationality-text"
+    );
     if (coach.nationality) {
       nationalityFlag.src = this.getCountryFlag(coach.nationality);
       nationalityFlag.style.display = "inline";
@@ -2603,19 +2682,28 @@ class TournamentManager {
       nationalityFlag.style.display = "none";
       nationalityText.textContent = "-";
     }
-    
-    document.getElementById("coach-profile-experience").textContent = coach.experience ? `${coach.experience} anos` : "-";
-    document.getElementById("coach-profile-formation").textContent = coach.formation || "-";
+
+    document.getElementById("coach-profile-experience").textContent =
+      coach.experience ? `${coach.experience} anos` : "-";
+    document.getElementById("coach-profile-formation").textContent =
+      coach.formation || "-";
 
     // Estatísticas
-    document.getElementById("coach-profile-matches").textContent = coachStats.matches;
+    document.getElementById("coach-profile-matches").textContent =
+      coachStats.matches;
     document.getElementById("coach-profile-wins").textContent = coachStats.wins;
-    document.getElementById("coach-profile-draws").textContent = coachStats.draws;
-    document.getElementById("coach-profile-losses").textContent = coachStats.losses;
-    document.getElementById("coach-profile-winrate").textContent = coachStats.matches > 0 ? ((coachStats.wins / coachStats.matches) * 100).toFixed(1) + "%" : "-";
+    document.getElementById("coach-profile-draws").textContent =
+      coachStats.draws;
+    document.getElementById("coach-profile-losses").textContent =
+      coachStats.losses;
+    document.getElementById("coach-profile-winrate").textContent =
+      coachStats.matches > 0
+        ? ((coachStats.wins / coachStats.matches) * 100).toFixed(1) + "%"
+        : "-";
 
     this.loadCoachClubHistory(coach, coachStats.matchHistory);
     this.loadCoachMatches(coachStats.matchHistory);
+    this.loadCoachOpponents(coachId);
 
     document.getElementById("coach-profile-modal").style.display = "block";
   }
@@ -2625,13 +2713,14 @@ class TournamentManager {
     const currentYear = new Date().getFullYear();
 
     if (matchHistory.length === 0) {
-      container.innerHTML = '<div class="no-matches">Nenhum histórico encontrado</div>';
+      container.innerHTML =
+        '<div class="no-matches">Nenhum histórico encontrado</div>';
       return;
     }
 
     // Agrupar partidas por clube
     const clubStats = {};
-    matchHistory.forEach(match => {
+    matchHistory.forEach((match) => {
       const clubId = match.club.id;
       if (!clubStats[clubId]) {
         clubStats[clubId] = {
@@ -2639,19 +2728,23 @@ class TournamentManager {
           matches: 0,
           wins: 0,
           draws: 0,
-          losses: 0
+          losses: 0,
         };
       }
-      
+
       clubStats[clubId].matches++;
-      if (match.result === 'win') clubStats[clubId].wins++;
-      else if (match.result === 'draw') clubStats[clubId].draws++;
-      else if (match.result === 'loss') clubStats[clubId].losses++;
+      if (match.result === "win") clubStats[clubId].wins++;
+      else if (match.result === "draw") clubStats[clubId].draws++;
+      else if (match.result === "loss") clubStats[clubId].losses++;
     });
 
-    container.innerHTML = Object.values(clubStats).map(stats => `
+    container.innerHTML = Object.values(clubStats)
+      .map(
+        (stats) => `
       <div class="club-history-item current-season">
-        <img src="${stats.club.logo || "https://via.placeholder.com/40"}" class="club-history-logo" alt="${stats.club.name}">
+        <img src="${
+          stats.club.logo || "https://via.placeholder.com/40"
+        }" class="club-history-logo" alt="${stats.club.name}">
         <div class="club-history-info">
           <div class="club-history-name">
             ${stats.club.name}
@@ -2674,32 +2767,168 @@ class TournamentManager {
           </div>
         </div>
       </div>
-    `).join("");
+    `
+      )
+      .join("");
   }
 
   loadCoachMatches(matchHistory) {
     const timeline = document.getElementById("coach-profile-matches-timeline");
     if (matchHistory.length === 0) {
-      timeline.innerHTML = '<div class="no-matches">Nenhuma partida encontrada</div>';
+      timeline.innerHTML =
+        '<div class="no-matches">Nenhuma partida encontrada</div>';
       return;
     }
 
-    timeline.innerHTML = matchHistory.map(match => `
+    timeline.innerHTML = matchHistory
+      .map(
+        (match) => `
       <div class="match-timeline-item">
-        <div class="match-date">${new Date(match.date).toLocaleDateString("pt-BR")}</div>
+        <div class="match-date">${new Date(match.date).toLocaleDateString(
+          "pt-BR"
+        )}</div>
         <div class="match-teams">
           <div class="match-team-logos">
-            <img src="${match.homeTeam?.logo || "https://via.placeholder.com/25"}" class="match-team-logo" alt="${match.homeTeam?.name}">
+            <img src="${
+              match.homeTeam?.logo || "https://via.placeholder.com/25"
+            }" class="match-team-logo" alt="${match.homeTeam?.name}">
             <span class="match-vs">vs</span>
-            <img src="${match.awayTeam?.logo || "https://via.placeholder.com/25"}" class="match-team-logo" alt="${match.awayTeam?.name}">
+            <img src="${
+              match.awayTeam?.logo || "https://via.placeholder.com/25"
+            }" class="match-team-logo" alt="${match.awayTeam?.name}">
           </div>
         </div>
         <div class="match-result">${match.score}</div>
         <div class="match-result-badge ${match.result}">
-          ${match.result === 'win' ? 'V' : match.result === 'draw' ? 'E' : 'D'}
+          ${match.result === "win" ? "V" : match.result === "draw" ? "E" : "D"}
         </div>
       </div>
-    `).join("");
+    `
+      )
+      .join("");
+  }
+
+  loadCoachOpponents(coachId) {
+    const select = document.getElementById("h2h-opponent-select");
+    const allMatches = this.getUserData("matches").filter(m => m.status === "finished");
+    const opponentIds = new Set();
+    
+    allMatches.forEach(match => {
+      if (match.homeCoachId == coachId && match.awayCoachId) {
+        opponentIds.add(match.awayCoachId);
+      } else if (match.awayCoachId == coachId && match.homeCoachId) {
+        opponentIds.add(match.homeCoachId);
+      }
+    });
+    
+    const opponents = Array.from(opponentIds).map(id => 
+      this.data.coaches.find(c => c.id == id)
+    ).filter(Boolean);
+    
+    select.innerHTML = '<option value="">Selecione um adversário</option>' +
+      opponents.map(coach => `<option value="${coach.id}">${coach.name}</option>`).join("");
+    
+    select.dataset.currentCoachId = coachId;
+  }
+  
+  loadCoachH2H() {
+    const select = document.getElementById("h2h-opponent-select");
+    const coachId = parseInt(select.dataset.currentCoachId);
+    const opponentId = parseInt(select.value);
+    
+    if (!opponentId) return;
+    
+    const coach = this.data.coaches.find(c => c.id == coachId);
+    const opponent = this.data.coaches.find(c => c.id == opponentId);
+    const matches = this.getUserData("matches").filter(m => 
+      m.status === "finished" && 
+      ((m.homeCoachId == coachId && m.awayCoachId == opponentId) ||
+       (m.homeCoachId == opponentId && m.awayCoachId == coachId))
+    );
+    
+    let coachWins = 0, opponentWins = 0, draws = 0;
+    let coachGoals = 0, opponentGoals = 0;
+    
+    matches.forEach(match => {
+      const coachIsHome = match.homeCoachId == coachId;
+      const coachScore = coachIsHome ? match.homeScore : match.awayScore;
+      const opponentScore = coachIsHome ? match.awayScore : match.homeScore;
+      
+      coachGoals += coachScore;
+      opponentGoals += opponentScore;
+      
+      if (coachScore > opponentScore) coachWins++;
+      else if (opponentScore > coachScore) opponentWins++;
+      else draws++;
+    });
+    
+    const container = document.getElementById("coach-h2h-results");
+    container.innerHTML = `
+      <div class="h2h-header">
+        <div class="h2h-coach">
+          <img src="${coach.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" alt="${coach.name}">
+          <span>${coach.name}</span>
+        </div>
+        <div class="h2h-vs">vs</div>
+        <div class="h2h-coach">
+          <img src="${opponent.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" alt="${opponent.name}">
+          <span>${opponent.name}</span>
+        </div>
+      </div>
+      
+      <div class="h2h-stats">
+        <div class="h2h-stat">
+          <div class="stat-number">${matches.length}</div>
+          <div class="stat-label">Jogos</div>
+        </div>
+        <div class="h2h-stat">
+          <div class="stat-number">${coachWins}</div>
+          <div class="stat-label">Vitórias</div>
+        </div>
+        <div class="h2h-stat">
+          <div class="stat-number">${draws}</div>
+          <div class="stat-label">Empates</div>
+        </div>
+        <div class="h2h-stat">
+          <div class="stat-number">${opponentWins}</div>
+          <div class="stat-label">Vitórias</div>
+        </div>
+        <div class="h2h-stat">
+          <div class="stat-number">${coachGoals}</div>
+          <div class="stat-label">Gols</div>
+        </div>
+        <div class="h2h-stat">
+          <div class="stat-number">${opponentGoals}</div>
+          <div class="stat-label">Gols</div>
+        </div>
+      </div>
+      
+      ${matches.length > 0 ? `
+      <div class="h2h-matches">
+        <h4>Últimos Confrontos</h4>
+        ${matches.slice(-5).reverse().map(match => {
+          const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
+          const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
+          const coachIsHome = match.homeCoachId == coachId;
+          const result = match.homeScore > match.awayScore ? 
+            (coachIsHome ? 'win' : 'loss') : 
+            match.homeScore < match.awayScore ? 
+            (coachIsHome ? 'loss' : 'win') : 'draw';
+          
+          return `
+            <div class="h2h-match-item ${result}">
+              <div class="h2h-match-teams">
+                <span>${homeTeam?.name || 'Time'}</span>
+                <span class="h2h-score">${match.homeScore} - ${match.awayScore}</span>
+                <span>${awayTeam?.name || 'Time'}</span>
+              </div>
+              <div class="h2h-match-date">${new Date(match.date).toLocaleDateString('pt-BR')}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      ` : ''}
+    `;
   }
 
   closeCoachProfile() {
@@ -3172,13 +3401,15 @@ class TournamentManager {
             <div class="team-info">
               <img src="${
                 team.club.logo || "https://via.placeholder.com/30"
-              }" class="team-logo" alt="${team.club.name}" onclick="app.showClubProfile(${
-              team.club.id
-            })">
+              }" class="team-logo" alt="${
+          team.club.name
+        }" onclick="app.showClubProfile(${team.club.id})">
               <span class="team-name" onclick="app.showClubProfile(${
-              team.club.id
-            })">${team.club.name}</span>
-              <button class="btn-history" onclick="event.stopPropagation(); app.showTeamHistoryOptions(${team.club.id}, ${tournamentId})" title="Ver histórico">📊</button>
+                team.club.id
+              })">${team.club.name}</span>
+              <button class="btn-history" onclick="event.stopPropagation(); app.showTeamHistoryOptions(${
+                team.club.id
+              }, ${tournamentId})" title="Ver histórico">📊</button>
             </div>
           </td>
           <td class="stat-number">${team.matches}</td>
@@ -3486,122 +3717,160 @@ class TournamentManager {
 
   // Histórico de Confrontos
   showMatchHistory(club1Id, club2Id) {
-    const club1 = this.data.clubs.find(c => c.id == club1Id);
-    const club2 = this.data.clubs.find(c => c.id == club2Id);
-    
+    const club1 = this.data.clubs.find((c) => c.id == club1Id);
+    const club2 = this.data.clubs.find((c) => c.id == club2Id);
+
     if (!club1 || !club2) return;
-    
-    const matches = this.getUserData("matches").filter(m => 
-      m.status === "finished" && 
-      ((m.homeTeamId == club1Id && m.awayTeamId == club2Id) || 
-       (m.homeTeamId == club2Id && m.awayTeamId == club1Id))
+
+    const matches = this.getUserData("matches").filter(
+      (m) =>
+        m.status === "finished" &&
+        ((m.homeTeamId == club1Id && m.awayTeamId == club2Id) ||
+          (m.homeTeamId == club2Id && m.awayTeamId == club1Id))
     );
-    
+
     // Calcular estatísticas do confronto
-    let club1Wins = 0, club2Wins = 0, draws = 0;
-    let club1Goals = 0, club2Goals = 0;
-    
-    matches.forEach(match => {
+    let club1Wins = 0,
+      club2Wins = 0,
+      draws = 0;
+    let club1Goals = 0,
+      club2Goals = 0;
+
+    matches.forEach((match) => {
       const club1IsHome = match.homeTeamId == club1Id;
       const club1Score = club1IsHome ? match.homeScore : match.awayScore;
       const club2Score = club1IsHome ? match.awayScore : match.homeScore;
-      
+
       club1Goals += club1Score;
       club2Goals += club2Score;
-      
+
       if (club1Score > club2Score) club1Wins++;
       else if (club2Score > club1Score) club2Wins++;
       else draws++;
     });
-    
+
     // Preencher modal
-    document.getElementById("history-club1-logo").src = club1.logo || "https://via.placeholder.com/60";
+    document.getElementById("history-club1-logo").src =
+      club1.logo || "https://via.placeholder.com/60";
     document.getElementById("history-club1-name").textContent = club1.name;
-    document.getElementById("history-club2-logo").src = club2.logo || "https://via.placeholder.com/60";
+    document.getElementById("history-club2-logo").src =
+      club2.logo || "https://via.placeholder.com/60";
     document.getElementById("history-club2-name").textContent = club2.name;
-    
-    document.getElementById("history-total-matches").textContent = matches.length;
+
+    document.getElementById("history-total-matches").textContent =
+      matches.length;
     document.getElementById("history-club1-wins").textContent = club1Wins;
     document.getElementById("history-draws").textContent = draws;
     document.getElementById("history-club2-wins").textContent = club2Wins;
     document.getElementById("history-club1-goals").textContent = club1Goals;
     document.getElementById("history-club2-goals").textContent = club2Goals;
-    
+
     // Carregar lista de partidas
     const container = document.getElementById("history-matches-list");
     if (matches.length === 0) {
-      container.innerHTML = '<div class="no-data">Nenhum confronto encontrado</div>';
+      container.innerHTML =
+        '<div class="no-data">Nenhum confronto encontrado</div>';
     } else {
-      container.innerHTML = matches.sort((a, b) => new Date(b.date) - new Date(a.date)).map(match => {
-        const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
-        const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
-        const tournament = this.data.tournaments.find(t => t.id == match.tournamentId);
-        
-        return `
-          <div class="history-match-item" onclick="app.showMatchDetails(${match.id})">
-            <div class="history-match-date">${new Date(match.date).toLocaleDateString("pt-BR")}</div>
+      container.innerHTML = matches
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .map((match) => {
+          const homeTeam = this.data.clubs.find(
+            (c) => c.id == match.homeTeamId
+          );
+          const awayTeam = this.data.clubs.find(
+            (c) => c.id == match.awayTeamId
+          );
+          const tournament = this.data.tournaments.find(
+            (t) => t.id == match.tournamentId
+          );
+
+          return `
+          <div class="history-match-item" onclick="app.showMatchDetails(${
+            match.id
+          })">
+            <div class="history-match-date">${new Date(
+              match.date
+            ).toLocaleDateString("pt-BR")}</div>
             <div class="history-match-teams">
               <div class="history-match-team">
-                <img src="${homeTeam?.logo || "https://via.placeholder.com/30"}" alt="${homeTeam?.name}">
+                <img src="${
+                  homeTeam?.logo || "https://via.placeholder.com/30"
+                }" alt="${homeTeam?.name}">
                 <span>${homeTeam?.name}</span>
               </div>
-              <div class="history-match-score">${match.homeScore} - ${match.awayScore}</div>
+              <div class="history-match-score">${match.homeScore} - ${
+            match.awayScore
+          }</div>
               <div class="history-match-team">
                 <span>${awayTeam?.name}</span>
-                <img src="${awayTeam?.logo || "https://via.placeholder.com/30"}" alt="${awayTeam?.name}">
+                <img src="${
+                  awayTeam?.logo || "https://via.placeholder.com/30"
+                }" alt="${awayTeam?.name}">
               </div>
             </div>
-            <div class="history-match-tournament">${tournament?.name || "Torneio"}</div>
+            <div class="history-match-tournament">${
+              tournament?.name || "Torneio"
+            }</div>
           </div>
         `;
-      }).join("");
+        })
+        .join("");
     }
-    
+
     document.getElementById("match-history-modal").style.display = "block";
   }
-  
+
   closeMatchHistory() {
     document.getElementById("match-history-modal").style.display = "none";
   }
-  
+
   showTeamHistoryOptions(clubId, tournamentId) {
-    const club = this.data.clubs.find(c => c.id == clubId);
-    const otherClubs = this.getUserData("clubs").filter(c => 
-      c.tournamentId == tournamentId && c.id != clubId
+    const club = this.data.clubs.find((c) => c.id == clubId);
+    const otherClubs = this.getUserData("clubs").filter(
+      (c) => c.tournamentId == tournamentId && c.id != clubId
     );
-    
+
     if (otherClubs.length === 0) {
       alert("Não há outros clubes neste torneio para comparar.");
       return;
     }
-    
-    document.getElementById("history-options-club-name").textContent = club.name;
-    document.getElementById("history-options-club-logo").src = club.logo || "https://via.placeholder.com/40";
-    
+
+    document.getElementById("history-options-club-name").textContent =
+      club.name;
+    document.getElementById("history-options-club-logo").src =
+      club.logo || "https://via.placeholder.com/40";
+
     const container = document.getElementById("history-options-list");
-    container.innerHTML = otherClubs.map(otherClub => {
-      const matches = this.getUserData("matches").filter(m => 
-        m.status === "finished" && 
-        ((m.homeTeamId == clubId && m.awayTeamId == otherClub.id) || 
-         (m.homeTeamId == otherClub.id && m.awayTeamId == clubId))
-      );
-      
-      return `
-        <div class="history-option-item" onclick="app.showMatchHistory(${clubId}, ${otherClub.id}); app.closeHistoryOptions();">
-          <img src="${otherClub.logo || "https://via.placeholder.com/30"}" alt="${otherClub.name}">
+    container.innerHTML = otherClubs
+      .map((otherClub) => {
+        const matches = this.getUserData("matches").filter(
+          (m) =>
+            m.status === "finished" &&
+            ((m.homeTeamId == clubId && m.awayTeamId == otherClub.id) ||
+              (m.homeTeamId == otherClub.id && m.awayTeamId == clubId))
+        );
+
+        return `
+        <div class="history-option-item" onclick="app.showMatchHistory(${clubId}, ${
+          otherClub.id
+        }); app.closeHistoryOptions();">
+          <img src="${
+            otherClub.logo || "https://via.placeholder.com/30"
+          }" alt="${otherClub.name}">
           <span class="opponent-name">${otherClub.name}</span>
           <span class="matches-count">${matches.length} jogos</span>
         </div>
       `;
-    }).join("");
-    
+      })
+      .join("");
+
     document.getElementById("history-options-modal").style.display = "block";
   }
-  
+
   closeHistoryOptions() {
     document.getElementById("history-options-modal").style.display = "none";
   }
-  
+
   updateCoachSelects() {
     const coaches = this.getUserData("coaches");
     const selects = ["home-coach", "away-coach"];
@@ -3621,12 +3890,19 @@ class TournamentManager {
   }
 
   getCoachClubs(coachId) {
-    const matches = this.getUserData("matches").filter(m => m.homeCoachId == coachId || m.awayCoachId == coachId);
-    const clubs = matches.map(m => {
-      const clubId = m.homeCoachId == coachId ? m.homeTeamId : m.awayTeamId;
-      return this.data.clubs.find(c => c.id == clubId);
-    }).filter((club, index, arr) => club && arr.findIndex(c => c.id === club.id) === index);
-    
+    const matches = this.getUserData("matches").filter(
+      (m) => m.homeCoachId == coachId || m.awayCoachId == coachId
+    );
+    const clubs = matches
+      .map((m) => {
+        const clubId = m.homeCoachId == coachId ? m.homeTeamId : m.awayTeamId;
+        return this.data.clubs.find((c) => c.id == clubId);
+      })
+      .filter(
+        (club, index, arr) =>
+          club && arr.findIndex((c) => c.id === club.id) === index
+      );
+
     return clubs;
   }
 
@@ -3718,13 +3994,13 @@ class TournamentManager {
     const currentYear = new Date().getFullYear();
     const yearElements = [
       "current-year-scorers",
-      "current-year-assists", 
+      "current-year-assists",
       "current-year-player",
       "current-year-club-scorers",
-      "current-year-club-assists"
+      "current-year-club-assists",
     ];
-    
-    yearElements.forEach(id => {
+
+    yearElements.forEach((id) => {
       const element = document.getElementById(id);
       if (element) element.textContent = currentYear;
     });
@@ -4077,7 +4353,7 @@ class TournamentManager {
       .getElementById("coach-form")
       .addEventListener("submit", async (e) => {
         e.preventDefault();
-        
+
         const data = {
           name: document.getElementById("coach-name").value,
           birthdate: document.getElementById("coach-birthdate").value,
@@ -4122,8 +4398,8 @@ class TournamentManager {
         const awayCoachId = document.getElementById("away-coach").value;
         if (homeCoachId) data.homeCoachId = parseInt(homeCoachId);
         if (awayCoachId) data.awayCoachId = parseInt(awayCoachId);
-        
-        console.log('Dados da partida sendo salvos:', data);
+
+        console.log("Dados da partida sendo salvos:", data);
 
         // Adicionar scores apenas se preenchidos
         const homeScore = document.getElementById("home-score").value;
