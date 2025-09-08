@@ -2572,27 +2572,32 @@ class TournamentManager {
             .map((event) => {
               let className = "";
               let icon = "";
+              let title = "";
               switch (event.type) {
                 case "Gol":
                   className = "event-goal";
                   icon = "⚽";
+                  title = `Gol aos ${event.minute}'`;
                   break;
                 case "Assistência":
                   className = "event-assist";
                   icon = "🅰️";
+                  title = `Assistência aos ${event.minute}'`;
                   break;
                 case "Cartão Amarelo":
                   className = "event-yellow";
                   icon = "🟨";
+                  title = `Cartão amarelo aos ${event.minute}'`;
                   break;
                 case "Cartão Vermelho":
                   className = "event-red";
                   icon = "🟥";
+                  title = `Cartão vermelho aos ${event.minute}'`;
                   break;
                 default:
                   return "";
               }
-              return `<span class="event-badge ${className}">${icon}</span>`;
+              return `<span class="event-badge ${className}" title="${title}">${icon}<small>${event.minute}'</small></span>`;
             })
             .join("")}
         </div>
