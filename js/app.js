@@ -151,6 +151,9 @@ class TournamentManager {
 
     // Carregar dados da nuvem antes de atualizar a interface
     await this.loadCloudData();
+    
+    // Preencher anos dinamicamente
+    this.updateCurrentYear();
 
     this.updateStats();
     this.loadDashboardData();
@@ -3709,6 +3712,22 @@ class TournamentManager {
         console.error("Erro ao carregar dados da nuvem:", error);
       }
     }
+  }
+
+  updateCurrentYear() {
+    const currentYear = new Date().getFullYear();
+    const yearElements = [
+      "current-year-scorers",
+      "current-year-assists", 
+      "current-year-player",
+      "current-year-club-scorers",
+      "current-year-club-assists"
+    ];
+    
+    yearElements.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = currentYear;
+    });
   }
 
   // Mobile Menu Functions

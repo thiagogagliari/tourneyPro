@@ -793,7 +793,7 @@
           <div id="tournament-statistics" class="tournament-tab-content">
             <div class="tournament-statistics-grid">
               <div class="tournament-stats-card">
-                <h3>Artilheiros - Temporada ${new Date().getFullYear()}</h3>
+                <h3>Artilheiros - Temporada <span id="current-year-scorers"></span></h3>
                 <div
                   class="tournament-top-scorers"
                   id="tournament-top-scorers-list"
@@ -803,7 +803,7 @@
               </div>
 
               <div class="tournament-stats-card">
-                <h3>Assistências - Temporada ${new Date().getFullYear()}</h3>
+                <h3>Assistências - Temporada <span id="current-year-assists"></span></h3>
                 <div
                   class="tournament-top-assists"
                   id="tournament-top-assists-list"
@@ -948,14 +948,14 @@
           <div id="club-statistics" class="club-tab-content">
             <div class="club-statistics-grid">
               <div class="club-stats-card">
-                <h3>Artilheiros - Temporada ${new Date().getFullYear()}</h3>
+                <h3>Artilheiros - Temporada <span id="current-year-club-scorers"></span></h3>
                 <div class="top-scorers-list" id="club-top-scorers">
                   <div class="no-data">Nenhum artilheiro encontrado</div>
                 </div>
               </div>
 
               <div class="club-stats-card">
-                <h3>Assistências - Temporada ${new Date().getFullYear()}</h3>
+                <h3>Assistências - Temporada <span id="current-year-club-assists"></span></h3>
                 <div class="top-assists-list" id="club-top-assists">
                   <div class="no-data">Nenhuma assistência encontrada</div>
                 </div>
@@ -1038,7 +1038,7 @@
             </div>
 
             <div class="player-info-card">
-              <h3>Estatísticas da Temporada ${new Date().getFullYear()}</h3>
+              <h3>Estatísticas da Temporada <span id="current-year-player"></span></h3>
               <div class="player-stats-summary">
                 <div class="stat-box">
                   <div class="stat-number" id="profile-matches">0</div>
