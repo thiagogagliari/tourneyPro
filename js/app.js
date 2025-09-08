@@ -1311,7 +1311,7 @@ class TournamentManager {
 
       // Calcular nota automática
       stats.rating = this.calculatePlayerRating(stats, player.position);
-      
+
       return stats;
     });
 
@@ -1404,7 +1404,9 @@ class TournamentManager {
                   }</strong></td>
                   <td>${stats.yellowCards > 0 ? stats.yellowCards : "-"}</td>
                   <td>${stats.redCards > 0 ? stats.redCards : "-"}</td>
-                  <td><strong style="color: #FF6B35;">${stats.rating > 0 ? stats.rating.toFixed(1) : "-"}</strong></td>
+                  <td><strong style="color: #FF6B35;">${
+                    stats.rating > 0 ? stats.rating.toFixed(1) : "-"
+                  }</strong></td>
                   <td><strong>${stats.totalEvents}</strong></td>
                 </tr>
               `
@@ -1471,7 +1473,7 @@ class TournamentManager {
             </thead>
             <tbody>
               ${activePlayerStats
-                .filter(stats => stats.rating > 0)
+                .filter((stats) => stats.rating > 0)
                 .sort((a, b) => b.rating - a.rating)
                 .slice(0, 15)
                 .map(
@@ -1486,7 +1488,9 @@ class TournamentManager {
                     stats.position
                   }</span></td>
                   <td>${stats.matches}</td>
-                  <td><strong style="color: #FF6B35;">${stats.rating.toFixed(1)}</strong></td>
+                  <td><strong style="color: #FF6B35;">${stats.rating.toFixed(
+                    1
+                  )}</strong></td>
                 </tr>
               `
                 )
@@ -2245,37 +2249,39 @@ class TournamentManager {
   // Função para calcular nota automática do jogador
   calculatePlayerRating(playerStats, position) {
     if (playerStats.matches === 0) return 0;
-    
+
     let baseRating = 5.0; // Nota base
-    
+
     // Pontuação por eventos positivos
     const goalPoints = playerStats.goals * 1.5;
     const assistPoints = playerStats.assists * 1.0;
-    
+
     // Penalização por cartões
     const yellowCardPenalty = playerStats.yellowCards * 0.3;
     const redCardPenalty = playerStats.redCards * 1.0;
-    
+
     // Bônus por posição (atacantes ganham mais por gols, defensores menos penalizados por cartões)
     let positionMultiplier = 1.0;
-    if (position === 'Atacante') {
+    if (position === "Atacante") {
       positionMultiplier = 1.2; // Atacantes ganham mais por gols
-    } else if (position === 'Meia') {
+    } else if (position === "Meia") {
       positionMultiplier = 1.1; // Meias ganham mais por assistências
-    } else if (position === 'Goleiro') {
+    } else if (position === "Goleiro") {
       positionMultiplier = 0.8; // Goleiros têm menos oportunidades de eventos
     }
-    
+
     // Calcular nota final
-    const totalPositivePoints = (goalPoints + assistPoints) * positionMultiplier;
+    const totalPositivePoints =
+      (goalPoints + assistPoints) * positionMultiplier;
     const totalPenalty = yellowCardPenalty + redCardPenalty;
-    const averagePerformance = (totalPositivePoints - totalPenalty) / playerStats.matches;
-    
+    const averagePerformance =
+      (totalPositivePoints - totalPenalty) / playerStats.matches;
+
     let finalRating = baseRating + averagePerformance;
-    
+
     // Limitar entre 1.0 e 10.0
     finalRating = Math.max(1.0, Math.min(10.0, finalRating));
-    
+
     return finalRating;
   }
 
@@ -2506,7 +2512,10 @@ class TournamentManager {
       playerStats.yellowCards;
     document.getElementById("profile-red-cards").textContent =
       playerStats.redCards;
-    const automaticRating = this.calculatePlayerRating(playerStats, player.position);
+    const automaticRating = this.calculatePlayerRating(
+      playerStats,
+      player.position
+    );
     document.getElementById("profile-rating").textContent =
       playerStats.matches > 0 ? automaticRating.toFixed(1) : "-";
 
@@ -2898,68 +2907,83 @@ class TournamentManager {
 
   loadCoachOpponents(coachId) {
     const select = document.getElementById("h2h-opponent-select");
-    const allMatches = this.getUserData("matches").filter(m => m.status === "finished");
+    const allMatches = this.getUserData("matches").filter(
+      (m) => m.status === "finished"
+    );
     const opponentIds = new Set();
-    
-    allMatches.forEach(match => {
+
+    allMatches.forEach((match) => {
       if (match.homeCoachId == coachId && match.awayCoachId) {
         opponentIds.add(match.awayCoachId);
       } else if (match.awayCoachId == coachId && match.homeCoachId) {
         opponentIds.add(match.homeCoachId);
       }
     });
-    
-    const opponents = Array.from(opponentIds).map(id => 
-      this.data.coaches.find(c => c.id == id)
-    ).filter(Boolean);
-    
-    select.innerHTML = '<option value="">Selecione um adversário</option>' +
-      opponents.map(coach => `<option value="${coach.id}">${coach.name}</option>`).join("");
-    
+
+    const opponents = Array.from(opponentIds)
+      .map((id) => this.data.coaches.find((c) => c.id == id))
+      .filter(Boolean);
+
+    select.innerHTML =
+      '<option value="">Selecione um adversário</option>' +
+      opponents
+        .map((coach) => `<option value="${coach.id}">${coach.name}</option>`)
+        .join("");
+
     select.dataset.currentCoachId = coachId;
   }
-  
+
   loadCoachH2H() {
     const select = document.getElementById("h2h-opponent-select");
     const coachId = parseInt(select.dataset.currentCoachId);
     const opponentId = parseInt(select.value);
-    
+
     if (!opponentId) return;
-    
-    const coach = this.data.coaches.find(c => c.id == coachId);
-    const opponent = this.data.coaches.find(c => c.id == opponentId);
-    const matches = this.getUserData("matches").filter(m => 
-      m.status === "finished" && 
-      ((m.homeCoachId == coachId && m.awayCoachId == opponentId) ||
-       (m.homeCoachId == opponentId && m.awayCoachId == coachId))
+
+    const coach = this.data.coaches.find((c) => c.id == coachId);
+    const opponent = this.data.coaches.find((c) => c.id == opponentId);
+    const matches = this.getUserData("matches").filter(
+      (m) =>
+        m.status === "finished" &&
+        ((m.homeCoachId == coachId && m.awayCoachId == opponentId) ||
+          (m.homeCoachId == opponentId && m.awayCoachId == coachId))
     );
-    
-    let coachWins = 0, opponentWins = 0, draws = 0;
-    let coachGoals = 0, opponentGoals = 0;
-    
-    matches.forEach(match => {
+
+    let coachWins = 0,
+      opponentWins = 0,
+      draws = 0;
+    let coachGoals = 0,
+      opponentGoals = 0;
+
+    matches.forEach((match) => {
       const coachIsHome = match.homeCoachId == coachId;
       const coachScore = coachIsHome ? match.homeScore : match.awayScore;
       const opponentScore = coachIsHome ? match.awayScore : match.homeScore;
-      
+
       coachGoals += coachScore;
       opponentGoals += opponentScore;
-      
+
       if (coachScore > opponentScore) coachWins++;
       else if (opponentScore > coachScore) opponentWins++;
       else draws++;
     });
-    
+
     const container = document.getElementById("coach-h2h-results");
     container.innerHTML = `
       <div class="h2h-header">
         <div class="h2h-coach">
-          <img src="${coach.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" alt="${coach.name}">
+          <img src="${
+            coach.photo ||
+            "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+          }" alt="${coach.name}">
           <span>${coach.name}</span>
         </div>
         <div class="h2h-vs">vs</div>
         <div class="h2h-coach">
-          <img src="${opponent.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" alt="${opponent.name}">
+          <img src="${
+            opponent.photo ||
+            "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+          }" alt="${opponent.name}">
           <span>${opponent.name}</span>
         </div>
       </div>
@@ -2991,31 +3015,53 @@ class TournamentManager {
         </div>
       </div>
       
-      ${matches.length > 0 ? `
+      ${
+        matches.length > 0
+          ? `
       <div class="h2h-matches">
         <h4>Últimos Confrontos</h4>
-        ${matches.slice(-5).reverse().map(match => {
-          const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
-          const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
-          const coachIsHome = match.homeCoachId == coachId;
-          const result = match.homeScore > match.awayScore ? 
-            (coachIsHome ? 'win' : 'loss') : 
-            match.homeScore < match.awayScore ? 
-            (coachIsHome ? 'loss' : 'win') : 'draw';
-          
-          return `
+        ${matches
+          .slice(-5)
+          .reverse()
+          .map((match) => {
+            const homeTeam = this.data.clubs.find(
+              (c) => c.id == match.homeTeamId
+            );
+            const awayTeam = this.data.clubs.find(
+              (c) => c.id == match.awayTeamId
+            );
+            const coachIsHome = match.homeCoachId == coachId;
+            const result =
+              match.homeScore > match.awayScore
+                ? coachIsHome
+                  ? "win"
+                  : "loss"
+                : match.homeScore < match.awayScore
+                ? coachIsHome
+                  ? "loss"
+                  : "win"
+                : "draw";
+
+            return `
             <div class="h2h-match-item ${result}">
               <div class="h2h-match-teams">
-                <span>${homeTeam?.name || 'Time'}</span>
-                <span class="h2h-score">${match.homeScore} - ${match.awayScore}</span>
-                <span>${awayTeam?.name || 'Time'}</span>
+                <span>${homeTeam?.name || "Time"}</span>
+                <span class="h2h-score">${match.homeScore} - ${
+              match.awayScore
+            }</span>
+                <span>${awayTeam?.name || "Time"}</span>
               </div>
-              <div class="h2h-match-date">${new Date(match.date).toLocaleDateString('pt-BR')}</div>
+              <div class="h2h-match-date">${new Date(
+                match.date
+              ).toLocaleDateString("pt-BR")}</div>
             </div>
           `;
-        }).join('')}
+          })
+          .join("")}
       </div>
-      ` : ''}
+      `
+          : ""
+      }
     `;
   }
 
