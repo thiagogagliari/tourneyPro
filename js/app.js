@@ -1273,6 +1273,7 @@ class TournamentManager {
         yellowCards: 0,
         redCards: 0,
         totalEvents: 0,
+        rating: 0,
       };
 
       matches.forEach((match) => {
@@ -1308,6 +1309,9 @@ class TournamentManager {
         }
       });
 
+      // Calcular nota automática
+      stats.rating = this.calculatePlayerRating(stats, player.position);
+      
       return stats;
     });
 
@@ -1376,6 +1380,7 @@ class TournamentManager {
                 <th>Assists</th>
                 <th>🟨</th>
                 <th>🟥</th>
+                <th>Nota</th>
                 <th>Total</th>
               </tr>
             </thead>
@@ -1399,6 +1404,7 @@ class TournamentManager {
                   }</strong></td>
                   <td>${stats.yellowCards > 0 ? stats.yellowCards : "-"}</td>
                   <td>${stats.redCards > 0 ? stats.redCards : "-"}</td>
+                  <td><strong style="color: #FF6B35;">${stats.rating > 0 ? stats.rating.toFixed(1) : "-"}</strong></td>
                   <td><strong>${stats.totalEvents}</strong></td>
                 </tr>
               `
@@ -1449,6 +1455,45 @@ class TournamentManager {
         `
             : ""
         }
+        
+        <div class="statistics-table rating-table">
+          <h3>🏆 Melhores Jogadores por Desempenho</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Pos</th>
+                <th>Jogador</th>
+                <th>Clube</th>
+                <th>Posição</th>
+                <th>Jogos</th>
+                <th>Nota Média</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${activePlayerStats
+                .filter(stats => stats.rating > 0)
+                .sort((a, b) => b.rating - a.rating)
+                .slice(0, 15)
+                .map(
+                  (stats, index) => `
+                <tr onclick="app.showPlayerProfile(${
+                  stats.id
+                })" style="cursor: pointer;">
+                  <td>${index + 1}</td>
+                  <td><strong>${stats.name}</strong></td>
+                  <td>${stats.club}</td>
+                  <td><span class="position-badge ${stats.position.toLowerCase()}">${
+                    stats.position
+                  }</span></td>
+                  <td>${stats.matches}</td>
+                  <td><strong style="color: #FF6B35;">${stats.rating.toFixed(1)}</strong></td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
       </div>
     `;
   }
@@ -2197,6 +2242,43 @@ class TournamentManager {
       .padStart(2, "0")}/${date.getFullYear()}`;
   }
 
+  // Função para calcular nota automática do jogador
+  calculatePlayerRating(playerStats, position) {
+    if (playerStats.matches === 0) return 0;
+    
+    let baseRating = 5.0; // Nota base
+    
+    // Pontuação por eventos positivos
+    const goalPoints = playerStats.goals * 1.5;
+    const assistPoints = playerStats.assists * 1.0;
+    
+    // Penalização por cartões
+    const yellowCardPenalty = playerStats.yellowCards * 0.3;
+    const redCardPenalty = playerStats.redCards * 1.0;
+    
+    // Bônus por posição (atacantes ganham mais por gols, defensores menos penalizados por cartões)
+    let positionMultiplier = 1.0;
+    if (position === 'Atacante') {
+      positionMultiplier = 1.2; // Atacantes ganham mais por gols
+    } else if (position === 'Meia') {
+      positionMultiplier = 1.1; // Meias ganham mais por assistências
+    } else if (position === 'Goleiro') {
+      positionMultiplier = 0.8; // Goleiros têm menos oportunidades de eventos
+    }
+    
+    // Calcular nota final
+    const totalPositivePoints = (goalPoints + assistPoints) * positionMultiplier;
+    const totalPenalty = yellowCardPenalty + redCardPenalty;
+    const averagePerformance = (totalPositivePoints - totalPenalty) / playerStats.matches;
+    
+    let finalRating = baseRating + averagePerformance;
+    
+    // Limitar entre 1.0 e 10.0
+    finalRating = Math.max(1.0, Math.min(10.0, finalRating));
+    
+    return finalRating;
+  }
+
   // Função para obter bandeira do país
   getCountryFlag(country) {
     const flags = {
@@ -2332,6 +2414,8 @@ class TournamentManager {
       yellowCards: 0,
       redCards: 0,
       matchHistory: [],
+      totalRating: 0,
+      averageRating: 0,
     };
 
     matches.forEach((match) => {
@@ -2422,13 +2506,9 @@ class TournamentManager {
       playerStats.yellowCards;
     document.getElementById("profile-red-cards").textContent =
       playerStats.redCards;
+    const automaticRating = this.calculatePlayerRating(playerStats, player.position);
     document.getElementById("profile-rating").textContent =
-      playerStats.matches > 0
-        ? (
-            (playerStats.goals * 2 + playerStats.assists) /
-            playerStats.matches
-          ).toFixed(1)
-        : "-";
+      playerStats.matches > 0 ? automaticRating.toFixed(1) : "-";
 
     this.loadPlayerClubHistory(player);
     this.loadPlayerMatches(playerStats.matchHistory);
