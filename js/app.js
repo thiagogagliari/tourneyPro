@@ -947,6 +947,9 @@ class TournamentManager {
 
     // Carregar eventos
     this.loadMatchEvents(match);
+    
+    // Carregar melhor jogador da partida
+    this.loadMatchMotm(match);
 
     document.getElementById("match-details-modal").style.display = "block";
   }
@@ -1020,6 +1023,35 @@ class TournamentManager {
       `;
       })
       .join("");
+  }
+
+  loadMatchMotm(match) {
+    const container = document.getElementById("match-motm-section");
+    
+    if (!match.motm || !match.motm.playerId) {
+      container.style.display = "none";
+      return;
+    }
+    
+    const player = this.data.players.find(p => p.id == match.motm.playerId);
+    const club = this.data.clubs.find(c => c.id == player?.clubId);
+    
+    if (player) {
+      container.style.display = "block";
+      container.innerHTML = `
+        <h3>⭐ Melhor Jogador da Partida</h3>
+        <div class="motm-player-card" onclick="app.showPlayerProfile(${player.id})">
+          <img src="${player.photo || "https://static.flashscore.com/res/image/empty-face-man-share.gif"}" class="motm-player-photo" alt="${player.name}">
+          <div class="motm-player-info">
+            <div class="motm-player-name">${player.name}</div>
+            <div class="motm-player-club">${club?.name || "Sem clube"}</div>
+            <div class="motm-player-rating">Nota: ${match.motm.rating}/10</div>
+          </div>
+        </div>
+      `;
+    } else {
+      container.style.display = "none";
+    }
   }
 
   closeMatchDetails() {
@@ -1280,48 +1312,111 @@ class TournamentManager {
       return;
     }
 
+    // Calcular melhores jogadores da temporada (MOTM)
+    const motmStats = {};
+    matches.forEach(match => {
+      if (match.motm && match.motm.playerId) {
+        const player = players.find(p => p.id == match.motm.playerId);
+        const club = clubs.find(c => c.id == player?.clubId);
+        if (player) {
+          if (!motmStats[player.id]) {
+            motmStats[player.id] = {
+              player,
+              club: club?.name || "N/A",
+              motmCount: 0,
+              totalRating: 0,
+              avgRating: 0
+            };
+          }
+          motmStats[player.id].motmCount++;
+          motmStats[player.id].totalRating += match.motm.rating;
+          motmStats[player.id].avgRating = (motmStats[player.id].totalRating / motmStats[player.id].motmCount).toFixed(1);
+        }
+      }
+    });
+    
+    const topMotmPlayers = Object.values(motmStats).sort((a, b) => {
+      if (b.motmCount !== a.motmCount) return b.motmCount - a.motmCount;
+      return b.avgRating - a.avgRating;
+    }).slice(0, 10);
+
     container.innerHTML = `
-      <div class="statistics-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Pos</th>
-              <th>Jogador</th>
-              <th>Clube</th>
-              <th>Posição</th>
-              <th>Jogos</th>
-              <th>Gols</th>
-              <th>Assists</th>
-              <th>🟨</th>
-              <th>🟥</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${activePlayerStats
-              .map(
-                (stats, index) => `
+      <div class="statistics-sections">
+        <div class="statistics-table">
+          <h3>Estatísticas Gerais dos Jogadores</h3>
+          <table>
+            <thead>
               <tr>
-                <td>${index + 1}</td>
-                <td><strong>${stats.name}</strong></td>
-                <td>${stats.club}</td>
-                <td><span class="position-badge ${stats.position.toLowerCase()}">${
-                  stats.position
-                }</span></td>
-                <td>${stats.matches}</td>
-                <td><strong style="color: #4CAF50;">${stats.goals}</strong></td>
-                <td><strong style="color: #2196F3;">${
-                  stats.assists
-                }</strong></td>
-                <td>${stats.yellowCards > 0 ? stats.yellowCards : "-"}</td>
-                <td>${stats.redCards > 0 ? stats.redCards : "-"}</td>
-                <td><strong>${stats.totalEvents}</strong></td>
+                <th>Pos</th>
+                <th>Jogador</th>
+                <th>Clube</th>
+                <th>Posição</th>
+                <th>Jogos</th>
+                <th>Gols</th>
+                <th>Assists</th>
+                <th>🟨</th>
+                <th>🟥</th>
+                <th>Total</th>
               </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${activePlayerStats
+                .map(
+                  (stats, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td><strong>${stats.name}</strong></td>
+                  <td>${stats.club}</td>
+                  <td><span class="position-badge ${stats.position.toLowerCase()}">${
+                    stats.position
+                  }</span></td>
+                  <td>${stats.matches}</td>
+                  <td><strong style="color: #4CAF50;">${stats.goals}</strong></td>
+                  <td><strong style="color: #2196F3;">${
+                    stats.assists
+                  }</strong></td>
+                  <td>${stats.yellowCards > 0 ? stats.yellowCards : "-"}</td>
+                  <td>${stats.redCards > 0 ? stats.redCards : "-"}</td>
+                  <td><strong>${stats.totalEvents}</strong></td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+        
+        ${topMotmPlayers.length > 0 ? `
+        <div class="statistics-table motm-table">
+          <h3>⭐ Melhores Jogadores da Temporada</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Pos</th>
+                <th>Jogador</th>
+                <th>Clube</th>
+                <th>MOTM</th>
+                <th>Nota Média</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${topMotmPlayers
+                .map(
+                  (stats, index) => `
+                <tr onclick="app.showPlayerProfile(${stats.player.id})" style="cursor: pointer;">
+                  <td>${index + 1}</td>
+                  <td><strong>${stats.player.name}</strong></td>
+                  <td>${stats.club}</td>
+                  <td><strong style="color: #FFD700;">${stats.motmCount}</strong></td>
+                  <td><strong style="color: #FF6B35;">${stats.avgRating}</strong></td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+        ` : ""}
       </div>
     `;
   }

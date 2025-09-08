@@ -1,0 +1,123 @@
+/* Seção do Melhor Jogador da Partida */
+.match-motm-section {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.match-motm-section h3 {
+  color: #1a1a1a;
+  margin: 0 0 15px 0;
+  font-size: 1.2em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.motm-player-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.motm-player-card:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.motm-player-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #FFD700;
+}
+
+.motm-player-info {
+  flex: 1;
+}
+
+.motm-player-name {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.motm-player-club {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 4px;
+}
+
+.motm-player-rating {
+  color: #FF6B35;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+/* Seção de Melhores Jogadores da Temporada */
+.statistics-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.motm-table {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.motm-table h3 {
+  color: #1a1a1a;
+  margin: 0 0 20px 0;
+  font-size: 1.3em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.motm-table table {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.motm-table thead th {
+  background: rgba(26, 26, 26, 0.9);
+  color: white;
+}
+
+.motm-table tbody tr:hover {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .statistics-sections {
+    gap: 20px;
+  }
+  
+  .motm-player-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .motm-player-photo {
+    width: 60px;
+    height: 60px;
+  }
+}
