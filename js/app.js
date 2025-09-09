@@ -4632,7 +4632,6 @@ class TournamentManager {
         document.getElementById("round-matches").innerHTML = "";
       });
   }
-}
 
   // Função para determinar classe de cor da nota
   getRatingClass(rating) {
