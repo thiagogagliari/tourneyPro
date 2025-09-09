@@ -4634,12 +4634,6 @@ class TournamentManager {
   }
 }
 
-// Funções globais
-function showLogin() {
-  document.getElementById("landing-screen").classList.remove("active");
-  document.getElementById("login-screen").classList.add("active");
-}
-
   // Função para determinar classe de cor da nota
   getRatingClass(rating) {
     if (rating < 5.0) return "rating-very-poor";
