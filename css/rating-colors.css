@@ -1,0 +1,40 @@
+/* Rating Color System */
+.rating-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: white;
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Rating < 5.0 - Red */
+.rating-very-poor {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Rating 5.0 - 6.4 - Orange */
+.rating-poor {
+    background-color: #fd7e14;
+    color: white;
+}
+
+/* Rating 6.5 - 7.0 - Light Green */
+.rating-average {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Rating 7.1 - 8.9 - Light Blue */
+.rating-good {
+    background-color: #17a2b8;
+    color: white;
+}
+
+/* Rating 9.0+ - Dark Blue */
+.rating-excellent {
+    background-color: #007bff;
+    color: white;
+}

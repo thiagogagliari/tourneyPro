@@ -1404,9 +1404,9 @@ class TournamentManager {
                   }</strong></td>
                   <td>${stats.yellowCards > 0 ? stats.yellowCards : "-"}</td>
                   <td>${stats.redCards > 0 ? stats.redCards : "-"}</td>
-                  <td><strong style="color: #FF6B35;">${
+                  <td><span class="rating-badge ${this.getRatingClass(stats.rating)}">${
                     stats.rating > 0 ? stats.rating.toFixed(1) : "-"
-                  }</strong></td>
+                  }</span></td>
                   <td><strong>${stats.totalEvents}</strong></td>
                 </tr>
               `
@@ -1488,9 +1488,9 @@ class TournamentManager {
                     stats.position
                   }</span></td>
                   <td>${stats.matches}</td>
-                  <td><strong style="color: #FF6B35;">${stats.rating.toFixed(
+                  <td><span class="rating-badge ${this.getRatingClass(stats.rating)}">${stats.rating.toFixed(
                     1
-                  )}</strong></td>
+                  )}</span></td>
                 </tr>
               `
                 )
@@ -2519,8 +2519,14 @@ class TournamentManager {
       playerStats,
       player.position
     );
-    document.getElementById("profile-rating").textContent =
-      playerStats.matches > 0 ? automaticRating.toFixed(1) : "-";
+    const ratingElement = document.getElementById("profile-rating");
+    if (playerStats.matches > 0) {
+      ratingElement.textContent = automaticRating.toFixed(1);
+      ratingElement.className = `stat-number rating-badge ${this.getRatingClass(automaticRating)}`;
+    } else {
+      ratingElement.textContent = "-";
+      ratingElement.className = "stat-number";
+    }
 
     this.loadPlayerClubHistory(player);
     this.loadPlayerMatches(playerStats.matchHistory);
@@ -4625,6 +4631,23 @@ class TournamentManager {
         e.target.reset();
         document.getElementById("round-matches").innerHTML = "";
       });
+  }
+}
+
+// Funções globais
+function showLogin() {
+  document.getElementById("landing-screen").classList.remove("active");
+  document.getElementById("login-screen").classList.add("active");
+}
+
+  // Função para determinar classe de cor da nota
+  getRatingClass(rating) {
+    if (rating < 5.0) return "rating-very-poor";
+    if (rating >= 5.0 && rating <= 6.4) return "rating-poor";
+    if (rating >= 6.5 && rating <= 7.0) return "rating-average";
+    if (rating >= 7.1 && rating <= 8.9) return "rating-good";
+    if (rating >= 9.0) return "rating-excellent";
+    return "";
   }
 }
 
