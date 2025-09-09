@@ -2398,6 +2398,9 @@ class TournamentManager {
       Paquistão: "https://flagcdn.com/w20/pk.png",
       "Sri Lanka": "https://flagcdn.com/w20/lk.png",
       Bolívia: "https://flagcdn.com/w20/bo.png",
+      "República Dominicana": "https://flagcdn.com/w20/do.png",
+      Haiti: "https://flagcdn.com/w20/ht.png",
+      Cuba: "https://flagcdn.com/w20/cu.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
