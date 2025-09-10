@@ -397,8 +397,20 @@ class TournamentManager {
   async updatePlayer(playerId, data) {
     const playerIndex = this.data.players.findIndex((p) => p.id == playerId);
     if (playerIndex !== -1) {
+      const currentPlayer = this.data.players[playerIndex];
+      
+      // Se mudou de clube, adicionar ao histórico
+      if (data.clubId && data.clubId != currentPlayer.clubId) {
+        const clubHistory = currentPlayer.clubHistory || [];
+        clubHistory.push({
+          clubId: data.clubId,
+          joinDate: new Date().toISOString()
+        });
+        data.clubHistory = clubHistory;
+      }
+      
       this.data.players[playerIndex] = {
-        ...this.data.players[playerIndex],
+        ...currentPlayer,
         ...data,
       };
       await this.saveData("players");
@@ -713,6 +725,10 @@ class TournamentManager {
       userId: this.currentUser.id,
       ...data,
       createdAt: new Date().toISOString(),
+      clubHistory: data.clubId ? [{
+        clubId: data.clubId,
+        joinDate: new Date().toISOString()
+      }] : []
     };
 
     this.data.players.push(player);
