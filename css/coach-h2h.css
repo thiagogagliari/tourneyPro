@@ -101,17 +101,17 @@
 }
 
 .h2h-match-item.win {
-  background: rgba(76, 175, 80, 0.1);
+  background: #0bb32a;
   border-left-color: #4CAF50;
 }
 
 .h2h-match-item.loss {
-  background: rgba(244, 67, 54, 0.1);
+  background: #ea313a;
   border-left-color: #f44336;
 }
 
 .h2h-match-item.draw {
-  background: rgba(255, 193, 7, 0.1);
+  background: rgba(218, 216, 212, 0.712);
   border-left-color: #FFC107;
 }
 

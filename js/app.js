@@ -1404,7 +1404,9 @@ class TournamentManager {
                   }</strong></td>
                   <td>${stats.yellowCards > 0 ? stats.yellowCards : "-"}</td>
                   <td>${stats.redCards > 0 ? stats.redCards : "-"}</td>
-                  <td><span class="rating-badge ${this.getRatingClass(stats.rating)}">${
+                  <td><span class="rating-badge ${this.getRatingClass(
+                    stats.rating
+                  )}">${
                     stats.rating > 0 ? stats.rating.toFixed(1) : "-"
                   }</span></td>
                   <td><strong>${stats.totalEvents}</strong></td>
@@ -1488,9 +1490,9 @@ class TournamentManager {
                     stats.position
                   }</span></td>
                   <td>${stats.matches}</td>
-                  <td><span class="rating-badge ${this.getRatingClass(stats.rating)}">${stats.rating.toFixed(
-                    1
-                  )}</span></td>
+                  <td><span class="rating-badge ${this.getRatingClass(
+                    stats.rating
+                  )}">${stats.rating.toFixed(1)}</span></td>
                 </tr>
               `
                 )
@@ -2401,6 +2403,10 @@ class TournamentManager {
       "República Dominicana": "https://flagcdn.com/w20/do.png",
       Haiti: "https://flagcdn.com/w20/ht.png",
       Cuba: "https://flagcdn.com/w20/cu.png",
+      "Burkina Faso": "https://flagcdn.com/w20/bf.png",
+      Benin: "https://flagcdn.com/w20/bj.png",
+      Gabão: "https://flagcdn.com/w20/ga.png",
+      Eslovênia: "https://flagcdn.com/w20/si.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
@@ -2522,7 +2528,9 @@ class TournamentManager {
     const ratingElement = document.getElementById("profile-rating");
     if (playerStats.matches > 0) {
       ratingElement.textContent = automaticRating.toFixed(1);
-      ratingElement.className = `stat-number rating-badge ${this.getRatingClass(automaticRating)}`;
+      ratingElement.className = `stat-number rating-badge ${this.getRatingClass(
+        automaticRating
+      )}`;
     } else {
       ratingElement.textContent = "-";
       ratingElement.className = "stat-number";

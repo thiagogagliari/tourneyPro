@@ -4937,7 +4937,7 @@ body {
 
 .player-name {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 
 .event-team {
