@@ -2568,13 +2568,40 @@ class TournamentManager {
     const container = document.getElementById("profile-club-history");
     const matches = this.getUserData("matches").filter(m => m.status === "finished");
     const clubStats = {};
+    const currentYear = new Date().getFullYear();
 
-    // Analisar cada partida para determinar em qual clube o jogador estava
+    // Sempre incluir o clube atual do jogador
+    if (player.clubId) {
+      const currentClub = this.data.clubs.find(c => c.id == player.clubId);
+      if (currentClub) {
+        clubStats[currentClub.id] = {
+          club: currentClub,
+          matches: new Set(),
+          goals: 0,
+          assists: 0
+        };
+      }
+    }
+    
+    // Incluir clubes do histórico se existir
+    const clubHistory = player.clubHistory || [];
+    clubHistory.forEach(historyItem => {
+      const club = this.data.clubs.find(c => c.id == historyItem.clubId);
+      if (club && !clubStats[club.id]) {
+        clubStats[club.id] = {
+          club: club,
+          matches: new Set(),
+          goals: 0,
+          assists: 0
+        };
+      }
+    });
+
+    // Analisar cada partida para determinar estatísticas por clube
     matches.forEach((match) => {
       if (match.events) {
         match.events.forEach((event) => {
           if (event.playerId == player.id || event.player === player.name) {
-            // Determinar clube do jogador na partida baseado no time
             let playerClub = null;
             const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
             const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
@@ -2582,16 +2609,7 @@ class TournamentManager {
             if (event.team === homeTeam?.name) playerClub = homeTeam;
             else if (event.team === awayTeam?.name) playerClub = awayTeam;
             
-            if (playerClub) {
-              if (!clubStats[playerClub.id]) {
-                clubStats[playerClub.id] = {
-                  club: playerClub,
-                  matches: new Set(),
-                  goals: 0,
-                  assists: 0
-                };
-              }
-              
+            if (playerClub && clubStats[playerClub.id]) {
               clubStats[playerClub.id].matches.add(match.id);
               if (event.type === "Gol") clubStats[playerClub.id].goals++;
               if (event.type === "Assistência") clubStats[playerClub.id].assists++;
@@ -2606,15 +2624,14 @@ class TournamentManager {
       stats.matches = stats.matches.size;
     });
 
-    const clubHistory = Object.values(clubStats);
-    const currentYear = new Date().getFullYear();
+    const clubHistoryList = Object.values(clubStats);
 
-    if (clubHistory.length === 0) {
+    if (clubHistoryList.length === 0) {
       container.innerHTML = '<div class="no-matches">Nenhum histórico encontrado</div>';
       return;
     }
 
-    container.innerHTML = clubHistory
+    container.innerHTML = clubHistoryList
       .map((history) => {
         const isCurrent = history.club.id == player.clubId;
         return `
