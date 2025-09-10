@@ -86,7 +86,7 @@
 
 .h2h-matches h4 {
   margin-bottom: 15px;
-  color: var(--text-color);
+  color: #fff;
   font-size: 1.1em;
 }
 
@@ -111,8 +111,8 @@
 }
 
 .h2h-match-item.draw {
-  background: rgba(218, 216, 212, 0.712);
-  border-left-color: #FFC107;
+  background: rgba(153, 152, 149, 0.712);
+  border-left-color: rgba(153, 152, 149, 0.712);
 }
 
 .h2h-match-teams {
@@ -131,7 +131,7 @@
 
 .h2h-match-date {
   font-size: 0.9em;
-  color: var(--text-secondary);
+  color: black;
 }
 
 /* Responsividade */

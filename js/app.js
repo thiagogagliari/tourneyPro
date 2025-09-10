@@ -2421,7 +2421,7 @@ class TournamentManager {
       (m) => m.status === "finished"
     );
 
-    // Calcular estatísticas do jogador
+    // Calcular estatísticas do jogador (apenas do clube atual)
     const playerStats = {
       matches: 0,
       goals: 0,
@@ -2435,37 +2435,43 @@ class TournamentManager {
 
     matches.forEach((match) => {
       let playerInMatch = false;
+      let playerInCurrentClub = false;
       const matchEvents = [];
+      const homeTeam = this.data.clubs.find((c) => c.id == match.homeTeamId);
+      const awayTeam = this.data.clubs.find((c) => c.id == match.awayTeamId);
 
       if (match.events) {
         match.events.forEach((event) => {
           if (event.playerId == player.id || event.player === player.name) {
             playerInMatch = true;
             matchEvents.push(event);
-
-            switch (event.type) {
-              case "Gol":
-                playerStats.goals++;
-                break;
-              case "Assistência":
-                playerStats.assists++;
-                break;
-              case "Cartão Amarelo":
-                playerStats.yellowCards++;
-                break;
-              case "Cartão Vermelho":
-                playerStats.redCards++;
-                break;
+            
+            // Verificar se jogou pelo clube atual
+            if ((event.team === homeTeam?.name && homeTeam?.id == player.clubId) ||
+                (event.team === awayTeam?.name && awayTeam?.id == player.clubId)) {
+              playerInCurrentClub = true;
+              
+              switch (event.type) {
+                case "Gol":
+                  playerStats.goals++;
+                  break;
+                case "Assistência":
+                  playerStats.assists++;
+                  break;
+                case "Cartão Amarelo":
+                  playerStats.yellowCards++;
+                  break;
+                case "Cartão Vermelho":
+                  playerStats.redCards++;
+                  break;
+              }
             }
           }
         });
       }
 
-      if (playerInMatch) {
+      if (playerInMatch && playerInCurrentClub) {
         playerStats.matches++;
-        const homeTeam = this.data.clubs.find((c) => c.id == match.homeTeamId);
-        const awayTeam = this.data.clubs.find((c) => c.id == match.awayTeamId);
-
         playerStats.matchHistory.push({
           date: match.date,
           homeTeam: homeTeam,
@@ -2544,108 +2550,84 @@ class TournamentManager {
 
   loadPlayerClubHistory(player) {
     const container = document.getElementById("profile-club-history");
-    const currentClub = this.data.clubs.find((c) => c.id == player.clubId);
-    const currentYear = new Date().getFullYear();
+    const matches = this.getUserData("matches").filter(m => m.status === "finished");
+    const clubStats = {};
 
-    // Simular histórico de clubes (na prática, isso viria do banco de dados)
-    const clubHistory = [];
-
-    // Clube atual (temporada atual)
-    if (currentClub) {
-      const currentSeasonMatches = this.getUserData("matches").filter(
-        (m) =>
-          m.status === "finished" &&
-          m.events &&
-          m.events.some(
-            (e) => e.playerId == player.id || e.player === player.name
-          )
-      );
-
-      let currentSeasonStats = {
-        matches: 0,
-        goals: 0,
-        assists: 0,
-      };
-
-      currentSeasonMatches.forEach((match) => {
-        let playerInMatch = false;
+    // Analisar cada partida para determinar em qual clube o jogador estava
+    matches.forEach((match) => {
+      if (match.events) {
         match.events.forEach((event) => {
           if (event.playerId == player.id || event.player === player.name) {
-            if (!playerInMatch) {
-              currentSeasonStats.matches++;
-              playerInMatch = true;
+            // Determinar clube do jogador na partida baseado no time
+            let playerClub = null;
+            const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
+            const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
+            
+            if (event.team === homeTeam?.name) playerClub = homeTeam;
+            else if (event.team === awayTeam?.name) playerClub = awayTeam;
+            
+            if (playerClub) {
+              if (!clubStats[playerClub.id]) {
+                clubStats[playerClub.id] = {
+                  club: playerClub,
+                  matches: new Set(),
+                  goals: 0,
+                  assists: 0
+                };
+              }
+              
+              clubStats[playerClub.id].matches.add(match.id);
+              if (event.type === "Gol") clubStats[playerClub.id].goals++;
+              if (event.type === "Assistência") clubStats[playerClub.id].assists++;
             }
-            if (event.type === "Gol") currentSeasonStats.goals++;
-            if (event.type === "Assistência") currentSeasonStats.assists++;
           }
         });
-      });
+      }
+    });
 
-      clubHistory.push({
-        club: currentClub,
-        period: `${currentYear} - Atual`,
-        isCurrent: true,
-        stats: currentSeasonStats,
-      });
-    }
+    // Converter Set para número
+    Object.values(clubStats).forEach(stats => {
+      stats.matches = stats.matches.size;
+    });
 
-    // Adicionar clubes anteriores (exemplo)
-    const previousClubs = [
-      {
-        name: "Clube Anterior 1",
-        period: `${currentYear - 1}`,
-        stats: { matches: 25, goals: 8, assists: 5 },
-      },
-      {
-        name: "Clube Anterior 2",
-        period: `${currentYear - 2}`,
-        stats: { matches: 30, goals: 12, assists: 7 },
-      },
-    ];
+    const clubHistory = Object.values(clubStats);
+    const currentYear = new Date().getFullYear();
 
-    if (clubHistory.length === 0 && previousClubs.length === 0) {
-      container.innerHTML =
-        '<div class="no-matches">Nenhum histórico encontrado</div>';
+    if (clubHistory.length === 0) {
+      container.innerHTML = '<div class="no-matches">Nenhum histórico encontrado</div>';
       return;
     }
 
     container.innerHTML = clubHistory
-      .map(
-        (history) => `
-      <div class="club-history-item ${
-        history.isCurrent ? "current-season" : ""
-      }">
-        <img src="${
-          history.club.logo || "https://via.placeholder.com/40"
-        }" class="club-history-logo" alt="${history.club.name}">
+      .map((history) => {
+        const isCurrent = history.club.id == player.clubId;
+        return `
+      <div class="club-history-item ${isCurrent ? "current-season" : ""}">
+        <img src="${history.club.logo || "https://via.placeholder.com/40"}" class="club-history-logo" alt="${history.club.name}">
         <div class="club-history-info">
           <div class="club-history-name">
             ${history.club.name}
-            ${
-              history.isCurrent
-                ? '<span class="current-season-badge">Temporada Atual</span>'
-                : ""
-            }
+            ${isCurrent ? '<span class="current-season-badge">Atual</span>' : ''}
           </div>
-          <div class="club-history-period">${history.period}</div>
+          <div class="club-history-period">${currentYear}</div>
         </div>
         <div class="season-stats">
           <div class="season-stat">
-            <div class="season-stat-number">${history.stats.matches}</div>
+            <div class="season-stat-number">${history.matches}</div>
             <div class="season-stat-label">Jogos</div>
           </div>
           <div class="season-stat">
-            <div class="season-stat-number">${history.stats.goals}</div>
+            <div class="season-stat-number">${history.goals}</div>
             <div class="season-stat-label">Gols</div>
           </div>
           <div class="season-stat">
-            <div class="season-stat-number">${history.stats.assists}</div>
+            <div class="season-stat-number">${history.assists}</div>
             <div class="season-stat-label">Assists</div>
           </div>
         </div>
       </div>
-    `
-      )
+    `;
+      })
       .join("");
   }
 
