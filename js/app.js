@@ -398,17 +398,17 @@ class TournamentManager {
     const playerIndex = this.data.players.findIndex((p) => p.id == playerId);
     if (playerIndex !== -1) {
       const currentPlayer = this.data.players[playerIndex];
-      
+
       // Se mudou de clube, adicionar ao histórico
       if (data.clubId && data.clubId != currentPlayer.clubId) {
         const clubHistory = currentPlayer.clubHistory || [];
         clubHistory.push({
           clubId: data.clubId,
-          joinDate: new Date().toISOString()
+          joinDate: new Date().toISOString(),
         });
         data.clubHistory = clubHistory;
       }
-      
+
       this.data.players[playerIndex] = {
         ...currentPlayer,
         ...data,
@@ -725,10 +725,14 @@ class TournamentManager {
       userId: this.currentUser.id,
       ...data,
       createdAt: new Date().toISOString(),
-      clubHistory: data.clubId ? [{
-        clubId: data.clubId,
-        joinDate: new Date().toISOString()
-      }] : []
+      clubHistory: data.clubId
+        ? [
+            {
+              clubId: data.clubId,
+              joinDate: new Date().toISOString(),
+            },
+          ]
+        : [],
     };
 
     this.data.players.push(player);
@@ -2423,6 +2427,9 @@ class TournamentManager {
       Benin: "https://flagcdn.com/w20/bj.png",
       Gabão: "https://flagcdn.com/w20/ga.png",
       Eslovênia: "https://flagcdn.com/w20/si.png",
+      "Coréia do Sul": "https://flagcdn.com/w20/kr.png",
+      "Coréia do Norte": "https://flagcdn.com/w20/kp.png",
+      "Bósnia e Herzegovina": "https://flagcdn.com/w20/ba.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
@@ -2461,12 +2468,15 @@ class TournamentManager {
           if (event.playerId == player.id || event.player === player.name) {
             playerInMatch = true;
             matchEvents.push(event);
-            
+
             // Verificar se jogou pelo clube atual
-            if ((event.team === homeTeam?.name && homeTeam?.id == player.clubId) ||
-                (event.team === awayTeam?.name && awayTeam?.id == player.clubId)) {
+            if (
+              (event.team === homeTeam?.name &&
+                homeTeam?.id == player.clubId) ||
+              (event.team === awayTeam?.name && awayTeam?.id == player.clubId)
+            ) {
               playerInCurrentClub = true;
-              
+
               switch (event.type) {
                 case "Gol":
                   playerStats.goals++;
@@ -2566,33 +2576,35 @@ class TournamentManager {
 
   loadPlayerClubHistory(player) {
     const container = document.getElementById("profile-club-history");
-    const matches = this.getUserData("matches").filter(m => m.status === "finished");
+    const matches = this.getUserData("matches").filter(
+      (m) => m.status === "finished"
+    );
     const clubStats = {};
     const currentYear = new Date().getFullYear();
 
     // Sempre incluir o clube atual do jogador
     if (player.clubId) {
-      const currentClub = this.data.clubs.find(c => c.id == player.clubId);
+      const currentClub = this.data.clubs.find((c) => c.id == player.clubId);
       if (currentClub) {
         clubStats[currentClub.id] = {
           club: currentClub,
           matches: new Set(),
           goals: 0,
-          assists: 0
+          assists: 0,
         };
       }
     }
-    
+
     // Incluir clubes do histórico se existir
     const clubHistory = player.clubHistory || [];
-    clubHistory.forEach(historyItem => {
-      const club = this.data.clubs.find(c => c.id == historyItem.clubId);
+    clubHistory.forEach((historyItem) => {
+      const club = this.data.clubs.find((c) => c.id == historyItem.clubId);
       if (club && !clubStats[club.id]) {
         clubStats[club.id] = {
           club: club,
           matches: new Set(),
           goals: 0,
-          assists: 0
+          assists: 0,
         };
       }
     });
@@ -2603,16 +2615,21 @@ class TournamentManager {
         match.events.forEach((event) => {
           if (event.playerId == player.id || event.player === player.name) {
             let playerClub = null;
-            const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
-            const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
-            
+            const homeTeam = this.data.clubs.find(
+              (c) => c.id == match.homeTeamId
+            );
+            const awayTeam = this.data.clubs.find(
+              (c) => c.id == match.awayTeamId
+            );
+
             if (event.team === homeTeam?.name) playerClub = homeTeam;
             else if (event.team === awayTeam?.name) playerClub = awayTeam;
-            
+
             if (playerClub && clubStats[playerClub.id]) {
               clubStats[playerClub.id].matches.add(match.id);
               if (event.type === "Gol") clubStats[playerClub.id].goals++;
-              if (event.type === "Assistência") clubStats[playerClub.id].assists++;
+              if (event.type === "Assistência")
+                clubStats[playerClub.id].assists++;
             }
           }
         });
@@ -2620,14 +2637,15 @@ class TournamentManager {
     });
 
     // Converter Set para número
-    Object.values(clubStats).forEach(stats => {
+    Object.values(clubStats).forEach((stats) => {
       stats.matches = stats.matches.size;
     });
 
     const clubHistoryList = Object.values(clubStats);
 
     if (clubHistoryList.length === 0) {
-      container.innerHTML = '<div class="no-matches">Nenhum histórico encontrado</div>';
+      container.innerHTML =
+        '<div class="no-matches">Nenhum histórico encontrado</div>';
       return;
     }
 
@@ -2636,11 +2654,15 @@ class TournamentManager {
         const isCurrent = history.club.id == player.clubId;
         return `
       <div class="club-history-item ${isCurrent ? "current-season" : ""}">
-        <img src="${history.club.logo || "https://via.placeholder.com/40"}" class="club-history-logo" alt="${history.club.name}">
+        <img src="${
+          history.club.logo || "https://via.placeholder.com/40"
+        }" class="club-history-logo" alt="${history.club.name}">
         <div class="club-history-info">
           <div class="club-history-name">
             ${history.club.name}
-            ${isCurrent ? '<span class="current-season-badge">Atual</span>' : ''}
+            ${
+              isCurrent ? '<span class="current-season-badge">Atual</span>' : ""
+            }
           </div>
           <div class="club-history-period">${currentYear}</div>
         </div>
