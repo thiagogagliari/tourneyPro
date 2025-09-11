@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TourneyPro - Torneios</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/public-view.css">
+    <link rel="stylesheet" href="css/rating-colors.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="public-container">
+        <!-- Header -->
+        <header class="public-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-trophy"></i>
+                    <span>TourneyPro</span>
+                </div>
+                <nav class="public-nav">
+                    <button class="nav-btn active" data-section="tournaments">
+                        <i class="fas fa-trophy"></i> Torneios
+                    </button>
+                    <button class="nav-btn" data-section="matches">
+                        <i class="fas fa-futbol"></i> Partidas
+                    </button>
+                    <button class="nav-btn" data-section="standings">
+                        <i class="fas fa-list-ol"></i> Classificação
+                    </button>
+                    <button class="nav-btn" data-section="players">
+                        <i class="fas fa-users"></i> Jogadores
+                    </button>
+                </nav>
+                <button class="admin-btn" onclick="window.location.href='index.html'">
+                    <i class="fas fa-cog"></i> Admin
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="public-main">
+            <!-- Tournaments Section -->
+            <section id="tournaments-section" class="content-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-trophy"></i> Torneios Ativos</h2>
+                </div>
+                <div id="tournaments-grid" class="tournaments-grid"></div>
+            </section>
+
+            <!-- Matches Section -->
+            <section id="matches-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-futbol"></i> Partidas</h2>
+                    <select id="tournament-filter" class="filter-select">
+                        <option value="">Todos os Torneios</option>
+                    </select>
+                </div>
+                <div id="matches-container" class="matches-container"></div>
+            </section>
+
+            <!-- Standings Section -->
+            <section id="standings-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list-ol"></i> Classificação</h2>
+                    <select id="standings-tournament-filter" class="filter-select">
+                        <option value="">Selecione um Torneio</option>
+                    </select>
+                </div>
+                <div id="standings-container" class="standings-container"></div>
+            </section>
+
+            <!-- Players Section -->
+            <section id="players-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> Jogadores</h2>
+                    <div class="filters">
+                        <select id="players-tournament-filter" class="filter-select">
+                            <option value="">Todos os Torneios</option>
+                        </select>
+                        <select id="players-club-filter" class="filter-select">
+                            <option value="">Todos os Clubes</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="players-container" class="players-container"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Tournament Details Modal -->
+    <div id="tournament-modal" class="modal">
+        <div class="modal-content tournament-modal-content">
+            <span class="close">&times;</span>
+            <div class="tournament-header">
+                <h2 id="tournament-modal-name"></h2>
+                <div class="tournament-info">
+                    <span id="tournament-modal-game" class="game-badge"></span>
+                    <span id="tournament-modal-dates"></span>
+                </div>
+            </div>
+            <div class="tournament-tabs">
+                <button class="tab-btn active" data-tab="overview">Visão Geral</button>
+                <button class="tab-btn" data-tab="matches">Partidas</button>
+                <button class="tab-btn" data-tab="standings">Classificação</button>
+                <button class="tab-btn" data-tab="stats">Estatísticas</button>
+            </div>
+            <div class="tournament-content">
+                <div id="overview-tab" class="tab-content active"></div>
+                <div id="matches-tab" class="tab-content"></div>
+                <div id="standings-tab" class="tab-content"></div>
+                <div id="stats-tab" class="tab-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Profile Modal -->
+    <div id="player-modal" class="modal">
+        <div class="modal-content player-modal-content">
+            <span class="close">&times;</span>
+            <div class="player-profile-header">
+                <img id="player-modal-photo" class="player-photo" alt="Foto do Jogador">
+                <div class="player-info">
+                    <h2 id="player-modal-name"></h2>
+                    <div class="player-details">
+                        <span id="player-modal-position" class="position-badge"></span>
+                        <span id="player-modal-club"></span>
+                        <span id="player-modal-age"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="player-stats" id="player-modal-stats"></div>
+        </div>
+    </div>
+
+    <script src="js/public-view.js"></script>
+</body>
+</html>

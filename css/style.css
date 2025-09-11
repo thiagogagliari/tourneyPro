@@ -113,6 +113,7 @@ body {
 }
 
 #login-form button {
+    color:#0056b3;
     width: 100%;
     padding: 15px;
     margin-bottom: 10px;
@@ -143,6 +144,29 @@ body {
 #register-btn:hover {
     background: #667eea;
     color: white;
+}
+
+.btn-public {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.btn-public:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
 }
 
 /* Dashboard */
