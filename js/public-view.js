@@ -18,6 +18,11 @@ class PublicTournamentViewer {
   }
 
   initFirebase() {
+    if (typeof firebase === 'undefined') {
+      console.error('Firebase não carregado');
+      return;
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyD4fzDTkT8PYZzxzJL9pEaFUIx0V0H8gPk",
       authDomain: "meu-torneio-pro.firebaseapp.com",
@@ -27,7 +32,7 @@ class PublicTournamentViewer {
       appId: "1:769236217387:web:7f188f16c93da66a99446e",
     };
 
-    if (!firebase.apps.length) {
+    if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
     this.db = firebase.firestore();
