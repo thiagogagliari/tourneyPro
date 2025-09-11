@@ -39,16 +39,21 @@ class PublicTournamentViewer {
   }
 
   async loadData() {
+    if (!this.db) {
+      console.error('Firebase não inicializado');
+      return;
+    }
+
     try {
-      const [tournaments, clubs, players, matches, coaches] = await Promise.all(
-        [
-          this.db.collection("tournaments").get(),
-          this.db.collection("clubs").get(),
-          this.db.collection("players").get(),
-          this.db.collection("matches").get(),
-          this.db.collection("coaches").get(),
-        ]
-      );
+      console.log('Carregando dados do Firebase...');
+      
+      const [tournaments, clubs, players, matches, coaches] = await Promise.all([
+        this.db.collection("tournaments").get(),
+        this.db.collection("clubs").get(),
+        this.db.collection("players").get(),
+        this.db.collection("matches").get(),
+        this.db.collection("coaches").get(),
+      ]);
 
       this.data.tournaments = tournaments.docs.map((doc) => ({
         id: doc.id,
@@ -78,9 +83,17 @@ class PublicTournamentViewer {
         matches: this.data.matches.length,
       });
 
+      // Debug: mostrar alguns dados
+      if (this.data.tournaments.length > 0) {
+        console.log('Primeiro torneio:', this.data.tournaments[0]);
+      }
+      if (this.data.clubs.length > 0) {
+        console.log('Primeiro clube:', this.data.clubs[0]);
+      }
+
       this.showTournaments();
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
+      console.error("Erro ao carregar dados do Firebase:", error);
     }
   }
 
