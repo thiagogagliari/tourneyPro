@@ -8,23 +8,12 @@ class PublicTournamentViewer {
             coaches: []
         };
         this.currentTournament = null;
-        this.userId = null;
         this.init();
     }
 
     init() {
-        this.getUserFromUrl();
         this.initFirebase();
         this.setupEventListeners();
-    }
-
-    getUserFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        this.userId = urlParams.get('user');
-        if (!this.userId) {
-            this.showUserSelector();
-            return;
-        }
         this.loadData();
     }
 
@@ -50,77 +39,66 @@ class PublicTournamentViewer {
     }
 
     async loadData() {
-        if (!this.userId || !this.db) {
-            console.error('UserId ou Firebase não disponível');
-            return;
-        }
-
         try {
             this.showLoading(true);
             
-            // Carregar dados do Firebase por usuário
-            const [tournaments, clubs, players, matches, coaches] = await Promise.all([
-                this.db.collection('tournaments').where('userId', '==', this.userId).get(),
-                this.db.collection('clubs').where('userId', '==', this.userId).get(),
-                this.db.collection('players').where('userId', '==', this.userId).get(),
-                this.db.collection('matches').where('userId', '==', this.userId).get(),
-                this.db.collection('coaches').where('userId', '==', this.userId).get()
-            ]);
+            if (this.db) {
+                // Carregar todos os dados do Firebase
+                const [tournaments, clubs, players, matches, coaches] = await Promise.all([
+                    this.db.collection('tournaments').get(),
+                    this.db.collection('clubs').get(),
+                    this.db.collection('players').get(),
+                    this.db.collection('matches').get(),
+                    this.db.collection('coaches').get()
+                ]);
 
-            this.data.tournaments = tournaments.docs.map(doc => ({id: doc.id, ...doc.data()}));
-            this.data.clubs = clubs.docs.map(doc => ({id: doc.id, ...doc.data()}));
-            this.data.players = players.docs.map(doc => ({id: doc.id, ...doc.data()}));
-            this.data.matches = matches.docs.map(doc => ({id: doc.id, ...doc.data()}));
-            this.data.coaches = coaches.docs.map(doc => ({id: doc.id, ...doc.data()}));
-            
-            console.log('Dados carregados do Firebase:', {
-                tournaments: this.data.tournaments.length,
-                clubs: this.data.clubs.length,
-                players: this.data.players.length,
-                matches: this.data.matches.length
-            });
+                this.data.tournaments = tournaments.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                this.data.clubs = clubs.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                this.data.players = players.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                this.data.matches = matches.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                this.data.coaches = coaches.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                
+                console.log('Dados carregados do Firebase:', {
+                    tournaments: this.data.tournaments.length,
+                    clubs: this.data.clubs.length,
+                    players: this.data.players.length,
+                    matches: this.data.matches.length
+                });
+            } else {
+                // Fallback para localStorage se Firebase não estiver disponível
+                this.data.tournaments = JSON.parse(localStorage.getItem('tournaments') || '[]');
+                this.data.clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
+                this.data.players = JSON.parse(localStorage.getItem('players') || '[]');
+                this.data.matches = JSON.parse(localStorage.getItem('matches') || '[]');
+                this.data.coaches = JSON.parse(localStorage.getItem('coaches') || '[]');
+                
+                console.log('Dados carregados do localStorage (fallback)');
+            }
             
             this.showLoading(false);
             this.showTournaments();
             
         } catch (error) {
             console.error('Erro ao carregar dados:', error);
-            this.showError('Erro ao carregar dados do torneio');
+            // Fallback para localStorage em caso de erro
+            this.data.tournaments = JSON.parse(localStorage.getItem('tournaments') || '[]');
+            this.data.clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
+            this.data.players = JSON.parse(localStorage.getItem('players') || '[]');
+            this.data.matches = JSON.parse(localStorage.getItem('matches') || '[]');
+            this.data.coaches = JSON.parse(localStorage.getItem('coaches') || '[]');
+            
+            this.showLoading(false);
+            this.showTournaments();
         }
     }
 
-    showUserSelector() {
-        document.querySelector('.public-main').innerHTML = `
-            <div class="user-selector">
-                <h2>Selecione o Organizador</h2>
-                <input type="text" id="user-input" placeholder="Digite o ID do organizador">
-                <button onclick="publicViewer.setUser()" class="btn-primary">Ver Torneios</button>
-            </div>
-        `;
-    }
 
-    setUser() {
-        const userId = document.getElementById('user-input').value.trim();
-        if (userId) {
-            window.location.href = `public.html?user=${userId}`;
-        }
-    }
 
     showLoading(show) {
         const main = document.querySelector('.public-main');
         if (show) {
-            main.innerHTML = '<div class="loading">Carregando dados...</div>';
+            main.innerHTML = '<div class="loading">Carregando torneios...</div>';
         }
-    }
-
-    showError(message) {
-        document.querySelector('.public-main').innerHTML = `
-            <div class="error-message">
-                <h3>Erro</h3>
-                <p>${message}</p>
-                <button onclick="location.reload()" class="btn-primary">Tentar Novamente</button>
-            </div>
-        `;
     }
 
     setupEventListeners() {
