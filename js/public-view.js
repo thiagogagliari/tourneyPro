@@ -24,6 +24,15 @@ class PublicTournamentViewer {
         this.data.players = JSON.parse(localStorage.getItem('players') || '[]');
         this.data.matches = JSON.parse(localStorage.getItem('matches') || '[]');
         this.data.coaches = JSON.parse(localStorage.getItem('coaches') || '[]');
+        
+        // Debug - verificar dados carregados
+        console.log('Dados carregados:', {
+            tournaments: this.data.tournaments.length,
+            clubs: this.data.clubs.length,
+            players: this.data.players.length,
+            matches: this.data.matches.length,
+            matchesFinished: this.data.matches.filter(m => m.status === 'finished' || m.status === 'Finalizada').length
+        });
     }
 
     setupEventListeners() {
@@ -102,7 +111,7 @@ class PublicTournamentViewer {
         this.data.tournaments.forEach(tournament => {
             const tournamentClubs = this.data.clubs.filter(c => c.tournamentId == tournament.id);
             const tournamentMatches = this.data.matches.filter(m => m.tournamentId == tournament.id);
-            const finishedMatches = tournamentMatches.filter(m => m.status === 'finished');
+            const finishedMatches = tournamentMatches.filter(m => m.status === 'finished' || m.status === 'Finalizada');
 
             const card = document.createElement('div');
             card.className = 'tournament-card';
@@ -155,7 +164,7 @@ class PublicTournamentViewer {
         const container = document.getElementById('matches-container');
         container.innerHTML = '';
 
-        let matches = this.data.matches.filter(m => m.status === 'finished');
+        let matches = this.data.matches.filter(m => m.status === 'finished' || m.status === 'Finalizada');
         if (tournamentId) {
             matches = matches.filter(m => m.tournamentId == tournamentId);
         }
@@ -547,7 +556,7 @@ class PublicTournamentViewer {
     // Utility methods
     calculateStandings(tournamentId) {
         const clubs = this.data.clubs.filter(c => c.tournamentId == tournamentId);
-        const matches = this.data.matches.filter(m => m.tournamentId == tournamentId && m.status === 'finished');
+        const matches = this.data.matches.filter(m => m.tournamentId == tournamentId && (m.status === 'finished' || m.status === 'Finalizada'));
 
         const standings = clubs.map(club => ({
             id: club.id,
@@ -570,10 +579,10 @@ class PublicTournamentViewer {
             if (homeTeam && awayTeam) {
                 homeTeam.matches++;
                 awayTeam.matches++;
-                homeTeam.goalsFor += match.homeScore;
-                homeTeam.goalsAgainst += match.awayScore;
-                awayTeam.goalsFor += match.awayScore;
-                awayTeam.goalsAgainst += match.homeScore;
+                homeTeam.goalsFor += (match.homeScore || 0);
+                homeTeam.goalsAgainst += (match.awayScore || 0);
+                awayTeam.goalsFor += (match.awayScore || 0);
+                awayTeam.goalsAgainst += (match.homeScore || 0);
 
                 if (match.homeScore > match.awayScore) {
                     homeTeam.wins++;
@@ -605,7 +614,7 @@ class PublicTournamentViewer {
 
     getPlayerStats(playerId) {
         const player = this.data.players.find(p => p.id == playerId);
-        const matches = this.data.matches.filter(m => m.status === 'finished');
+        const matches = this.data.matches.filter(m => m.status === 'finished' || m.status === 'Finalizada');
         
         let stats = { matches: 0, goals: 0, assists: 0, rating: '0.0' };
         let totalRating = 0;
@@ -647,14 +656,14 @@ class PublicTournamentViewer {
     }
 
     getTotalGoals(tournamentId) {
-        const matches = this.data.matches.filter(m => m.tournamentId == tournamentId && m.status === 'finished');
-        return matches.reduce((total, match) => total + match.homeScore + match.awayScore, 0);
+        const matches = this.data.matches.filter(m => m.tournamentId == tournamentId && (m.status === 'finished' || m.status === 'Finalizada'));
+        return matches.reduce((total, match) => total + (match.homeScore || 0) + (match.awayScore || 0), 0);
     }
 
     getTopScorers(tournamentId) {
         const tournamentClubs = this.data.clubs.filter(c => c.tournamentId == tournamentId);
         const players = this.data.players.filter(p => tournamentClubs.some(c => c.id == p.clubId));
-        const matches = this.data.matches.filter(m => m.tournamentId == tournamentId && m.status === 'finished');
+        const matches = this.data.matches.filter(m => m.tournamentId == tournamentId && (m.status === 'finished' || m.status === 'Finalizada'));
 
         const scorers = players.map(player => {
             const club = this.data.clubs.find(c => c.id == player.clubId);
