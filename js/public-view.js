@@ -81,37 +81,20 @@ class PublicTournamentViewer {
           });
           
           // Extrair dados dos documentos
-          if (tournaments.exists) {
-            const tournamentsData = tournaments.data();
-            console.log(`Usuário ${userId} - Dados de torneios:`, tournamentsData);
-            if (tournamentsData && tournamentsData.data) {
-              allTournaments.push(...tournamentsData.data.map(item => ({ ...item, userId })));
-            }
+          if (tournaments.exists && tournaments.data().data) {
+            allTournaments.push(...tournaments.data().data.map(item => ({ ...item, userId })));
           }
-          if (clubs.exists) {
-            const clubsData = clubs.data();
-            console.log(`Usuário ${userId} - Dados de clubes:`, clubsData);
-            if (clubsData && clubsData.data) {
-              allClubs.push(...clubsData.data.map(item => ({ ...item, userId })));
-            }
+          if (clubs.exists && clubs.data().data) {
+            allClubs.push(...clubs.data().data.map(item => ({ ...item, userId })));
           }
-          if (players.exists) {
-            const playersData = players.data();
-            if (playersData && playersData.data) {
-              allPlayers.push(...playersData.data.map(item => ({ ...item, userId })));
-            }
+          if (players.exists && players.data().data) {
+            allPlayers.push(...players.data().data.map(item => ({ ...item, userId })));
           }
-          if (matches.exists) {
-            const matchesData = matches.data();
-            if (matchesData && matchesData.data) {
-              allMatches.push(...matchesData.data.map(item => ({ ...item, userId })));
-            }
+          if (matches.exists && matches.data().data) {
+            allMatches.push(...matches.data().data.map(item => ({ ...item, userId })));
           }
-          if (coaches.exists) {
-            const coachesData = coaches.data();
-            if (coachesData && coachesData.data) {
-              allCoaches.push(...coachesData.data.map(item => ({ ...item, userId })));
-            }
+          if (coaches.exists && coaches.data().data) {
+            allCoaches.push(...coaches.data().data.map(item => ({ ...item, userId })));
           }
           
         } catch (userError) {
