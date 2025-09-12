@@ -300,13 +300,6 @@ class PublicTournamentViewer {
                         <span class="stat-label">Partidas</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">${tournament.type === 'knockout' ? 'Mata-mata' : tournament.type === 'champions' ? 'Champions' : tournament.type === 'national' ? 'Liga' : 'Padrão'}</span>
-                        <span class="stat-label">Formato</span>
-                    </div>shedMatches.length
-                        }</span>
-                        <span class="stat-label">Partidas</span>
-                    </div>
-                    <div class="stat-item">
                         <span class="stat-value">${this.getTotalGoals(
                           tournament.id
                         )}</span>

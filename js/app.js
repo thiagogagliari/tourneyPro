@@ -453,9 +453,7 @@ class TournamentManager {
       this.updateStats();
 
       document.querySelector("#match-modal h3").textContent = "Nova Partida";
-      return updatedMatch;
     }
-    return null;
   }
 
   deleteTournament(tournamentId) {
@@ -902,8 +900,7 @@ class TournamentManager {
           homeTeam?.name.toLowerCase().includes(searchTerm) ||
           awayTeam?.name.toLowerCase().includes(searchTerm) ||
           tournament?.name.toLowerCase().includes(searchTerm) ||
-          `rodada ${match.round}`.includes(searchTerm) ||
-          (match.phase && match.phase.toLowerCase().includes(searchTerm))
+          `rodada ${match.round}`.includes(searchTerm)
         );
       });
     }
@@ -917,16 +914,15 @@ class TournamentManager {
           (t) => t.id == match.tournamentId
         );
         const isFinished = match.status === "finished";
-        const isKnockout = tournament?.type === "knockout";
 
         return `
         <div class="card match-card ${
           isFinished ? "finished" : "scheduled"
-        } ${isKnockout ? "knockout-match" : ""}" onclick="${
+        }" onclick="${
           isFinished ? `app.showMatchDetails(${match.id})` : ""
         }" style="${isFinished ? "cursor: pointer;" : ""}">
           <div class="match-header">
-            <h3>${homeTeam?.name || "TBD"} vs ${awayTeam?.name || "TBD"}</h3>
+            <h3>${homeTeam?.name || "Time"} vs ${awayTeam?.name || "Time"}</h3>
             <span class="match-status">${
               isFinished ? "Finalizada" : "Agendada"
             }</span>
@@ -934,15 +930,14 @@ class TournamentManager {
           <div class="match-details">
             <p><strong>Placar:</strong> ${
               isFinished
-                ? `${match.homeScore} - ${match.awayScore}${match.penaltyWinner ? " (Pênaltis)" : ""}`
+                ? `${match.homeScore} - ${match.awayScore}`
                 : "A definir"
             }</p>
-            ${isKnockout && match.phase ? `<p><strong>Fase:</strong> ${match.phase}</p>` : `<p><strong>Rodada:</strong> ${match.round}</p>`}
+            <p><strong>Rodada:</strong> ${match.round}</p>
             <p><strong>Data:</strong> ${new Date(match.date).toLocaleDateString(
               "pt-BR"
             )}</p>
             <p><strong>Torneio:</strong> ${tournament?.name || "Torneio"}</p>
-            ${match.aggregateMatch ? `<p><strong>Agregado:</strong> ${this.getAggregateScore(match)}</p>` : ""}
           </div>
           <div class="match-actions">
             ${
@@ -1138,7 +1133,6 @@ class TournamentManager {
     await this.saveData("matches");
     this.loadMatches();
     this.updateStats();
-    return match;
   }
 
   editMatch(matchId) {
@@ -1158,27 +1152,6 @@ class TournamentManager {
         match.date.split("T")[1].substring(0, 5)
       : match.date;
     document.getElementById("match-date").value = dateValue;
-
-    // Verificar se é torneio mata-mata e mostrar campos específicos
-    const tournament = this.data.tournaments.find(t => t.id == match.tournamentId);
-    const knockoutFields = document.getElementById("knockout-fields");
-    
-    if (tournament?.type === "knockout") {
-      knockoutFields.style.display = "block";
-      if (match.phase) document.getElementById("match-phase").value = match.phase;
-      if (match.leg) document.getElementById("match-leg").value = match.leg;
-      if (match.pairId) document.getElementById("match-pair-id").value = match.pairId;
-      
-      // Mostrar campos de pênaltis se existirem
-      if (match.homePenalties !== undefined || match.awayPenalties !== undefined) {
-        document.getElementById("went-to-penalties").checked = true;
-        document.getElementById("penalty-section").style.display = "block";
-        document.getElementById("home-penalties").value = match.homePenalties || 0;
-        document.getElementById("away-penalties").value = match.awayPenalties || 0;
-      }
-    } else {
-      knockoutFields.style.display = "none";
-    }
 
     // Carregar treinadores se existirem
     if (match.homeCoachId) {
@@ -1824,12 +1797,6 @@ class TournamentManager {
         return;
       }
       this.generateNationalStructure(tournamentId, clubs);
-    } else if (tournament.type === "knockout") {
-      if (clubs.length !== 16 && clubs.length !== 32) {
-        alert("Copa Mata-mata requer exatamente 16 ou 32 clubes!");
-        return;
-      }
-      this.generateKnockoutCupStructure(tournamentId, clubs);
     }
   }
 
@@ -1866,121 +1833,6 @@ class TournamentManager {
     this.loadRounds();
 
     alert("Estrutura da Liga Nacional gerada!");
-  }
-
-  generateKnockoutCupStructure(tournamentId, clubs) {
-    this.data.rounds = this.data.rounds.filter(
-      (r) => r.tournamentId != tournamentId
-    );
-    this.data.matches = this.data.matches.filter(
-      (m) => m.tournamentId != tournamentId
-    );
-
-    const numTeams = clubs.length;
-    const shuffledClubs = [...clubs].sort(() => Math.random() - 0.5);
-    const baseDate = new Date();
-    
-    // Definir fases baseado no número de times
-    const phases = numTeams === 32 ? [
-      { name: "Oitavas - Ida", round: 1, teams: 32, matches: 16 },
-      { name: "Oitavas - Volta", round: 2, teams: 32, matches: 16 },
-      { name: "Quartas - Ida", round: 3, teams: 16, matches: 8 },
-      { name: "Quartas - Volta", round: 4, teams: 16, matches: 8 },
-      { name: "Semifinal - Ida", round: 5, teams: 8, matches: 4 },
-      { name: "Semifinal - Volta", round: 6, teams: 8, matches: 4 },
-      { name: "Final", round: 7, teams: 4, matches: 1 }
-    ] : [
-      { name: "Quartas - Ida", round: 1, teams: 16, matches: 8 },
-      { name: "Quartas - Volta", round: 2, teams: 16, matches: 8 },
-      { name: "Semifinal - Ida", round: 3, teams: 8, matches: 4 },
-      { name: "Semifinal - Volta", round: 4, teams: 8, matches: 4 },
-      { name: "Final", round: 5, teams: 4, matches: 1 }
-    ];
-
-    // Gerar primeira fase com times definidos
-    const firstPhase = phases[0];
-    const firstRoundMatches = [];
-    
-    for (let i = 0; i < shuffledClubs.length; i += 2) {
-      firstRoundMatches.push({
-        homeTeamId: shuffledClubs[i].id,
-        awayTeamId: shuffledClubs[i + 1].id,
-        phase: firstPhase.name,
-        leg: "ida",
-        pairId: Math.floor(i / 2) + 1
-      });
-    }
-
-    // Criar rodadas
-    phases.forEach((phase, index) => {
-      const phaseDate = new Date(baseDate);
-      phaseDate.setDate(baseDate.getDate() + (index * 7));
-      
-      let matches = [];
-      
-      if (index === 0) {
-        // Primeira fase - ida
-        matches = firstRoundMatches;
-      } else if (index === 1 && phase.name.includes("Volta")) {
-        // Segunda fase - volta (inverter mando)
-        matches = firstRoundMatches.map(match => ({
-          homeTeamId: match.awayTeamId,
-          awayTeamId: match.homeTeamId,
-          phase: phase.name,
-          leg: "volta",
-          aggregateMatch: true,
-          pairId: match.pairId
-        }));
-      } else {
-        // Fases seguintes - times TBD
-        for (let i = 0; i < phase.matches; i++) {
-          matches.push({
-            homeTeamId: null,
-            awayTeamId: null,
-            phase: phase.name,
-            leg: phase.name.includes("Final") ? "unico" : (phase.name.includes("Ida") ? "ida" : "volta"),
-            pairId: i + 1
-          });
-        }
-      }
-
-      const roundData = {
-        id: Date.now() + index,
-        userId: this.currentUser.id,
-        tournamentId: tournamentId,
-        number: phase.round,
-        name: phase.name,
-        date: phaseDate.toISOString().split("T")[0],
-        matches: matches,
-        isKnockout: true,
-        createdAt: new Date().toISOString(),
-      };
-
-      this.data.rounds.push(roundData);
-
-      // Criar partidas apenas para as duas primeiras fases
-      if (index <= 1) {
-        matches.forEach((match) => {
-          this.createMatch({
-            homeTeamId: match.homeTeamId,
-            awayTeamId: match.awayTeamId,
-            tournamentId: tournamentId,
-            round: phase.round,
-            phase: match.phase,
-            leg: match.leg,
-            aggregateMatch: match.aggregateMatch || false,
-            pairId: match.pairId,
-            date: phaseDate.toISOString().split("T")[0] + "T20:00:00",
-          });
-        });
-      }
-    });
-
-    this.saveData("rounds");
-    this.saveData("matches");
-    this.loadRounds();
-
-    alert("Estrutura da Copa Mata-mata gerada!");
   }
 
   generateChampionsGroupStage(tournamentId, clubs) {
@@ -4519,13 +4371,11 @@ class TournamentManager {
       const eventsSection = document.getElementById("match-events-section");
       const homeScore = document.getElementById("home-score");
       const awayScore = document.getElementById("away-score");
-      const penaltyLabel = document.getElementById("penalty-label");
 
       if (e.target.checked) {
         eventsSection.style.display = "block";
         homeScore.required = true;
         awayScore.required = true;
-        penaltyLabel.style.display = "block";
         this.updateMotmPlayers();
       } else {
         eventsSection.style.display = "none";
@@ -4533,22 +4383,7 @@ class TournamentManager {
         awayScore.required = false;
         homeScore.value = "";
         awayScore.value = "";
-        penaltyLabel.style.display = "none";
         document.getElementById("events-container").innerHTML = "";
-      }
-    });
-
-    document.getElementById("went-to-penalties").addEventListener("change", (e) => {
-      const penaltySection = document.getElementById("penalty-section");
-      penaltySection.style.display = e.target.checked ? "block" : "none";
-    });
-
-    // Listener para avançar times no mata-mata
-    document.addEventListener("click", (e) => {
-      if (e.target.classList.contains("advance-team-btn")) {
-        const matchId = parseInt(e.target.dataset.matchId);
-        const winnerId = parseInt(e.target.dataset.winnerId);
-        this.advanceTeamInKnockout(matchId, winnerId);
       }
     });
 
@@ -4558,19 +4393,6 @@ class TournamentManager {
 
     document.getElementById("away-team").addEventListener("change", () => {
       this.updateMotmPlayers();
-    });
-
-    // Mostrar campos do mata-mata quando torneio for selecionado
-    document.getElementById("match-tournament").addEventListener("change", (e) => {
-      const tournamentId = e.target.value;
-      const tournament = this.data.tournaments.find(t => t.id == tournamentId);
-      const knockoutFields = document.getElementById("knockout-fields");
-      
-      if (tournament?.type === "knockout") {
-        knockoutFields.style.display = "block";
-      } else {
-        knockoutFields.style.display = "none";
-      }
     });
 
     // Atualizar selects de treinadores quando modal abrir
@@ -4786,16 +4608,6 @@ class TournamentManager {
           ),
         };
 
-        // Adicionar campos específicos do mata-mata se existirem
-        const phaseField = document.getElementById("match-phase");
-        const legField = document.getElementById("match-leg");
-        const pairIdField = document.getElementById("match-pair-id");
-        
-        if (phaseField && phaseField.value) data.phase = phaseField.value;
-        if (legField && legField.value) data.leg = legField.value;
-        if (pairIdField && pairIdField.value) data.pairId = parseInt(pairIdField.value);
-        if (legField && legField.value === "volta") data.aggregateMatch = true;
-
         // Adicionar treinadores se selecionados
         const homeCoachId = document.getElementById("home-coach").value;
         const awayCoachId = document.getElementById("away-coach").value;
@@ -4809,24 +4621,6 @@ class TournamentManager {
         const awayScore = document.getElementById("away-score").value;
         if (homeScore) data.homeScore = parseInt(homeScore);
         if (awayScore) data.awayScore = parseInt(awayScore);
-
-        // Adicionar dados de pênaltis se aplicável
-        const wentToPenalties = document.getElementById("went-to-penalties").checked;
-        if (wentToPenalties) {
-          const homePenalties = document.getElementById("home-penalties").value;
-          const awayPenalties = document.getElementById("away-penalties").value;
-          if (homePenalties && awayPenalties) {
-            data.homePenalties = parseInt(homePenalties);
-            data.awayPenalties = parseInt(awayPenalties);
-            
-            // Determinar vencedor dos pênaltis
-            if (data.homePenalties > data.awayPenalties) {
-              data.penaltyWinner = data.homeTeamId;
-            } else if (data.awayPenalties > data.homePenalties) {
-              data.penaltyWinner = data.awayTeamId;
-            }
-          }
-        }
 
         // Adicionar dados do melhor jogador da partida
         const motmPlayerId = document.getElementById("motm-player").value;
@@ -4868,18 +4662,10 @@ class TournamentManager {
 
         const editId = e.target.dataset.editId;
         if (editId) {
-          const updatedMatch = await this.updateMatch(parseInt(editId), data);
-          // Verificar avanço no mata-mata após atualizar
-          if (data.aggregateMatch && data.homeScore !== undefined && data.awayScore !== undefined) {
-            setTimeout(() => this.checkKnockoutAdvancement(updatedMatch || { ...data, id: parseInt(editId) }), 100);
-          }
+          await this.updateMatch(parseInt(editId), data);
           delete e.target.dataset.editId;
         } else {
-          const newMatch = await this.createMatch(data);
-          // Verificar avanço no mata-mata após criar
-          if (data.aggregateMatch && data.homeScore !== undefined && data.awayScore !== undefined) {
-            setTimeout(() => this.checkKnockoutAdvancement(newMatch || data), 100);
-          }
+          await this.createMatch(data);
         }
 
         document.getElementById("match-modal").style.display = "none";
