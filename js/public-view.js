@@ -65,19 +65,29 @@ class PublicTournamentViewer {
         
         try {
           const [tournaments, clubs, players, matches, coaches] = await Promise.all([
-            this.db.collection("users").doc(userId).collection("data").doc("tournaments").collection("items").get(),
-            this.db.collection("users").doc(userId).collection("data").doc("clubs").collection("items").get(),
-            this.db.collection("users").doc(userId).collection("data").doc("players").collection("items").get(),
-            this.db.collection("users").doc(userId).collection("data").doc("matches").collection("items").get(),
-            this.db.collection("users").doc(userId).collection("data").doc("coaches").collection("items").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("tournaments").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("clubs").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("players").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("matches").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("coaches").get(),
           ]);
           
-          // Adicionar dados do usuário aos arrays gerais
-          allTournaments.push(...tournaments.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
-          allClubs.push(...clubs.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
-          allPlayers.push(...players.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
-          allMatches.push(...matches.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
-          allCoaches.push(...coaches.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
+          // Extrair dados dos documentos
+          if (tournaments.exists && tournaments.data().data) {
+            allTournaments.push(...tournaments.data().data.map(item => ({ ...item, userId })));
+          }
+          if (clubs.exists && clubs.data().data) {
+            allClubs.push(...clubs.data().data.map(item => ({ ...item, userId })));
+          }
+          if (players.exists && players.data().data) {
+            allPlayers.push(...players.data().data.map(item => ({ ...item, userId })));
+          }
+          if (matches.exists && matches.data().data) {
+            allMatches.push(...matches.data().data.map(item => ({ ...item, userId })));
+          }
+          if (coaches.exists && coaches.data().data) {
+            allCoaches.push(...coaches.data().data.map(item => ({ ...item, userId })));
+          }
           
         } catch (userError) {
           console.warn(`Erro ao carregar dados do usuário ${userId}:`, userError);
