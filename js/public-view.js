@@ -18,8 +18,8 @@ class PublicTournamentViewer {
   }
 
   initFirebase() {
-    if (typeof firebase === 'undefined') {
-      console.error('Firebase não carregado');
+    if (typeof firebase === "undefined") {
+      console.error("Firebase não carregado");
       return;
     }
 
@@ -40,20 +40,22 @@ class PublicTournamentViewer {
 
   async loadData() {
     if (!this.db) {
-      console.error('Firebase não inicializado');
+      console.error("Firebase não inicializado");
       return;
     }
 
     try {
-      console.log('Carregando dados do Firebase...');
-      
-      const [tournaments, clubs, players, matches, coaches] = await Promise.all([
-        this.db.collection("tournaments").get(),
-        this.db.collection("clubs").get(),
-        this.db.collection("players").get(),
-        this.db.collection("matches").get(),
-        this.db.collection("coaches").get(),
-      ]);
+      console.log("Carregando dados do Firebase...");
+
+      const [tournaments, clubs, players, matches, coaches] = await Promise.all(
+        [
+          this.db.collection("tournaments").get(),
+          this.db.collection("clubs").get(),
+          this.db.collection("players").get(),
+          this.db.collection("matches").get(),
+          this.db.collection("coaches").get(),
+        ]
+      );
 
       this.data.tournaments = tournaments.docs.map((doc) => ({
         id: doc.id,
@@ -81,14 +83,19 @@ class PublicTournamentViewer {
         clubs: this.data.clubs.length,
         players: this.data.players.length,
         matches: this.data.matches.length,
+        coaches: this.data.coaches.length,
       });
 
-      // Debug: mostrar alguns dados
-      if (this.data.tournaments.length > 0) {
-        console.log('Primeiro torneio:', this.data.tournaments[0]);
+      // Debug detalhado
+      console.log("Todos os torneios:", this.data.tournaments);
+      console.log("Todos os clubes:", this.data.clubs);
+      console.log("Todas as partidas:", this.data.matches);
+
+      if (this.data.tournaments.length === 0) {
+        console.warn("Nenhum torneio encontrado no Firebase!");
       }
-      if (this.data.clubs.length > 0) {
-        console.log('Primeiro clube:', this.data.clubs[0]);
+      if (this.data.clubs.length === 0) {
+        console.warn("Nenhum clube encontrado no Firebase!");
       }
 
       this.showTournaments();
