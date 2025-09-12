@@ -5119,3 +5119,47 @@ body {
     background: #fd7e14 !important;
     color: white;
 }
+/* Checkboxes para seleção múltipla de torneios */
+.tournaments-selection {
+  margin: 15px 0;
+}
+
+.tournaments-selection label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.checkboxes-container {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--card-bg);
+}
+
+.checkbox-item {
+  display: flex !important;
+  align-items: center;
+  margin-bottom: 8px !important;
+  font-weight: normal !important;
+  cursor: pointer;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+}
+
+.checkbox-item span {
+  color: var(--text-color);
+}
+
+.checkbox-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 4px;
+}

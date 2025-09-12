@@ -225,7 +225,7 @@ class PublicTournamentViewer {
 
     this.data.tournaments.forEach((tournament) => {
       const tournamentClubs = this.data.clubs.filter(
-        (c) => c.tournamentId == tournament.id
+        (c) => c.tournamentIds && c.tournamentIds.includes(tournament.id)
       );
       const tournamentMatches = this.data.matches.filter(
         (m) => m.tournamentId == tournament.id

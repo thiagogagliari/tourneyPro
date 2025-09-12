@@ -514,7 +514,6 @@ class TournamentManager {
   updateTournamentSelects() {
     const tournaments = this.getUserData("tournaments");
     const selects = [
-      "club-tournament",
       "tournament-scorers-filter",
       "tournament-statistics-filter",
       "match-tournament",
@@ -533,6 +532,24 @@ class TournamentManager {
         select.value = currentValue;
       }
     });
+    
+    // Atualizar checkboxes de torneios para clubes
+    this.updateTournamentCheckboxes();
+  }
+  
+  updateTournamentCheckboxes() {
+    const tournaments = this.getUserData("tournaments");
+    const container = document.getElementById("club-tournaments-checkboxes");
+    if (container) {
+      container.innerHTML = tournaments
+        .map(t => `
+          <label class="checkbox-item">
+            <input type="checkbox" value="${t.id}" name="tournament">
+            <span>${t.name}</span>
+          </label>
+        `)
+        .join("");
+    }
   }
 
   // Clubes
@@ -554,9 +571,10 @@ class TournamentManager {
     container.innerHTML = clubs
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((club) => {
-        const tournament = this.data.tournaments.find(
-          (t) => t.id == club.tournamentId
+        const tournaments = this.data.tournaments.filter(
+          (t) => club.tournamentIds && club.tournamentIds.includes(t.id)
         );
+        const tournamentNames = tournaments.map(t => t.name).join(', ') || 'Nenhum';
         return `
         <div class="card">
           <img src="${club.logo || "https://via.placeholder.com/50"}" alt="${
@@ -570,7 +588,7 @@ class TournamentManager {
           club.country
         }" style="width: 20px; height: 15px; margin-left: 5px;">
           </p>
-          <p><strong>Torneio:</strong> ${tournament?.name || "Nenhum"}</p>
+          <p><strong>Torneios:</strong> ${tournamentNames}</p>
           <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="app.showClubProfile(${
               club.id
@@ -608,7 +626,11 @@ class TournamentManager {
     document.getElementById("club-name").value = club.name;
     document.getElementById("club-country").value = club.country;
     document.getElementById("club-logo").value = club.logo || "";
-    document.getElementById("club-tournament").value = club.tournamentId || "";
+    // Marcar checkboxes dos torneios do clube
+    const clubTournaments = club.tournamentIds || [];
+    document.querySelectorAll('#club-tournaments-checkboxes input[type="checkbox"]').forEach(checkbox => {
+      checkbox.checked = clubTournaments.includes(parseInt(checkbox.value));
+    });
 
     document.getElementById("club-modal").style.display = "block";
 
@@ -4481,12 +4503,17 @@ class TournamentManager {
       .getElementById("club-form")
       .addEventListener("submit", async (e) => {
         e.preventDefault();
+        // Coletar torneios selecionados
+        const selectedTournaments = [];
+        document.querySelectorAll('#club-tournaments-checkboxes input[type="checkbox"]:checked').forEach(checkbox => {
+          selectedTournaments.push(parseInt(checkbox.value));
+        });
+        
         const data = {
           name: document.getElementById("club-name").value,
           country: document.getElementById("club-country").value,
           logo: document.getElementById("club-logo").value,
-          tournamentId:
-            parseInt(document.getElementById("club-tournament").value) || null,
+          tournamentIds: selectedTournaments,
         };
 
         const editId = e.target.dataset.editId;
