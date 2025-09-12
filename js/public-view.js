@@ -46,37 +46,50 @@ class PublicTournamentViewer {
 
     try {
       console.log("Carregando dados do Firebase...");
-
-      const [tournaments, clubs, players, matches, coaches] = await Promise.all(
-        [
-          this.db.collection("tournaments").get(),
-          this.db.collection("clubs").get(),
-          this.db.collection("players").get(),
-          this.db.collection("matches").get(),
-          this.db.collection("coaches").get(),
-        ]
-      );
-
-      this.data.tournaments = tournaments.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      this.data.clubs = clubs.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      this.data.players = players.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      this.data.matches = matches.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      this.data.coaches = coaches.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      
+      // Buscar todos os usuários
+      const usersSnapshot = await this.db.collection("users").get();
+      console.log(`Encontrados ${usersSnapshot.docs.length} usuários`);
+      
+      // Arrays para armazenar todos os dados
+      let allTournaments = [];
+      let allClubs = [];
+      let allPlayers = [];
+      let allMatches = [];
+      let allCoaches = [];
+      
+      // Para cada usuário, buscar suas subcoleções
+      for (const userDoc of usersSnapshot.docs) {
+        const userId = userDoc.id;
+        console.log(`Carregando dados do usuário: ${userId}`);
+        
+        try {
+          const [tournaments, clubs, players, matches, coaches] = await Promise.all([
+            this.db.collection("users").doc(userId).collection("data").doc("tournaments").collection("items").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("clubs").collection("items").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("players").collection("items").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("matches").collection("items").get(),
+            this.db.collection("users").doc(userId).collection("data").doc("coaches").collection("items").get(),
+          ]);
+          
+          // Adicionar dados do usuário aos arrays gerais
+          allTournaments.push(...tournaments.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
+          allClubs.push(...clubs.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
+          allPlayers.push(...players.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
+          allMatches.push(...matches.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
+          allCoaches.push(...coaches.docs.map(doc => ({ id: doc.id, userId, ...doc.data() })));
+          
+        } catch (userError) {
+          console.warn(`Erro ao carregar dados do usuário ${userId}:`, userError);
+        }
+      }
+      
+      // Atribuir aos dados da classe
+      this.data.tournaments = allTournaments;
+      this.data.clubs = allClubs;
+      this.data.players = allPlayers;
+      this.data.matches = allMatches;
+      this.data.coaches = allCoaches;
 
       console.log("Dados carregados do Firebase:", {
         tournaments: this.data.tournaments.length,
