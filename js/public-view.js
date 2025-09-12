@@ -46,62 +46,100 @@ class PublicTournamentViewer {
 
     try {
       console.log("Carregando dados do Firebase...");
-      
+
       // Buscar todos os usuários
       const usersSnapshot = await this.db.collection("users").get();
       console.log(`Encontrados ${usersSnapshot.docs.length} usuários`);
-      
+
       // Arrays para armazenar todos os dados
       let allTournaments = [];
       let allClubs = [];
       let allPlayers = [];
       let allMatches = [];
       let allCoaches = [];
-      
+
       // Para cada usuário, buscar suas subcoleções
       for (const userDoc of usersSnapshot.docs) {
         const userId = userDoc.id;
         console.log(`Carregando dados do usuário: ${userId}`);
-        
+
         try {
-          const [tournaments, clubs, players, matches, coaches] = await Promise.all([
-            this.db.collection("users").doc(userId).collection("data").doc("tournaments").get(),
-            this.db.collection("users").doc(userId).collection("data").doc("clubs").get(),
-            this.db.collection("users").doc(userId).collection("data").doc("players").get(),
-            this.db.collection("users").doc(userId).collection("data").doc("matches").get(),
-            this.db.collection("users").doc(userId).collection("data").doc("coaches").get(),
-          ]);
-          
+          const [tournaments, clubs, players, matches, coaches] =
+            await Promise.all([
+              this.db
+                .collection("users")
+                .doc(userId)
+                .collection("data")
+                .doc("tournaments")
+                .get(),
+              this.db
+                .collection("users")
+                .doc(userId)
+                .collection("data")
+                .doc("clubs")
+                .get(),
+              this.db
+                .collection("users")
+                .doc(userId)
+                .collection("data")
+                .doc("players")
+                .get(),
+              this.db
+                .collection("users")
+                .doc(userId)
+                .collection("data")
+                .doc("matches")
+                .get(),
+              this.db
+                .collection("users")
+                .doc(userId)
+                .collection("data")
+                .doc("coaches")
+                .get(),
+            ]);
+
           console.log(`Usuário ${userId} - Documentos encontrados:`, {
             tournaments: tournaments.exists,
             clubs: clubs.exists,
             players: players.exists,
             matches: matches.exists,
-            coaches: coaches.exists
+            coaches: coaches.exists,
           });
-          
+
           // Extrair dados dos documentos
           if (tournaments.exists && tournaments.data().data) {
-            allTournaments.push(...tournaments.data().data.map(item => ({ ...item, userId })));
+            allTournaments.push(
+              ...tournaments.data().data.map((item) => ({ ...item, userId }))
+            );
           }
           if (clubs.exists && clubs.data().data) {
-            allClubs.push(...clubs.data().data.map(item => ({ ...item, userId })));
+            allClubs.push(
+              ...clubs.data().data.map((item) => ({ ...item, userId }))
+            );
           }
           if (players.exists && players.data().data) {
-            allPlayers.push(...players.data().data.map(item => ({ ...item, userId })));
+            allPlayers.push(
+              ...players.data().data.map((item) => ({ ...item, userId }))
+            );
           }
           if (matches.exists && matches.data().data) {
-            allMatches.push(...matches.data().data.map(item => ({ ...item, userId })));
+            allMatches.push(
+              ...matches.data().data.map((item) => ({ ...item, userId }))
+            );
           }
           if (coaches.exists && coaches.data().data) {
-            allCoaches.push(...coaches.data().data.map(item => ({ ...item, userId })));
+            allCoaches.push(
+              ...coaches.data().data.map((item) => ({ ...item, userId }))
+            );
           }
-          
         } catch (userError) {
-          console.warn(`Erro ao carregar dados do usuário ${userId}:`, userError);
+          console.warn(
+            `Erro ao carregar dados do usuário ${userId}:`,
+            userError
+          );
         }
       }
-      
+
       // Atribuir aos dados da classe
       this.data.tournaments = allTournaments;
       this.data.clubs = allClubs;
@@ -258,6 +296,13 @@ class PublicTournamentViewer {
                     <div class="stat-item">
                         <span class="stat-value">${
                           finishedMatches.length
+                        }</span>
+                        <span class="stat-label">Partidas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${tournament.type === 'knockout' ? 'Mata-mata' : tournament.type === 'champions' ? 'Champions' : tournament.type === 'national' ? 'Liga' : 'Padrão'}</span>
+                        <span class="stat-label">Formato</span>
+                    </div>shedMatches.length
                         }</span>
                         <span class="stat-label">Partidas</span>
                     </div>

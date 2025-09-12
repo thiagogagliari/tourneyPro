@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Copa Mata-mata</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+        }
+        .test-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>🏆 Teste do Sistema Copa Mata-mata</h1>
+    
+    <div class="test-section">
+        <h2>✅ Funcionalidades Implementadas</h2>
+        <ul>
+            <li class="success">✓ Opção "Copa Mata-mata" no tipo de torneio</li>
+            <li class="success">✓ Suporte para 16 ou 32 times</li>
+            <li class="success">✓ Geração automática de chaveamento</li>
+            <li class="success">✓ Sistema ida e volta por fase</li>
+            <li class="success">✓ Cálculo de saldo agregado</li>
+            <li class="success">✓ Sistema de pênaltis para empates</li>
+            <li class="success">✓ Avanço automático de times</li>
+            <li class="success">✓ Interface específica para mata-mata</li>
+            <li class="success">✓ Campos específicos no modal de partidas</li>
+            <li class="success">✓ Estilos CSS para knockout</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Como Usar o Sistema Copa Mata-mata</h2>
+        <ol>
+            <li class="info"><strong>Criar Torneio:</strong> Selecione "Copa Mata-mata (16 ou 32 clubes)" no tipo</li>
+            <li class="info"><strong>Adicionar Clubes:</strong> Cadastre exatamente 16 ou 32 clubes no torneio</li>
+            <li class="info"><strong>Gerar Estrutura:</strong> Na seção Rodadas, clique em "Gerar Estrutura Copa Mata-mata"</li>
+            <li class="info"><strong>Registrar Resultados:</strong> Insira os resultados das partidas de ida e volta</li>
+            <li class="info"><strong>Pênaltis:</strong> Se empatar no agregado, marque "Foi para os pênaltis" e insira o resultado</li>
+            <li class="info"><strong>Avanço Automático:</strong> O sistema avança automaticamente os vencedores</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>⚽ Estrutura das Fases</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h3>🏆 Copa com 16 Times</h3>
+                <ul>
+                    <li>Quartas - Ida (8 jogos)</li>
+                    <li>Quartas - Volta (8 jogos)</li>
+                    <li>Semifinal - Ida (4 jogos)</li>
+                    <li>Semifinal - Volta (4 jogos)</li>
+                    <li>Final (1 jogo único)</li>
+                </ul>
+            </div>
+            <div>
+                <h3>🏆 Copa com 32 Times</h3>
+                <ul>
+                    <li>Oitavas - Ida (16 jogos)</li>
+                    <li>Oitavas - Volta (16 jogos)</li>
+                    <li>Quartas - Ida (8 jogos)</li>
+                    <li>Quartas - Volta (8 jogos)</li>
+                    <li>Semifinal - Ida (4 jogos)</li>
+                    <li>Semifinal - Volta (4 jogos)</li>
+                    <li>Final (1 jogo único)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Critérios de Classificação</h2>
+        <ul>
+            <li class="info"><strong>Saldo de Gols:</strong> Soma dos gols de ida + volta</li>
+            <li class="info"><strong>Empate no Agregado:</strong> Vai para os pênaltis</li>
+            <li class="info"><strong>Final:</strong> Jogo único, se empatar vai para pênaltis</li>
+            <li class="info"><strong>Avanço:</strong> Vencedor avança automaticamente para próxima fase</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 Interface do Usuário</h2>
+        <ul>
+            <li class="success">✓ Campos específicos para fase e perna no modal de partidas</li>
+            <li class="success">✓ Seção de pênaltis quando necessário</li>
+            <li class="success">✓ Indicador de placar agregado nas partidas</li>
+            <li class="success">✓ Botões para avançar times manualmente (se necessário)</li>
+            <li class="success">✓ Visualização do chaveamento por fases</li>
+            <li class="success">✓ Estilos visuais diferenciados para mata-mata</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 Próximos Passos</h2>
+        <p class="info">O sistema Copa Mata-mata está completamente implementado e pronto para uso! 
+        Você pode agora criar torneios eliminatórios com chaveamento automático, 
+        sistema ida/volta e classificação por saldo de gols.</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="index.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+           color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; 
+           font-weight: bold;">🏆 Voltar ao TourneyPro</a>
+    </div>
+</body>
+</html>

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/motm-styles.css" />
     <link rel="stylesheet" href="css/coach-h2h.css" />
     <link rel="stylesheet" href="css/rating-colors.css" />
+    <link rel="stylesheet" href="css/knockout-styles.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -439,6 +440,7 @@
             <option value="">Selecione o tipo</option>
             <option value="champions">Liga dos Campeões (36 clubes)</option>
             <option value="national">Liga Nacional (20 clubes)</option>
+            <option value="knockout">Copa Mata-mata (16 ou 32 clubes)</option>
           </select>
           <input type="date" id="tournament-start" required />
           <textarea
@@ -692,10 +694,25 @@
             </div>
           </div>
 
+          <div class="knockout-fields" id="knockout-fields" style="display: none;">
+            <h4>Informações do Mata-mata</h4>
+            <input type="text" id="match-phase" placeholder="Fase (ex: Quartas - Ida)" readonly />
+            <input type="text" id="match-leg" placeholder="Perna (ida/volta/unico)" readonly />
+            <input type="hidden" id="match-pair-id" />
+            <div class="penalty-section" id="penalty-section" style="display: none;">
+              <h5>Cobranças de Pênaltis</h5>
+              <input type="number" id="home-penalties" placeholder="Pênaltis casa" min="0" />
+              <input type="number" id="away-penalties" placeholder="Pênaltis visitante" min="0" />
+            </div>
+          </div>
+
           <div class="match-status">
             <label>
               <input type="checkbox" id="match-played" /> Partida já foi
               realizada
+            </label>
+            <label id="penalty-label" style="display: none;">
+              <input type="checkbox" id="went-to-penalties" /> Foi para os pênaltis
             </label>
           </div>
 
