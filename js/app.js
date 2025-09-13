@@ -45,61 +45,47 @@ class TournamentManager {
   }
 
   async login(email, password) {
-    if (!cloudStorage.firebaseReady) {
-      alert('Sistema não está conectado. Tente novamente.');
-      return false;
-    }
-    
-    const result = await cloudStorage.signIn(email, password);
-    if (result.success) {
-      // Aguardar carregamento dos dados da nuvem
-      await this.loadCloudData();
+    // Carregar dados compartilhados
+    await this.loadCloudData();
 
-      // Criar ou encontrar usuário local
-      let user = this.data.users.find((u) => u.email === email);
-      if (!user) {
-        user = {
-          id: Date.now(),
-          email,
-          username: email.split("@")[0],
-          createdAt: new Date().toISOString(),
-        };
-        this.data.users.push(user);
-        await this.saveData("users");
-      }
+    // Verificar usuário
+    const user = this.data.users.find(
+      (u) => (u.email === email || u.username === email) && u.password === password
+    );
+
+    if (user) {
       this.currentUser = user;
       localStorage.setItem("currentUser", JSON.stringify(user));
       this.showDashboard();
       return true;
     }
-    
     return false;
   }
 
   async register(email, password) {
-    if (!cloudStorage.firebaseReady) {
-      alert('Sistema não está conectado. Tente novamente.');
+    await this.loadCloudData();
+    
+    const existingUser = this.data.users.find(
+      (u) => u.email === email || u.username === email
+    );
+    if (existingUser) {
       return false;
     }
-    
-    const result = await cloudStorage.signUp(email, password);
-    if (result.success) {
-      const newUser = {
-        id: Date.now(),
-        email,
-        username: email.split("@")[0],
-        createdAt: new Date().toISOString(),
-      };
-      this.data.users.push(newUser);
-      await this.saveData("users");
-      return true;
-    } else {
-      throw new Error(result.error);
-    }
+
+    const newUser = {
+      id: Date.now(),
+      email,
+      username: email.split("@")[0],
+      password,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.data.users.push(newUser);
+    await this.saveData("users");
+    return true;
   }
 
   async logout() {
-    await cloudStorage.signOut();
     this.currentUser = null;
     localStorage.removeItem("currentUser");
     this.showLogin();
@@ -150,20 +136,9 @@ class TournamentManager {
 
   // Dados
   async saveData(type) {
-    if (!cloudStorage.firebaseReady) {
-      console.error('Firebase não está pronto');
-      alert('Sistema não está conectado. Tente novamente.');
-      return;
-    }
-    
     try {
-      console.log(`Salvando ${type} no Firebase:`, {
-        firebaseReady: cloudStorage.firebaseReady,
-        currentUser: !!cloudStorage.currentUser,
-        dataLength: this.data[type].length,
-      });
-      await cloudStorage.saveData(type, this.data[type]);
-      console.log(`${type} salvo com sucesso no Firebase`);
+      sharedStorage.saveData(type, this.data[type]);
+      console.log(`${type} salvo com sucesso`);
     } catch (error) {
       console.error(`Erro ao salvar ${type}:`, error);
       alert(`Erro ao salvar ${type}: ${error.message}`);
@@ -4151,34 +4126,28 @@ class TournamentManager {
     }
   }
 
-  // Carregar dados da nuvem
+  // Carregar dados compartilhados
   async loadCloudData() {
-    if (!cloudStorage.firebaseReady) {
-      console.error('Firebase não está pronto');
-      return;
-    }
-    
-    console.log("Carregando todos os dados da nuvem...");
+    console.log("Carregando dados compartilhados...");
 
     try {
-      // Carregar cada tipo de dado
-      this.data.users = await cloudStorage.loadData("users");
-      this.data.tournaments = await cloudStorage.loadData("tournaments");
-      this.data.clubs = await cloudStorage.loadData("clubs");
-      this.data.players = await cloudStorage.loadData("players");
-      this.data.coaches = await cloudStorage.loadData("coaches");
-      this.data.matches = await cloudStorage.loadData("matches");
-      this.data.rounds = await cloudStorage.loadData("rounds");
+      const allData = sharedStorage.loadAllData();
+      this.data.tournaments = allData.tournaments || [];
+      this.data.clubs = allData.clubs || [];
+      this.data.players = allData.players || [];
+      this.data.coaches = allData.coaches || [];
+      this.data.matches = allData.matches || [];
+      this.data.rounds = allData.rounds || [];
+      this.data.users = allData.users || [];
 
-      console.log("Dados carregados da nuvem:", {
+      console.log("Dados compartilhados carregados:", {
         tournaments: this.data.tournaments.length,
         clubs: this.data.clubs.length,
         players: this.data.players.length,
         matches: this.data.matches.length,
       });
     } catch (error) {
-      console.error("Erro ao carregar dados da nuvem:", error);
-      alert('Erro ao carregar dados. Tente recarregar a página.');
+      console.error("Erro ao carregar dados:", error);
     }
   }
 

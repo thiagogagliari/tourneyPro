@@ -22,6 +22,11 @@ class GlobalDataManager {
           firebase.initializeApp(this.firebaseConfig);
         }
         this.db = firebase.firestore();
+        this.auth = firebase.auth();
+        
+        // Autenticação anônima para leitura
+        await this.auth.signInAnonymously();
+        
         this.firebaseReady = true;
         console.log("Firebase inicializado para dados globais");
       }
