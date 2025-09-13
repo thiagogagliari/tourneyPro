@@ -30,7 +30,7 @@ class GlobalDataManager {
     }
   }
 
-  // Carregar todos os dados de todos os usuários
+  // Carregar dados da coleção pública
   async loadAllData() {
     if (!this.firebaseReady) {
       console.error("Firebase não está pronto");
@@ -38,34 +38,24 @@ class GlobalDataManager {
     }
 
     try {
-      console.log("Carregando dados globais de todos os usuários...");
-      
-      const usersSnapshot = await this.db.collection("users").get();
-      console.log(`Encontrados ${usersSnapshot.docs.length} usuários`);
+      console.log("Carregando dados da coleção pública...");
       
       let allData = { tournaments: [], clubs: [], players: [], matches: [], coaches: [] };
+      const dataCollections = ['tournaments', 'clubs', 'players', 'matches', 'coaches'];
       
-      for (const userDoc of usersSnapshot.docs) {
-        const userId = userDoc.id;
-        console.log(`Carregando dados do usuário: ${userId}`);
-        
+      for (const collection of dataCollections) {
         try {
-          const dataCollections = ['tournaments', 'clubs', 'players', 'matches', 'coaches'];
+          const snapshot = await this.db.collection("public").doc(collection).get();
           
-          for (const collection of dataCollections) {
-            const doc = await this.db.collection("users").doc(userId).collection("data").doc(collection).get();
-            
-            if (doc.exists && doc.data().data) {
-              const userData = doc.data().data.map(item => ({ ...item, userId }));
-              allData[collection].push(...userData);
-            }
+          if (snapshot.exists && snapshot.data().data) {
+            allData[collection] = snapshot.data().data;
           }
         } catch (error) {
-          console.warn(`Erro ao carregar dados do usuário ${userId}:`, error);
+          console.warn(`Erro ao carregar ${collection}:`, error);
         }
       }
       
-      console.log("Dados globais carregados:", {
+      console.log("Dados públicos carregados:", {
         tournaments: allData.tournaments.length,
         clubs: allData.clubs.length,
         players: allData.players.length,
@@ -75,13 +65,13 @@ class GlobalDataManager {
       
       return allData;
     } catch (error) {
-      console.error("Erro ao carregar dados globais:", error);
+      console.error("Erro ao carregar dados públicos:", error);
       return { tournaments: [], clubs: [], players: [], matches: [], coaches: [] };
     }
   }
 
-  // Salvar dados globalmente (para um usuário específico)
-  async saveGlobalData(userId, type, data) {
+  // Salvar dados na coleção pública
+  async savePublicData(type, data) {
     if (!this.firebaseReady) {
       throw new Error("Firebase não está pronto");
     }
@@ -89,17 +79,15 @@ class GlobalDataManager {
     try {
       const cleanedData = this.cleanData(data);
       await this.db
-        .collection("users")
-        .doc(userId)
-        .collection("data")
+        .collection("public")
         .doc(type)
         .set({
           data: cleanedData,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
         });
-      console.log(`${type} salvo globalmente para usuário ${userId}`);
+      console.log(`${type} salvo na coleção pública`);
     } catch (error) {
-      console.error(`Erro ao salvar ${type} globalmente:`, error);
+      console.error(`Erro ao salvar ${type} publicamente:`, error);
       throw error;
     }
   }
