@@ -52,21 +52,32 @@ class PublicTournamentViewer {
 
   async loadFromFirebase() {
     console.log("Carregando dados do Firebase...");
+    
+    // Fazer login anônimo para acessar dados públicos
+    await firebase.auth().signInAnonymously();
+    
     const usersSnapshot = await this.db.collection("users").get();
+    console.log(`Encontrados ${usersSnapshot.docs.length} usuários`);
     
     let allData = { tournaments: [], clubs: [], players: [], matches: [], coaches: [] };
     
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
-      const userData = await this.db.collection("users").doc(userId).collection("data").get();
+      console.log(`Carregando dados do usuário: ${userId}`);
       
-      userData.docs.forEach(doc => {
-        const docData = doc.data();
-        if (docData.data && Array.isArray(docData.data)) {
-          allData[doc.id] = allData[doc.id] || [];
-          allData[doc.id].push(...docData.data.map(item => ({ ...item, userId })));
+      try {
+        const dataCollections = ['tournaments', 'clubs', 'players', 'matches', 'coaches'];
+        
+        for (const collection of dataCollections) {
+          const doc = await this.db.collection("users").doc(userId).collection("data").doc(collection).get();
+          
+          if (doc.exists && doc.data().data) {
+            allData[collection].push(...doc.data().data.map(item => ({ ...item, userId })));
+          }
         }
-      });
+      } catch (error) {
+        console.warn(`Erro ao carregar dados do usuário ${userId}:`, error);
+      }
     }
     
     Object.assign(this.data, allData);
