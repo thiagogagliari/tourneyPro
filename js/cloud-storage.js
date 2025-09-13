@@ -23,10 +23,6 @@ class CloudStorage {
         firebase.initializeApp(this.firebaseConfig);
         this.db = firebase.firestore();
         this.auth = firebase.auth();
-        
-        // Autenticação anônima para leitura pública
-        await this.auth.signInAnonymously();
-        
         this.firebaseReady = true;
 
         // Listener de autenticação
