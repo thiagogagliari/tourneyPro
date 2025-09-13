@@ -37,13 +37,12 @@ class CloudStorage {
 
 
 
-  // Salvar dados no Firebase (privado e público)
+  // Salvar dados apenas no Firebase
   async saveData(key, data) {
     if (!this.firebaseReady || !this.currentUser) {
       throw new Error("Usuário não logado ou Firebase não disponível");
     }
-    await this.saveToCloud(key, data);
-    await this.saveToPublic(key, data);
+    return await this.saveToCloud(key, data);
   }
 
   // Carregar dados apenas do Firebase
@@ -72,14 +71,16 @@ class CloudStorage {
     return obj;
   }
 
-  // Salvar na nuvem (privado)
+  // Salvar na nuvem
   async saveToCloud(key, data) {
     if (!this.firebaseReady || !this.currentUser) {
       throw new Error("Firebase não disponível ou usuário não logado");
     }
 
     try {
+      // Limpar dados removendo undefined
       const cleanedData = this.cleanData(data);
+      console.log(`Salvando ${key} na nuvem:`, cleanedData.length, "itens");
       await this.db
         .collection("users")
         .doc(this.currentUser.uid)
@@ -89,41 +90,10 @@ class CloudStorage {
           data: cleanedData,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
         });
+      console.log(`${key} salvo com sucesso na nuvem`);
     } catch (error) {
       console.error("Erro ao salvar na nuvem:", error);
       throw error;
-    }
-  }
-
-  // Salvar na coleção pública
-  async saveToPublic(key, data) {
-    try {
-      const cleanedData = this.cleanData(data);
-      
-      // Carregar dados existentes
-      const existingDoc = await this.db.collection("public").doc(key).get();
-      let existingData = [];
-      
-      if (existingDoc.exists && existingDoc.data().data) {
-        existingData = existingDoc.data().data;
-      }
-      
-      // Mesclar dados do usuário atual
-      const userItems = cleanedData.map(item => ({ ...item, userId: this.currentUser.uid }));
-      const otherUsersData = existingData.filter(item => item.userId !== this.currentUser.uid);
-      const mergedData = [...otherUsersData, ...userItems];
-      
-      await this.db
-        .collection("public")
-        .doc(key)
-        .set({
-          data: mergedData,
-          lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-      
-      console.log(`${key} salvo na coleção pública`);
-    } catch (error) {
-      console.warn(`Erro ao salvar ${key} publicamente:`, error);
     }
   }
 
