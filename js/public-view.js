@@ -10,100 +10,28 @@ class PublicTournamentViewer {
     this.init();
   }
 
-  init() {
-    this.initFirebase();
+  async init() {
     this.setupEventListeners();
-    this.loadData();
-  }
-
-  initFirebase() {
-    if (typeof firebase === "undefined") {
-      console.error("Firebase não carregado");
-      return;
-    }
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD4fzDTkT8PYZzxzJL9pEaFUIx0V0H8gPk",
-      authDomain: "meu-torneio-pro.firebaseapp.com",
-      projectId: "meu-torneio-pro",
-      storageBucket: "meu-torneio-pro.firebasestorage.app",
-      messagingSenderId: "769236217387",
-      appId: "1:769236217387:web:7f188f16c93da66a99446e",
-    };
-
-    if (!firebase.apps || !firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    this.db = firebase.firestore();
+    await this.loadData();
   }
 
   async loadData() {
-    if (this.db) {
-      try {
-        await this.loadFromFirebase();
-        return;
-      } catch (error) {
-        console.warn("Erro no Firebase, tentando localStorage:", error);
-      }
+    if (!globalDataManager.firebaseReady) {
+      console.error("Firebase não está pronto");
+      return;
     }
     
-    this.loadFromLocalStorage();
-  }
-
-  async loadFromFirebase() {
-    console.log("Carregando dados do Firebase...");
-    
-    // Fazer login anônimo para acessar dados públicos
-    await firebase.auth().signInAnonymously();
-    
-    const usersSnapshot = await this.db.collection("users").get();
-    console.log(`Encontrados ${usersSnapshot.docs.length} usuários`);
-    
-    let allData = { tournaments: [], clubs: [], players: [], matches: [], coaches: [] };
-    
-    for (const userDoc of usersSnapshot.docs) {
-      const userId = userDoc.id;
-      console.log(`Carregando dados do usuário: ${userId}`);
-      
-      try {
-        const dataCollections = ['tournaments', 'clubs', 'players', 'matches', 'coaches'];
-        
-        for (const collection of dataCollections) {
-          const doc = await this.db.collection("users").doc(userId).collection("data").doc(collection).get();
-          
-          if (doc.exists && doc.data().data) {
-            allData[collection].push(...doc.data().data.map(item => ({ ...item, userId })));
-          }
-        }
-      } catch (error) {
-        console.warn(`Erro ao carregar dados do usuário ${userId}:`, error);
-      }
+    try {
+      console.log("Carregando dados globais...");
+      this.data = await globalDataManager.loadAllData();
+      console.log("Dados carregados:", this.data);
+      this.showTournaments();
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
     }
-    
-    Object.assign(this.data, allData);
-    console.log("Dados Firebase carregados:", this.data);
-    this.showTournaments();
   }
 
-  loadFromLocalStorage() {
-    console.log("Carregando dados do localStorage...");
-    const keys = ['tournaments', 'clubs', 'players', 'matches', 'coaches'];
-    
-    keys.forEach(key => {
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        try {
-          this.data[key] = JSON.parse(stored);
-        } catch (e) {
-          console.warn(`Erro ao parsear ${key}:`, e);
-          this.data[key] = [];
-        }
-      }
-    });
-    
-    console.log("Dados localStorage carregados:", this.data);
-    this.showTournaments();
-  }
+
 
   setupEventListeners() {
     document.querySelectorAll(".nav-btn").forEach((btn) => {

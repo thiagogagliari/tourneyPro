@@ -45,85 +45,57 @@ class TournamentManager {
   }
 
   async login(email, password) {
-    // Tentar login no Firebase primeiro
-    if (cloudStorage.firebaseReady) {
-      const result = await cloudStorage.signIn(email, password);
-      if (result.success) {
-        // Aguardar carregamento dos dados da nuvem
-        await this.loadCloudData();
-
-        // Criar ou encontrar usuário local
-        let user = this.data.users.find((u) => u.email === email);
-        if (!user) {
-          user = {
-            id: Date.now(),
-            email,
-            username: email.split("@")[0],
-            createdAt: new Date().toISOString(),
-          };
-          this.data.users.push(user);
-          this.saveData("users");
-        }
-        this.currentUser = user;
-        localStorage.setItem("currentUser", JSON.stringify(user));
-        this.showDashboard();
-        return true;
-      }
+    if (!cloudStorage.firebaseReady) {
+      alert('Sistema não está conectado. Tente novamente.');
+      return false;
     }
+    
+    const result = await cloudStorage.signIn(email, password);
+    if (result.success) {
+      // Aguardar carregamento dos dados da nuvem
+      await this.loadCloudData();
 
-    // Fallback para sistema local
-    const user = this.data.users.find(
-      (u) =>
-        (u.email === email || u.username === email) && u.password === password
-    );
-
-    if (user) {
-      this.currentUser = user;
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      this.showDashboard();
-      return true;
-    }
-    return false;
-  }
-
-  async register(email, password) {
-    // Tentar registro no Firebase primeiro
-    if (cloudStorage.firebaseReady) {
-      const result = await cloudStorage.signUp(email, password);
-      if (result.success) {
-        const newUser = {
+      // Criar ou encontrar usuário local
+      let user = this.data.users.find((u) => u.email === email);
+      if (!user) {
+        user = {
           id: Date.now(),
           email,
           username: email.split("@")[0],
           createdAt: new Date().toISOString(),
         };
-        this.data.users.push(newUser);
-        cloudStorage.saveData("users", this.data.users);
-        return true;
-      } else {
-        throw new Error(result.error);
+        this.data.users.push(user);
+        await this.saveData("users");
       }
+      this.currentUser = user;
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      this.showDashboard();
+      return true;
     }
+    
+    return false;
+  }
 
-    // Fallback para sistema local
-    const existingUser = this.data.users.find(
-      (u) => u.email === email || u.username === email
-    );
-    if (existingUser) {
+  async register(email, password) {
+    if (!cloudStorage.firebaseReady) {
+      alert('Sistema não está conectado. Tente novamente.');
       return false;
     }
-
-    const newUser = {
-      id: Date.now(),
-      email,
-      username: email.split("@")[0],
-      password,
-      createdAt: new Date().toISOString(),
-    };
-
-    this.data.users.push(newUser);
-    cloudStorage.saveData("users", this.data.users);
-    return true;
+    
+    const result = await cloudStorage.signUp(email, password);
+    if (result.success) {
+      const newUser = {
+        id: Date.now(),
+        email,
+        username: email.split("@")[0],
+        createdAt: new Date().toISOString(),
+      };
+      this.data.users.push(newUser);
+      await this.saveData("users");
+      return true;
+    } else {
+      throw new Error(result.error);
+    }
   }
 
   async logout() {
@@ -178,14 +150,20 @@ class TournamentManager {
 
   // Dados
   async saveData(type) {
+    if (!cloudStorage.firebaseReady) {
+      console.error('Firebase não está pronto');
+      alert('Sistema não está conectado. Tente novamente.');
+      return;
+    }
+    
     try {
-      console.log(`Tentando salvar ${type}:`, {
+      console.log(`Salvando ${type} no Firebase:`, {
         firebaseReady: cloudStorage.firebaseReady,
         currentUser: !!cloudStorage.currentUser,
         dataLength: this.data[type].length,
       });
       await cloudStorage.saveData(type, this.data[type]);
-      console.log(`${type} salvo com sucesso`);
+      console.log(`${type} salvo com sucesso no Firebase`);
     } catch (error) {
       console.error(`Erro ao salvar ${type}:`, error);
       alert(`Erro ao salvar ${type}: ${error.message}`);
@@ -4175,28 +4153,32 @@ class TournamentManager {
 
   // Carregar dados da nuvem
   async loadCloudData() {
-    if (cloudStorage.firebaseReady && cloudStorage.currentUser) {
-      console.log("Carregando todos os dados da nuvem...");
+    if (!cloudStorage.firebaseReady) {
+      console.error('Firebase não está pronto');
+      return;
+    }
+    
+    console.log("Carregando todos os dados da nuvem...");
 
-      try {
-        // Carregar cada tipo de dado
-        this.data.users = await cloudStorage.loadData("users");
-        this.data.tournaments = await cloudStorage.loadData("tournaments");
-        this.data.clubs = await cloudStorage.loadData("clubs");
-        this.data.players = await cloudStorage.loadData("players");
-        this.data.coaches = await cloudStorage.loadData("coaches");
-        this.data.matches = await cloudStorage.loadData("matches");
-        this.data.rounds = await cloudStorage.loadData("rounds");
+    try {
+      // Carregar cada tipo de dado
+      this.data.users = await cloudStorage.loadData("users");
+      this.data.tournaments = await cloudStorage.loadData("tournaments");
+      this.data.clubs = await cloudStorage.loadData("clubs");
+      this.data.players = await cloudStorage.loadData("players");
+      this.data.coaches = await cloudStorage.loadData("coaches");
+      this.data.matches = await cloudStorage.loadData("matches");
+      this.data.rounds = await cloudStorage.loadData("rounds");
 
-        console.log("Dados carregados da nuvem:", {
-          tournaments: this.data.tournaments.length,
-          clubs: this.data.clubs.length,
-          players: this.data.players.length,
-          matches: this.data.matches.length,
-        });
-      } catch (error) {
-        console.error("Erro ao carregar dados da nuvem:", error);
-      }
+      console.log("Dados carregados da nuvem:", {
+        tournaments: this.data.tournaments.length,
+        clubs: this.data.clubs.length,
+        players: this.data.players.length,
+        matches: this.data.matches.length,
+      });
+    } catch (error) {
+      console.error("Erro ao carregar dados da nuvem:", error);
+      alert('Erro ao carregar dados. Tente recarregar a página.');
     }
   }
 
