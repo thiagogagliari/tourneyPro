@@ -3494,28 +3494,72 @@ class TournamentManager {
       return;
     }
     
-    // Formação padrão 4-3-3
     const formation = club.formation || '4-3-3';
-    const lineup = this.generateLineup(players, formation);
-    this.renderFormationField(lineup, formation, club);
+    const lineup = club.lineup || this.generateDefaultLineup(players, formation);
+    this.renderFormationEditor(lineup, formation, club, players);
   }
   
-  // Gerar escalação baseada na formação
-  generateLineup(players, formation) {
-    const lineup = {
-      goalkeeper: null,
-      defenders: [],
-      midfielders: [],
-      forwards: []
+  // Gerar escalação padrão
+  generateDefaultLineup(players, formation) {
+    const formations = {
+      '4-3-3': { def: 4, mid: 3, att: 3 },
+      '4-4-2': { def: 4, mid: 4, att: 2 },
+      '3-5-2': { def: 3, mid: 5, att: 2 },
+      '4-2-3-1': { def: 4, mid: 5, att: 1 },
+      '5-3-2': { def: 5, mid: 3, att: 2 }
     };
     
-    // Separar jogadores por posição
+    const formationData = formations[formation] || formations['4-3-3'];
     const goalkeepers = players.filter(p => p.position === 'Goleiro');
     const defenders = players.filter(p => ['Zagueiro', 'Lateral'].includes(p.position));
     const midfielders = players.filter(p => ['Volante', 'Meia'].includes(p.position));
     const forwards = players.filter(p => p.position === 'Atacante');
     
-    // Definir quantidades por formação
+    return {
+      goalkeeper: goalkeepers[0]?.id || null,
+      defenders: defenders.slice(0, formationData.def).map(p => p.id),
+      midfielders: midfielders.slice(0, formationData.mid).map(p => p.id),
+      forwards: forwards.slice(0, formationData.att).map(p => p.id)
+    };
+  }
+  
+  // Renderizar editor de formação
+  renderFormationEditor(lineup, formation, club, allPlayers) {
+    const container = document.getElementById('club-formation-field');
+    
+    container.innerHTML = `
+      <div class="formation-header">
+        <div class="club-formation-info">
+          <img src="${club.logo || 'https://via.placeholder.com/40'}" class="formation-club-logo" alt="${club.name}">
+          <div>
+            <h3>${club.name}</h3>
+            <select id="formation-select" onchange="app.changeFormation(${club.id})">
+              <option value="4-3-3" ${formation === '4-3-3' ? 'selected' : ''}>4-3-3</option>
+              <option value="4-4-2" ${formation === '4-4-2' ? 'selected' : ''}>4-4-2</option>
+              <option value="3-5-2" ${formation === '3-5-2' ? 'selected' : ''}>3-5-2</option>
+              <option value="4-2-3-1" ${formation === '4-2-3-1' ? 'selected' : ''}>4-2-3-1</option>
+              <option value="5-3-2" ${formation === '5-3-2' ? 'selected' : ''}>5-3-2</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="app.saveLineup(${club.id})">Salvar Escalação</button>
+      </div>
+      <div class="football-field">
+        <div class="field-lines">
+          <div class="center-circle"></div>
+          <div class="center-line"></div>
+          <div class="penalty-area penalty-top"></div>
+          <div class="penalty-area penalty-bottom"></div>
+        </div>
+        <div class="players-positions">
+          ${this.renderEditablePositions(lineup, formation, allPlayers)}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Renderizar posições editáveis
+  renderEditablePositions(lineup, formation, allPlayers) {
     const formations = {
       '4-3-3': { def: 4, mid: 3, att: 3 },
       '4-4-2': { def: 4, mid: 4, att: 2 },
@@ -3526,80 +3570,173 @@ class TournamentManager {
     
     const formationData = formations[formation] || formations['4-3-3'];
     
-    // Selecionar jogadores
-    lineup.goalkeeper = goalkeepers[0] || null;
-    lineup.defenders = defenders.slice(0, formationData.def);
-    lineup.midfielders = midfielders.slice(0, formationData.mid);
-    lineup.forwards = forwards.slice(0, formationData.att);
-    
-    return lineup;
-  }
-  
-  // Renderizar campo com formação
-  renderFormationField(lineup, formation, club) {
-    const container = document.getElementById('club-formation-field');
-    
-    container.innerHTML = `
-      <div class="formation-header">
-        <div class="club-formation-info">
-          <img src="${club.logo || 'https://via.placeholder.com/40'}" class="formation-club-logo" alt="${club.name}">
-          <div>
-            <h3>${club.name}</h3>
-            <span class="formation-system">${formation}</span>
-          </div>
-        </div>
+    return `
+      <div class="position-line forwards-line">
+        ${this.renderPositionSlots('forward', formationData.att, lineup.forwards, allPlayers)}
       </div>
-      <div class="football-field">
-        <div class="field-lines">
-          <div class="center-circle"></div>
-          <div class="center-line"></div>
-          <div class="penalty-area penalty-top"></div>
-          <div class="penalty-area penalty-bottom"></div>
-        </div>
-        <div class="players-positions">
-          ${this.renderPositionPlayers('goalkeeper', lineup.goalkeeper)}
-          ${this.renderPositionPlayers('defenders', lineup.defenders)}
-          ${this.renderPositionPlayers('midfielders', lineup.midfielders)}
-          ${this.renderPositionPlayers('forwards', lineup.forwards)}
-        </div>
+      <div class="position-line midfielders-line">
+        ${this.renderPositionSlots('midfielder', formationData.mid, lineup.midfielders, allPlayers)}
+      </div>
+      <div class="position-line defenders-line">
+        ${this.renderPositionSlots('defender', formationData.def, lineup.defenders, allPlayers)}
+      </div>
+      <div class="position-line goalkeeper-line">
+        ${this.renderPositionSlots('goalkeeper', 1, [lineup.goalkeeper], allPlayers)}
       </div>
     `;
   }
   
-  // Renderizar jogadores por posição
-  renderPositionPlayers(positionType, players) {
-    if (positionType === 'goalkeeper' && players) {
-      return `
-        <div class="position-line goalkeeper-line">
-          <div class="player-card" onclick="app.showPlayerProfile(${players.id})">
-            <img src="${players.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${players.name}">
-            <div class="player-info">
-              <span class="player-name">${players.name}</span>
-              <span class="player-number">${players.number || '1'}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    
-    if (Array.isArray(players) && players.length > 0) {
-      const positionClass = `${positionType}-line`;
-      return `
-        <div class="position-line ${positionClass}">
-          ${players.map(player => `
+  // Renderizar slots de posição
+  renderPositionSlots(positionType, count, selectedIds, allPlayers) {
+    const slots = [];
+    for (let i = 0; i < count; i++) {
+      const playerId = selectedIds[i];
+      const player = playerId ? allPlayers.find(p => p.id == playerId) : null;
+      
+      slots.push(`
+        <div class="player-slot" data-position="${positionType}" data-index="${i}">
+          ${player ? `
             <div class="player-card" onclick="app.showPlayerProfile(${player.id})">
               <img src="${player.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${player.name}">
               <div class="player-info">
                 <span class="player-name">${player.name}</span>
                 <span class="player-number">${player.number || '?'}</span>
               </div>
+              <button class="remove-player" onclick="app.removeFromLineup('${positionType}', ${i})">&times;</button>
             </div>
-          `).join('')}
+          ` : `
+            <div class="empty-slot" onclick="app.showPlayerSelector('${positionType}', ${i})">
+              <i class="fas fa-plus"></i>
+              <span>Adicionar</span>
+            </div>
+          `}
         </div>
-      `;
+      `);
+    }
+    return slots.join('');
+  }
+
+  // Mudar formação
+  changeFormation(clubId) {
+    const formation = document.getElementById('formation-select').value;
+    const club = this.data.clubs.find(c => c.id === clubId);
+    club.formation = formation;
+    club.lineup = null; // Reset lineup
+    this.loadClubFormation(clubId);
+  }
+  
+  // Salvar escalação
+  async saveLineup(clubId) {
+    const club = this.data.clubs.find(c => c.id === clubId);
+    const formation = document.getElementById('formation-select').value;
+    
+    const lineup = {
+      goalkeeper: null,
+      defenders: [],
+      midfielders: [],
+      forwards: []
+    };
+    
+    // Coletar jogadores selecionados
+    document.querySelectorAll('.player-slot').forEach(slot => {
+      const position = slot.dataset.position;
+      const index = parseInt(slot.dataset.index);
+      const playerCard = slot.querySelector('.player-card');
+      
+      if (playerCard) {
+        const playerId = parseInt(playerCard.getAttribute('onclick').match(/\d+/)[0]);
+        
+        if (position === 'goalkeeper') {
+          lineup.goalkeeper = playerId;
+        } else if (position === 'defender') {
+          lineup.defenders[index] = playerId;
+        } else if (position === 'midfielder') {
+          lineup.midfielders[index] = playerId;
+        } else if (position === 'forward') {
+          lineup.forwards[index] = playerId;
+        }
+      }
+    });
+    
+    club.formation = formation;
+    club.lineup = lineup;
+    await this.saveData('clubs');
+    alert('Escalação salva com sucesso!');
+  }
+  
+  // Mostrar seletor de jogador
+  showPlayerSelector(position, index) {
+    const clubId = parseInt(document.getElementById('club-profile-modal').dataset.clubId);
+    const players = this.getUserData('players').filter(p => p.clubId == clubId);
+    
+    const positionFilters = {
+      goalkeeper: ['Goleiro'],
+      defender: ['Zagueiro', 'Lateral'],
+      midfielder: ['Volante', 'Meia'],
+      forward: ['Atacante']
+    };
+    
+    const availablePlayers = players.filter(p => 
+      positionFilters[position].includes(p.position)
+    );
+    
+    if (availablePlayers.length === 0) {
+      alert('Nenhum jogador disponível para esta posição');
+      return;
     }
     
-    return '';
+    const playerList = availablePlayers.map(p => 
+      `<div class="player-option" onclick="app.selectPlayer('${position}', ${index}, ${p.id})">
+        <img src="${p.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${p.name}">
+        <span>${p.name} (${p.number || '?'})</span>
+      </div>`
+    ).join('');
+    
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="player-selector-modal" id="player-selector">
+        <div class="player-selector-content">
+          <h3>Selecionar Jogador</h3>
+          <div class="player-options">${playerList}</div>
+          <button onclick="app.closePlayerSelector()">Cancelar</button>
+        </div>
+      </div>
+    `);
+  }
+  
+  // Selecionar jogador
+  selectPlayer(position, index, playerId) {
+    const slot = document.querySelector(`[data-position="${position}"][data-index="${index}"]`);
+    const player = this.data.players.find(p => p.id == playerId);
+    
+    slot.innerHTML = `
+      <div class="player-card" onclick="app.showPlayerProfile(${player.id})">
+        <img src="${player.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${player.name}">
+        <div class="player-info">
+          <span class="player-name">${player.name}</span>
+          <span class="player-number">${player.number || '?'}</span>
+        </div>
+        <button class="remove-player" onclick="app.removeFromLineup('${position}', ${index})">&times;</button>
+      </div>
+    `;
+    
+    this.closePlayerSelector();
+  }
+  
+  // Remover da escalação
+  removeFromLineup(position, index) {
+    const slot = document.querySelector(`[data-position="${position}"][data-index="${index}"]`);
+    slot.innerHTML = `
+      <div class="empty-slot" onclick="app.showPlayerSelector('${position}', ${index})">
+        <i class="fas fa-plus"></i>
+        <span>Adicionar</span>
+      </div>
+    `;
+  }
+  
+  // Fechar seletor
+  closePlayerSelector() {
+    const modal = document.getElementById('player-selector');
+    if (modal) modal.remove();
   }
 
   closeClubProfile() {
