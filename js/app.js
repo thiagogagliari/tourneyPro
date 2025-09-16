@@ -3570,31 +3570,71 @@ class TournamentManager {
     
     const formationData = formations[formation] || formations['4-3-3'];
     
+    // Ajustar arrays para o tamanho correto da formação
+    const adjustedLineup = {
+      goalkeeper: lineup.goalkeeper,
+      defenders: (lineup.defenders || []).slice(0, formationData.def),
+      midfielders: (lineup.midfielders || []).slice(0, formationData.mid),
+      forwards: (lineup.forwards || []).slice(0, formationData.att)
+    };
+    
+    // Preencher com nulls se necessário
+    while (adjustedLineup.defenders.length < formationData.def) {
+      adjustedLineup.defenders.push(null);
+    }
+    while (adjustedLineup.midfielders.length < formationData.mid) {
+      adjustedLineup.midfielders.push(null);
+    }
+    while (adjustedLineup.forwards.length < formationData.att) {
+      adjustedLineup.forwards.push(null);
+    }
+    
+    // Renderizar meio-campo especial para 4-2-3-1
+    let midfieldHtml = '';
+    if (formation === '4-2-3-1') {
+      const defensiveMids = adjustedLineup.midfielders.slice(0, 2);
+      const offensiveMids = adjustedLineup.midfielders.slice(2, 5);
+      
+      midfieldHtml = `
+        <div class="position-line midfielders-line offensive-mids">
+          ${this.renderPositionSlots('midfielder', 3, offensiveMids, allPlayers, 2)}
+        </div>
+        <div class="position-line midfielders-line defensive-mids">
+          ${this.renderPositionSlots('midfielder', 2, defensiveMids, allPlayers, 0)}
+        </div>
+      `;
+    } else {
+      midfieldHtml = `
+        <div class="position-line midfielders-line">
+          ${this.renderPositionSlots('midfielder', formationData.mid, adjustedLineup.midfielders, allPlayers)}
+        </div>
+      `;
+    }
+    
     return `
       <div class="position-line forwards-line">
-        ${this.renderPositionSlots('forward', formationData.att, lineup.forwards, allPlayers)}
+        ${this.renderPositionSlots('forward', formationData.att, adjustedLineup.forwards, allPlayers)}
       </div>
-      <div class="position-line midfielders-line">
-        ${this.renderPositionSlots('midfielder', formationData.mid, lineup.midfielders, allPlayers)}
-      </div>
+      ${midfieldHtml}
       <div class="position-line defenders-line">
-        ${this.renderPositionSlots('defender', formationData.def, lineup.defenders, allPlayers)}
+        ${this.renderPositionSlots('defender', formationData.def, adjustedLineup.defenders, allPlayers)}
       </div>
       <div class="position-line goalkeeper-line">
-        ${this.renderPositionSlots('goalkeeper', 1, [lineup.goalkeeper], allPlayers)}
+        ${this.renderPositionSlots('goalkeeper', 1, [adjustedLineup.goalkeeper], allPlayers)}
       </div>
     `;
   }
   
   // Renderizar slots de posição
-  renderPositionSlots(positionType, count, selectedIds, allPlayers) {
+  renderPositionSlots(positionType, count, selectedIds, allPlayers, indexOffset = 0) {
     const slots = [];
     for (let i = 0; i < count; i++) {
+      const actualIndex = i + indexOffset;
       const playerId = selectedIds[i];
       const player = playerId ? allPlayers.find(p => p.id == playerId) : null;
       
       slots.push(`
-        <div class="player-slot" data-position="${positionType}" data-index="${i}">
+        <div class="player-slot" data-position="${positionType}" data-index="${actualIndex}">
           ${player ? `
             <div class="player-card" onclick="app.showPlayerProfile(${player.id})">
               <img src="${player.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${player.name}">
@@ -3602,10 +3642,10 @@ class TournamentManager {
                 <span class="player-name">${player.name}</span>
                 <span class="player-number">${player.number || '?'}</span>
               </div>
-              <button class="remove-player" onclick="app.removeFromLineup('${positionType}', ${i})">&times;</button>
+              <button class="remove-player" onclick="app.removeFromLineup('${positionType}', ${actualIndex})">&times;</button>
             </div>
           ` : `
-            <div class="empty-slot" onclick="app.showPlayerSelector('${positionType}', ${i})">
+            <div class="empty-slot" onclick="app.showPlayerSelector('${positionType}', ${actualIndex})">
               <i class="fas fa-plus"></i>
               <span>Adicionar</span>
             </div>
@@ -3620,8 +3660,11 @@ class TournamentManager {
   changeFormation(clubId) {
     const formation = document.getElementById('formation-select').value;
     const club = this.data.clubs.find(c => c.id === clubId);
+    const players = this.getUserData('players').filter(p => p.clubId == clubId);
+    
     club.formation = formation;
-    club.lineup = null; // Reset lineup
+    // Gerar nova escalação baseada na formação selecionada
+    club.lineup = this.generateDefaultLineup(players, formation);
     this.loadClubFormation(clubId);
   }
   

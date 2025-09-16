@@ -36,9 +36,8 @@
   border: 3px solid white;
   border-radius: 10px;
   position: relative;
-  width: 100%;
-  max-width: 600px;
-  height: 400px;
+  width: 850px;
+  height: 600px;
   margin: 0 auto;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -112,6 +111,7 @@
   align-items: center;
   gap: 15px;
   flex-wrap: wrap;
+  min-height: 80px;
 }
 
 .goalkeeper-line {
@@ -119,15 +119,48 @@
 }
 
 .defenders-line {
-  justify-content: space-around;
+  justify-content: space-evenly;
 }
 
 .midfielders-line {
-  justify-content: space-around;
+  justify-content: space-evenly;
 }
 
 .forwards-line {
-  justify-content: space-around;
+  justify-content: space-evenly;
+}
+
+/* Ajustes específicos para diferentes formações */
+.offensive-mids {
+  margin-bottom: 20px;
+}
+
+.defensive-mids {
+  margin-top: 20px;
+}
+
+/* Espaçamento especial para 4-2-3-1 */
+.offensive-mids .player-slot {
+  margin: 0 10px;
+}
+
+.defensive-mids .player-slot {
+  margin: 0 20px;
+}
+
+/* Responsividade para formações com muitos jogadores */
+@media (max-width: 768px) {
+  .position-line {
+    gap: 8px;
+    min-height: 60px;
+  }
+  
+  .defenders-line,
+  .midfielders-line,
+  .forwards-line {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 
 .player-card {
