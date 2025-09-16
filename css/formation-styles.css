@@ -18,7 +18,6 @@
 .formation-club-logo {
   width: 50px;
   height: 50px;
-  border-radius: 50%;
   object-fit: cover;
 }
 
@@ -164,7 +163,6 @@
 }
 
 .player-card {
-  background: rgba(255, 255, 255, 0.95);
   border-radius: 8px;
   padding: 10px;
   text-align: center;
@@ -173,12 +171,13 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   min-width: 80px;
   position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .player-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  background: rgba(255, 255, 255, 1);
+  filter: brightness(1.1);
 }
 
 .player-card img {
@@ -366,4 +365,42 @@
     width: 100px;
     height: 60px;
   }
+}
+
+/* Estilos para seleção de cores do clube */
+.club-colors-section {
+  margin: 15px 0;
+}
+
+.club-colors-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.color-inputs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.color-inputs input[type="color"] {
+  width: 50px;
+  height: 40px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+}
+
+.color-inputs input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 6px;
+}
+
+.color-inputs input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 6px;
 }

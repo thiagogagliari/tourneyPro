@@ -626,6 +626,9 @@ class TournamentManager {
     document.getElementById("club-name").value = club.name;
     document.getElementById("club-country").value = club.country;
     document.getElementById("club-logo").value = club.logo || "";
+    document.getElementById("club-primary-color").value = club.primaryColor || "#ffffff";
+    document.getElementById("club-secondary-color").value = club.secondaryColor || "#000000";
+    document.getElementById("club-text-color").value = club.textColor || "#000000";
     // Marcar checkboxes dos torneios do clube
     const clubTournaments = club.tournamentIds || [];
     document.querySelectorAll('#club-tournaments-checkboxes input[type="checkbox"]').forEach(checkbox => {
@@ -3628,19 +3631,29 @@ class TournamentManager {
   // Renderizar slots de posição
   renderPositionSlots(positionType, count, selectedIds, allPlayers, indexOffset = 0) {
     const slots = [];
+    const clubId = parseInt(document.getElementById('club-profile-modal').dataset.clubId);
+    const club = this.data.clubs.find(c => c.id === clubId);
+    
     for (let i = 0; i < count; i++) {
       const actualIndex = i + indexOffset;
       const playerId = selectedIds[i];
       const player = playerId ? allPlayers.find(p => p.id == playerId) : null;
       
+      const clubColors = club ? {
+        primary: club.primaryColor || '#ffffff',
+        secondary: club.secondaryColor || '#000000', 
+        text: club.textColor || '#000000'
+      } : { primary: '#ffffff', secondary: '#000000', text: '#000000' };
+      
       slots.push(`
         <div class="player-slot" data-position="${positionType}" data-index="${actualIndex}">
           ${player ? `
-            <div class="player-card" onclick="app.showPlayerProfile(${player.id})">
+            <div class="player-card" onclick="app.showPlayerProfile(${player.id})" 
+                 style="background: linear-gradient(135deg, ${clubColors.primary} 0%, ${clubColors.secondary} 100%); color: ${clubColors.text};">
               <img src="${player.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${player.name}">
               <div class="player-info">
-                <span class="player-name">${player.name}</span>
-                <span class="player-number">${player.number || '?'}</span>
+                <span class="player-name" style="color: ${clubColors.text}; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">${player.name}</span>
+                <span class="player-number" style="background: rgba(255,255,255,0.2); color: ${clubColors.text};">${player.number || '?'}</span>
               </div>
               <button class="remove-player" onclick="app.removeFromLineup('${positionType}', ${actualIndex})">&times;</button>
             </div>
@@ -4820,6 +4833,9 @@ class TournamentManager {
           name: document.getElementById("club-name").value,
           country: document.getElementById("club-country").value,
           logo: document.getElementById("club-logo").value,
+          primaryColor: document.getElementById("club-primary-color").value,
+          secondaryColor: document.getElementById("club-secondary-color").value,
+          textColor: document.getElementById("club-text-color").value,
           tournamentIds: selectedTournaments,
         };
 
