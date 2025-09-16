@@ -3233,6 +3233,8 @@ class TournamentManager {
     this.loadClubMatches(clubMatches, club);
     this.loadClubStatistics(clubPlayers, clubMatches);
 
+    // Salvar clubId no modal para uso posterior
+    document.getElementById("club-profile-modal").dataset.clubId = clubId;
     document.getElementById("club-profile-modal").style.display = "block";
   }
 
@@ -3473,6 +3475,131 @@ class TournamentManager {
     // Ativar aba selecionada
     event.target.classList.add("active");
     document.getElementById(`club-${tabName}`).classList.add("active");
+    
+    // Carregar formação se for a aba de formação
+    if (tabName === 'formation') {
+      const clubId = parseInt(document.getElementById('club-profile-modal').dataset.clubId);
+      this.loadClubFormation(clubId);
+    }
+  }
+
+  // Carregar formação do clube
+  loadClubFormation(clubId) {
+    const club = this.data.clubs.find(c => c.id === clubId);
+    const players = this.getUserData('players').filter(p => p.clubId == clubId);
+    
+    if (players.length === 0) {
+      document.getElementById('club-formation-field').innerHTML = 
+        '<div class="no-data">Nenhum jogador encontrado para montar a formação</div>';
+      return;
+    }
+    
+    // Formação padrão 4-3-3
+    const formation = club.formation || '4-3-3';
+    const lineup = this.generateLineup(players, formation);
+    this.renderFormationField(lineup, formation, club);
+  }
+  
+  // Gerar escalação baseada na formação
+  generateLineup(players, formation) {
+    const lineup = {
+      goalkeeper: null,
+      defenders: [],
+      midfielders: [],
+      forwards: []
+    };
+    
+    // Separar jogadores por posição
+    const goalkeepers = players.filter(p => p.position === 'Goleiro');
+    const defenders = players.filter(p => ['Zagueiro', 'Lateral'].includes(p.position));
+    const midfielders = players.filter(p => ['Volante', 'Meia'].includes(p.position));
+    const forwards = players.filter(p => p.position === 'Atacante');
+    
+    // Definir quantidades por formação
+    const formations = {
+      '4-3-3': { def: 4, mid: 3, att: 3 },
+      '4-4-2': { def: 4, mid: 4, att: 2 },
+      '3-5-2': { def: 3, mid: 5, att: 2 },
+      '4-2-3-1': { def: 4, mid: 5, att: 1 },
+      '5-3-2': { def: 5, mid: 3, att: 2 }
+    };
+    
+    const formationData = formations[formation] || formations['4-3-3'];
+    
+    // Selecionar jogadores
+    lineup.goalkeeper = goalkeepers[0] || null;
+    lineup.defenders = defenders.slice(0, formationData.def);
+    lineup.midfielders = midfielders.slice(0, formationData.mid);
+    lineup.forwards = forwards.slice(0, formationData.att);
+    
+    return lineup;
+  }
+  
+  // Renderizar campo com formação
+  renderFormationField(lineup, formation, club) {
+    const container = document.getElementById('club-formation-field');
+    
+    container.innerHTML = `
+      <div class="formation-header">
+        <div class="club-formation-info">
+          <img src="${club.logo || 'https://via.placeholder.com/40'}" class="formation-club-logo" alt="${club.name}">
+          <div>
+            <h3>${club.name}</h3>
+            <span class="formation-system">${formation}</span>
+          </div>
+        </div>
+      </div>
+      <div class="football-field">
+        <div class="field-lines">
+          <div class="center-circle"></div>
+          <div class="center-line"></div>
+          <div class="penalty-area penalty-top"></div>
+          <div class="penalty-area penalty-bottom"></div>
+        </div>
+        <div class="players-positions">
+          ${this.renderPositionPlayers('goalkeeper', lineup.goalkeeper)}
+          ${this.renderPositionPlayers('defenders', lineup.defenders)}
+          ${this.renderPositionPlayers('midfielders', lineup.midfielders)}
+          ${this.renderPositionPlayers('forwards', lineup.forwards)}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Renderizar jogadores por posição
+  renderPositionPlayers(positionType, players) {
+    if (positionType === 'goalkeeper' && players) {
+      return `
+        <div class="position-line goalkeeper-line">
+          <div class="player-card" onclick="app.showPlayerProfile(${players.id})">
+            <img src="${players.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${players.name}">
+            <div class="player-info">
+              <span class="player-name">${players.name}</span>
+              <span class="player-number">${players.number || '1'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    if (Array.isArray(players) && players.length > 0) {
+      const positionClass = `${positionType}-line`;
+      return `
+        <div class="position-line ${positionClass}">
+          ${players.map(player => `
+            <div class="player-card" onclick="app.showPlayerProfile(${player.id})">
+              <img src="${player.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${player.name}">
+              <div class="player-info">
+                <span class="player-name">${player.name}</span>
+                <span class="player-number">${player.number || '?'}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    return '';
   }
 
   closeClubProfile() {

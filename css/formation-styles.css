@@ -1,0 +1,220 @@
+/* Estilos para Formação do Clube */
+.formation-container {
+  padding: 20px;
+  background: var(--bg-card);
+  border-radius: 10px;
+}
+
+.formation-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.formation-club-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.formation-system {
+  background: var(--primary-color);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.football-field {
+  background: linear-gradient(to bottom, #2d5a27 0%, #4a7c59 50%, #2d5a27 100%);
+  border: 3px solid white;
+  border-radius: 10px;
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  margin: 0 auto;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.field-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.center-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+.center-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: white;
+  transform: translateY(-50%);
+}
+
+.penalty-area {
+  position: absolute;
+  width: 120px;
+  height: 80px;
+  border: 2px solid white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.penalty-top {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.penalty-bottom {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.players-positions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.position-line {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.goalkeeper-line {
+  justify-content: center;
+}
+
+.defenders-line {
+  justify-content: space-around;
+}
+
+.midfielders-line {
+  justify-content: space-around;
+}
+
+.forwards-line {
+  justify-content: space-around;
+}
+
+.player-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  min-width: 60px;
+  position: relative;
+}
+
+.player-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 1);
+}
+
+.player-card img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 4px;
+}
+
+.player-info {
+  font-size: 0.7rem;
+  color: #333;
+}
+
+.player-name {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50px;
+}
+
+.player-number {
+  display: block;
+  font-size: 0.6rem;
+  color: #666;
+  font-weight: 700;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .football-field {
+    height: 300px;
+    max-width: 100%;
+  }
+  
+  .players-positions {
+    padding: 15px;
+  }
+  
+  .position-line {
+    gap: 10px;
+  }
+  
+  .player-card {
+    min-width: 50px;
+    padding: 6px;
+  }
+  
+  .player-card img {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .player-name {
+    max-width: 40px;
+    font-size: 0.6rem;
+  }
+  
+  .center-circle {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .penalty-area {
+    width: 100px;
+    height: 60px;
+  }
+}

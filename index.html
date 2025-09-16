@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/motm-styles.css" />
     <link rel="stylesheet" href="css/coach-h2h.css" />
     <link rel="stylesheet" href="css/rating-colors.css" />
+    <link rel="stylesheet" href="css/formation-styles.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -875,6 +876,9 @@
             <button class="club-tab" onclick="app.showClubTab('statistics')">
               Estatísticas
             </button>
+            <button class="club-tab" onclick="app.showClubTab('formation')">
+              Formação
+            </button>
           </div>
 
           <!-- Visão Geral -->
@@ -968,6 +972,13 @@
                   <div class="no-data">Nenhuma assistência encontrada</div>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          <!-- Formação -->
+          <div id="club-formation" class="club-tab-content">
+            <div id="club-formation-field" class="formation-container">
+              <div class="no-data">Carregando formação...</div>
             </div>
           </div>
         </div>
@@ -1330,6 +1341,7 @@
     
     <!-- App Scripts -->
     <script src="js/cloud-storage.js"></script>
+    <script src="js/global-data.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>
