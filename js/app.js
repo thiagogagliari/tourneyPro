@@ -948,11 +948,7 @@ class TournamentManager {
                 ? `<button class="btn-primary" onclick="event.stopPropagation(); app.showMatchDetails(${match.id})">Ver Detalhes</button>`
                 : ""
             }
-            ${
-              !isFinished
-                ? `<button class="btn-edit" onclick="app.editMatch(${match.id})">Editar</button>`
-                : ""
-            }
+            <button class="btn-edit" onclick="app.editMatch(${match.id})">Editar</button>
             <button class="btn-danger" onclick="app.deleteMatch(${
               match.id
             })">Excluir</button>
@@ -1171,6 +1167,28 @@ class TournamentManager {
       document.getElementById("match-events-section").style.display = "block";
       document.getElementById("home-score").required = true;
       document.getElementById("away-score").required = true;
+
+      // Carregar eventos existentes
+      if (match.events && match.events.length > 0) {
+        match.events.forEach((event, index) => {
+          this.addMatchEvent();
+          const eventItem = document.querySelectorAll('.event-item')[index];
+          if (eventItem) {
+            eventItem.querySelector(`input[name="event_minute_${index}"]`).value = event.minute;
+            eventItem.querySelector(`select[name="event_type_${index}"]`).value = event.type;
+            eventItem.querySelector(`select[name="event_team_${index}"]`).value = event.team;
+            
+            // Atualizar jogadores e selecionar o correto
+            this.updateEventPlayers(index);
+            setTimeout(() => {
+              const playerSelect = eventItem.querySelector(`select[name="event_player_${index}"]`);
+              if (playerSelect) {
+                playerSelect.value = event.player;
+              }
+            }, 100);
+          }
+        });
+      }
 
       // Carregar dados do MOTM
       this.updateMotmPlayers();
