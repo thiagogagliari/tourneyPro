@@ -1018,61 +1018,132 @@ class TournamentManager {
     const homeTeam = this.data.clubs.find((c) => c.id == match.homeTeamId);
     const awayTeam = this.data.clubs.find((c) => c.id == match.awayTeamId);
 
-    const sortedEvents = match.events.sort((a, b) => a.minute - b.minute);
+    // Agrupar eventos por minuto e time
+    const eventsByMinute = {};
+    match.events.forEach(event => {
+      const key = `${event.minute}-${event.team}`;
+      if (!eventsByMinute[key]) {
+        eventsByMinute[key] = [];
+      }
+      eventsByMinute[key].push(event);
+    });
 
-    container.innerHTML = sortedEvents
-      .map((event) => {
-        const isHomeTeam = event.team === homeTeam?.name;
-        const player = this.data.players.find(
-          (p) => p.id == event.playerId || p.name === event.player
-        );
+    // Ordenar por minuto
+    const sortedMinutes = Object.keys(eventsByMinute).sort((a, b) => {
+      const minuteA = parseInt(a.split('-')[0]);
+      const minuteB = parseInt(b.split('-')[0]);
+      return minuteA - minuteB;
+    });
 
-        let eventIcon = "";
-        let eventClass = "";
+    container.innerHTML = sortedMinutes
+      .map((key) => {
+        const events = eventsByMinute[key];
+        const minute = parseInt(key.split('-')[0]);
+        const team = key.split('-')[1];
+        const isHomeTeam = team === homeTeam?.name;
 
-        switch (event.type) {
-          case "Gol":
-            eventIcon = "⚽";
-            eventClass = "goal-event";
-            break;
-          case "Assistência":
-            eventIcon = "🅰️";
-            eventClass = "assist-event";
-            break;
-          case "Cartão Amarelo":
-            eventIcon = "🟨";
-            eventClass = "yellow-card-event";
-            break;
-          case "Cartão Vermelho":
-            eventIcon = "🟥";
-            eventClass = "red-card-event";
-            break;
-          default:
-            eventIcon = "⚪";
-            eventClass = "other-event";
+        // Separar gol e assistência
+        const goal = events.find(e => e.type === 'Gol');
+        const assist = events.find(e => e.type === 'Assistência');
+        const otherEvents = events.filter(e => e.type !== 'Gol' && e.type !== 'Assistência');
+
+        let html = '';
+
+        // Se há gol e assistência no mesmo minuto, mostrar juntos
+        if (goal && assist) {
+          const goalPlayer = this.data.players.find(p => p.id == goal.playerId || p.name === goal.player);
+          const assistPlayer = this.data.players.find(p => p.id == assist.playerId || p.name === assist.player);
+          
+          html += `
+            <div class="match-event-item goal-event ${isHomeTeam ? "home-event" : "away-event"}">
+              <div class="event-minute">${minute}'</div>
+              <div class="event-content">
+                <div class="event-icon">⚽</div>
+                <div class="event-details">
+                  <div class="goal-assist-combo">
+                    <div class="goal-info">
+                      <span class="event-type">Gol</span>
+                      <div class="event-player">
+                        <img src="${
+                          goalPlayer?.photo ||
+                          "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+                        }" class="event-player-photo" alt="${goal.player}">
+                        <span class="player-name">${goal.player}</span>
+                      </div>
+                    </div>
+                    <div class="assist-info">
+                      <span class="assist-label">Assistência:</span>
+                      <div class="event-player">
+                        <img src="${
+                          assistPlayer?.photo ||
+                          "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+                        }" class="event-player-photo" alt="${assist.player}">
+                        <span class="player-name">${assist.player}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="event-team">${team}</div>
+            </div>
+          `;
+        } else {
+          // Mostrar eventos individuais
+          events.forEach(event => {
+            const player = this.data.players.find(
+              (p) => p.id == event.playerId || p.name === event.player
+            );
+
+            let eventIcon = "";
+            let eventClass = "";
+
+            switch (event.type) {
+              case "Gol":
+                eventIcon = "⚽";
+                eventClass = "goal-event";
+                break;
+              case "Assistência":
+                eventIcon = "🅰️";
+                eventClass = "assist-event";
+                break;
+              case "Cartão Amarelo":
+                eventIcon = "🟨";
+                eventClass = "yellow-card-event";
+                break;
+              case "Cartão Vermelho":
+                eventIcon = "🟥";
+                eventClass = "red-card-event";
+                break;
+              default:
+                eventIcon = "⚪";
+                eventClass = "other-event";
+            }
+
+            html += `
+              <div class="match-event-item ${eventClass} ${
+                isHomeTeam ? "home-event" : "away-event"
+              }">
+                <div class="event-minute">${event.minute}'</div>
+                <div class="event-content">
+                  <div class="event-icon">${eventIcon}</div>
+                  <div class="event-details">
+                    <div class="event-type">${event.type}</div>
+                    <div class="event-player">
+                      <img src="${
+                        player?.photo ||
+                        "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+                      }" class="event-player-photo" alt="${event.player}">
+                      <span class="player-name">${event.player}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="event-team">${team}</div>
+              </div>
+            `;
+          });
         }
 
-        return `
-        <div class="match-event-item ${eventClass} ${
-          isHomeTeam ? "home-event" : "away-event"
-        }">
-          <div class="event-minute">${event.minute}'</div>
-          <div class="event-content">
-            <div class="event-icon">${eventIcon}</div>
-            <div class="event-details">
-              <div class="event-type">${event.type}</div>
-              <div class="event-player">
-                <img src="${
-                  player?.photo ||
-                  "https://static.flashscore.com/res/image/empty-face-man-share.gif"
-                }" class="event-player-photo" alt="${event.player}">
-                <span class="player-name">${event.player}</span>
-              </div>
-            </div>
-          </div>
-          <div class="event-team">${event.team}</div>
-        </div>
-      `;
+        return html;
       })
       .join("");
   }
