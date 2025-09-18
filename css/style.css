@@ -5322,8 +5322,8 @@ body {
 
 .assist-info .player-name {
   font-weight: 500;
-  color: #3498db;
-  font-size: 0.95rem;
+  color: #8ca2b1;
+  font-size: 1.40rem;
 }
 
 @media (max-width: 768px) {

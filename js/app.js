@@ -1186,6 +1186,86 @@ class TournamentManager {
     document.getElementById("match-details-modal").style.display = "none";
   }
 
+  calculateDefensiveRatings(match) {
+    if (match.status !== 'finished') return;
+
+    const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
+    const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
+    
+    if (!homeTeam || !awayTeam) return;
+
+    // Jogadores que participaram dos eventos
+    const playersWithEvents = new Set();
+    if (match.events) {
+      match.events.forEach(event => {
+        if (event.playerId) playersWithEvents.add(event.playerId);
+      });
+    }
+
+    // Calcular notas para time da casa
+    const homePlayers = this.data.players.filter(p => p.clubId == match.homeTeamId);
+    const homeDefenders = homePlayers.filter(p => 
+      ['Goleiro', 'Zagueiro', 'Lateral'].includes(p.position) && 
+      !playersWithEvents.has(p.id)
+    );
+
+    homeDefenders.forEach(player => {
+      let rating = 6.0; // Nota base
+      
+      // Bônus por não sofrer gols
+      if (match.awayScore === 0) {
+        rating += player.position === 'Goleiro' ? 2.0 : 1.5;
+      } else if (match.awayScore === 1) {
+        rating += player.position === 'Goleiro' ? 0.5 : 0.3;
+      } else {
+        // Penalidade por sofrer muitos gols
+        rating -= (match.awayScore - 1) * (player.position === 'Goleiro' ? 0.8 : 0.5);
+      }
+
+      // Bônus por vitória
+      if (match.homeScore > match.awayScore) {
+        rating += 0.5;
+      } else if (match.homeScore < match.awayScore) {
+        rating -= 0.3;
+      }
+
+      rating = Math.max(4.0, Math.min(10.0, rating));
+      
+      if (!match.defensiveRatings) match.defensiveRatings = {};
+      match.defensiveRatings[player.id] = parseFloat(rating.toFixed(1));
+    });
+
+    // Calcular notas para time visitante
+    const awayPlayers = this.data.players.filter(p => p.clubId == match.awayTeamId);
+    const awayDefenders = awayPlayers.filter(p => 
+      ['Goleiro', 'Zagueiro', 'Lateral'].includes(p.position) && 
+      !playersWithEvents.has(p.id)
+    );
+
+    awayDefenders.forEach(player => {
+      let rating = 6.0;
+      
+      if (match.homeScore === 0) {
+        rating += player.position === 'Goleiro' ? 2.0 : 1.5;
+      } else if (match.homeScore === 1) {
+        rating += player.position === 'Goleiro' ? 0.5 : 0.3;
+      } else {
+        rating -= (match.homeScore - 1) * (player.position === 'Goleiro' ? 0.8 : 0.5);
+      }
+
+      if (match.awayScore > match.homeScore) {
+        rating += 0.5;
+      } else if (match.awayScore < match.homeScore) {
+        rating -= 0.3;
+      }
+
+      rating = Math.max(4.0, Math.min(10.0, rating));
+      
+      if (!match.defensiveRatings) match.defensiveRatings = {};
+      match.defensiveRatings[player.id] = parseFloat(rating.toFixed(1));
+    });
+  }
+
   async createMatch(data) {
     const match = {
       id: Date.now(),
@@ -1197,6 +1277,11 @@ class TournamentManager {
           : "scheduled",
       createdAt: new Date().toISOString(),
     };
+
+    // Calcular notas defensivas se a partida estiver finalizada
+    if (match.status === 'finished') {
+      this.calculateDefensiveRatings(match);
+    }
 
     console.log("Partida criada:", match);
     this.data.matches.push(match);
@@ -1440,6 +1525,11 @@ class TournamentManager {
               }
             }
           });
+        }
+        
+        // Adicionar nota defensiva automática se existir
+        if (match.defensiveRatings && match.defensiveRatings[player.id]) {
+          stats.totalEvents++; // Contar como participação
         }
       });
 
@@ -2387,7 +2477,24 @@ class TournamentManager {
     if (playerStats.matches === 0) return 0;
 
     let baseRating = 5.0; // Nota base
+    let totalRating = 0;
+    let ratingCount = 0;
 
+    // Verificar se há notas defensivas automáticas
+    const matches = this.getUserData("matches").filter(m => m.status === 'finished');
+    matches.forEach(match => {
+      if (match.defensiveRatings && match.defensiveRatings[playerStats.id]) {
+        totalRating += match.defensiveRatings[playerStats.id];
+        ratingCount++;
+      }
+    });
+
+    // Se há notas defensivas, usar média delas
+    if (ratingCount > 0) {
+      return totalRating / ratingCount;
+    }
+
+    // Caso contrário, usar sistema antigo baseado em eventos
     // Pontuação por eventos positivos
     const goalPoints = playerStats.goals * 1.5;
     const assistPoints = playerStats.assists * 1.0;
@@ -5111,7 +5218,27 @@ class TournamentManager {
 
         const editId = e.target.dataset.editId;
         if (editId) {
-          await this.updateMatch(parseInt(editId), data);
+          const matchIndex = this.data.matches.findIndex((m) => m.id == editId);
+          if (matchIndex !== -1) {
+            this.data.matches[matchIndex] = {
+              ...this.data.matches[matchIndex],
+              ...data,
+              id: parseInt(editId),
+              status:
+                data.homeScore !== undefined && data.awayScore !== undefined
+                  ? "finished"
+                  : "scheduled",
+            };
+            
+            // Calcular notas defensivas se a partida estiver finalizada
+            if (this.data.matches[matchIndex].status === 'finished') {
+              this.calculateDefensiveRatings(this.data.matches[matchIndex]);
+            }
+            
+            await this.saveData("matches");
+            this.loadMatches();
+            this.updateStats();
+          }
           delete e.target.dataset.editId;
         } else {
           await this.createMatch(data);
