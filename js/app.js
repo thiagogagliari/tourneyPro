@@ -3646,6 +3646,17 @@ class TournamentManager {
     `;
   }
   
+  // Formatar nome do jogador para exibição na formação
+  formatPlayerName(fullName) {
+    if (!fullName) return '';
+    const nameParts = fullName.trim().split(' ');
+    if (nameParts.length === 1) {
+      return nameParts[0]; // Apenas um nome
+    }
+    // Nome e sobrenome: primeira letra + sobrenome
+    return nameParts[0].charAt(0) + '. ' + nameParts.slice(1).join(' ');
+  }
+
   // Renderizar slots de posição
   renderPositionSlots(positionType, count, selectedIds, allPlayers, indexOffset = 0) {
     const slots = [];
@@ -3670,7 +3681,7 @@ class TournamentManager {
                  style="background: linear-gradient(135deg, ${clubColors.primary} 0%, ${clubColors.secondary} 100%); color: ${clubColors.text};">
               <img src="${player.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" alt="${player.name}">
               <div class="player-info">
-                <span class="player-name" style="color: ${clubColors.text}; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">${player.name}</span>
+                <span class="player-name" style="color: ${clubColors.text}; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">${this.formatPlayerName(player.name)}</span>
                 <span class="player-number" style="background: rgba(255,255,255,0.2); color: ${clubColors.text};">${player.number || '?'}</span>
               </div>
               <button class="remove-player" onclick="app.removeFromLineup('${positionType}', ${actualIndex})">&times;</button>
