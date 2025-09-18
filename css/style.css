@@ -5349,3 +5349,42 @@ body {
     font-size: 0.9rem;
   }
 }
+/* Resumo dos gols */
+.match-goals-summary {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.goal-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.goal-minute {
+  font-weight: 600;
+  color: var(--primary-color);
+  min-width: 30px;
+}
+
+.goal-player {
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .match-goals-summary {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

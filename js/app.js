@@ -997,6 +997,9 @@ class TournamentManager {
       "match-detail-round"
     ).textContent = `Rodada ${match.round}`;
 
+    // Carregar resumo dos gols
+    this.loadMatchGoalsSummary(match);
+
     // Carregar eventos
     this.loadMatchEvents(match);
 
@@ -1004,6 +1007,46 @@ class TournamentManager {
     this.loadMatchMotm(match);
 
     document.getElementById("match-details-modal").style.display = "block";
+  }
+
+  loadMatchGoalsSummary(match) {
+    const container = document.getElementById("match-goals-summary");
+    
+    if (!match.events || match.events.length === 0) {
+      container.style.display = "none";
+      return;
+    }
+
+    const homeTeam = this.data.clubs.find((c) => c.id == match.homeTeamId);
+    const awayTeam = this.data.clubs.find((c) => c.id == match.awayTeamId);
+    
+    const homeGoals = match.events.filter(e => e.type === 'Gol' && e.team === homeTeam?.name);
+    const awayGoals = match.events.filter(e => e.type === 'Gol' && e.team === awayTeam?.name);
+    
+    if (homeGoals.length === 0 && awayGoals.length === 0) {
+      container.style.display = "none";
+      return;
+    }
+
+    container.style.display = "flex";
+    container.innerHTML = `
+      <div class="goals-list">
+        ${homeGoals.map(goal => `
+          <div class="goal-item">
+            <span class="goal-minute">${goal.minute}'</span>
+            <span class="goal-player">${goal.player}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="goals-list">
+        ${awayGoals.map(goal => `
+          <div class="goal-item">
+            <span class="goal-minute">${goal.minute}'</span>
+            <span class="goal-player">${goal.player}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
   }
 
   loadMatchEvents(match) {
