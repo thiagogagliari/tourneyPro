@@ -3918,6 +3918,23 @@ class TournamentManager {
       return stats;
     });
 
+    // Calcular últimos 5 jogos para cada time
+    standings.forEach(team => {
+      const teamMatches = matches.filter(m => 
+        (m.homeTeamId == team.club.id || m.awayTeamId == team.club.id) && m.status === 'finished'
+      ).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+      
+      team.recentResults = teamMatches.map(match => {
+        const isHome = match.homeTeamId == team.club.id;
+        const teamScore = isHome ? match.homeScore : match.awayScore;
+        const opponentScore = isHome ? match.awayScore : match.homeScore;
+        
+        if (teamScore > opponentScore) return 'V';
+        if (teamScore < opponentScore) return 'D';
+        return 'E';
+      });
+    });
+
     // Ordenar por pontos, saldo de gols, gols pró
     standings.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
@@ -3951,12 +3968,20 @@ class TournamentManager {
             positionClass = "position-relegation";
         }
 
+        const recentResultsHtml = team.recentResults.map(result => {
+          let className = '';
+          if (result === 'V') className = 'result-win';
+          else if (result === 'E') className = 'result-draw';
+          else if (result === 'D') className = 'result-loss';
+          return `<span class="recent-result ${className}">${result}</span>`;
+        }).join('');
+
         return `
         <tr>
-          <td><div class="standings-position ${positionClass}">${
+          <td class="pos-col"><div class="standings-position ${positionClass}">${
           index + 1
         }</div></td>
-          <td>
+          <td class="team-col">
             <div class="team-info">
               <img src="${
                 team.club.logo || "https://via.placeholder.com/30"
@@ -3971,18 +3996,19 @@ class TournamentManager {
               }, ${tournamentId})" title="Ver histórico">📊</button>
             </div>
           </td>
-          <td class="stat-number">${team.matches}</td>
-          <td class="stat-number">${team.wins}</td>
-          <td class="stat-number">${team.draws}</td>
-          <td class="stat-number">${team.losses}</td>
-          <td class="stat-number">${team.goalsFor}</td>
-          <td class="stat-number">${team.goalsAgainst}</td>
-          <td class="stat-number">${team.goalDifference > 0 ? "+" : ""}${
+          <td class="stat-number mobile-hide">${team.matches}</td>
+          <td class="stat-number mobile-hide">${team.wins}</td>
+          <td class="stat-number mobile-hide">${team.draws}</td>
+          <td class="stat-number mobile-hide">${team.losses}</td>
+          <td class="stat-number mobile-hide">${team.goalsFor}</td>
+          <td class="stat-number mobile-hide">${team.goalsAgainst}</td>
+          <td class="stat-number mobile-hide">${team.goalDifference > 0 ? "+" : ""}${
           team.goalDifference
         }</td>
-          <td class="stat-number" style="font-weight: 700; color: var(--primary-color);">${
-            team.points
-          }</td>
+          <td class="stat-number pts-col">${team.points}</td>
+          <td class="recent-col">
+            <div class="recent-results">${recentResultsHtml}</div>
+          </td>
         </tr>
       `;
       })
