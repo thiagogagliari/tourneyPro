@@ -4964,9 +4964,8 @@ body {
 }
 
 .event-player-photo {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
+    width: 50px;
+    height: 52px;
     object-fit: cover;
 }
 
@@ -5281,10 +5280,9 @@ body {
 
 .assist-info {
   display: flex;
-  flex-direction: column;
   gap: 4px;
   padding-left: 15px;
-  border-left: 2px solid rgba(52, 152, 219, 0.3);
+  border-left: 2px solid rgba(168, 201, 223, 0.3);
 }
 
 .assist-label {
@@ -5309,9 +5307,8 @@ body {
 
 .goal-info .event-player-photo,
 .assist-info .event-player-photo {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 50px;
+  height: 52px;
   object-fit: cover;
 }
 
