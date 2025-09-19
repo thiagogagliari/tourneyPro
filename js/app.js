@@ -4298,7 +4298,15 @@ class TournamentManager {
                         <img src="${homeTeam?.logo || 'https://via.placeholder.com/30'}" class="current-match-logo" alt="${homeTeam?.name}">
                         <span class="current-match-name">${homeTeam?.name}</span>
                       </div>
-                      <div class="current-match-vs">${isFinished ? `${match.homeScore} - ${match.awayScore}` : 'vs'}</div>
+                      <div class="current-match-vs">
+                        ${isFinished ? 
+                          match.homeScore > match.awayScore ? 
+                            `<span class="score-winner">${match.homeScore}</span> - <span class="score-loser">${match.awayScore}</span>` :
+                          match.homeScore < match.awayScore ?
+                            `<span class="score-loser">${match.homeScore}</span> - <span class="score-winner">${match.awayScore}</span>` :
+                            `<span class="score-draw">${match.homeScore} - ${match.awayScore}</span>`
+                          : 'vs'}
+                      </div>
                       <div class="current-match-team away">
                         <img src="${awayTeam?.logo || 'https://via.placeholder.com/30'}" class="current-match-logo" alt="${awayTeam?.name}">
                         <span class="current-match-name">${awayTeam?.name}</span>
@@ -4314,7 +4322,7 @@ class TournamentManager {
     }
     
     // Rodadas em ordem cronológica (mais recente para mais antiga)
-    const otherRounds = rounds.filter(r => r !== currentRound).reverse();
+    const otherRounds = rounds.filter(r => r !== currentRound).sort((a, b) => parseInt(b) - parseInt(a));
     
     otherRounds.forEach(round => {
       const roundMatches = matchesByRound[round];
@@ -4339,7 +4347,13 @@ class TournamentManager {
                       <img src="${homeTeam?.logo || 'https://via.placeholder.com/25'}" class="tournament-match-team-logo" alt="${homeTeam?.name}">
                     </div>
                     <div class="tournament-match-score">
-                      ${isFinished ? `${match.homeScore} - ${match.awayScore}` : 'vs'}
+                      ${isFinished ? 
+                        match.homeScore > match.awayScore ? 
+                          `<span class="score-winner">${match.homeScore}</span> - <span class="score-loser">${match.awayScore}</span>` :
+                        match.homeScore < match.awayScore ?
+                          `<span class="score-loser">${match.homeScore}</span> - <span class="score-winner">${match.awayScore}</span>` :
+                          `<span class="score-draw">${match.homeScore} - ${match.awayScore}</span>`
+                        : 'vs'}
                     </div>
                     <div class="tournament-match-team">
                       <img src="${awayTeam?.logo || 'https://via.placeholder.com/25'}" class="tournament-match-team-logo" alt="${awayTeam?.name}">

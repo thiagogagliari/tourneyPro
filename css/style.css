@@ -5550,3 +5550,18 @@ body {
     margin: 0;
   }
 }
+/* Cores do placar baseado no resultado */
+.score-winner {
+  color: #000 !important;
+  font-weight: 700;
+}
+
+.score-loser {
+  color: #999 !important;
+  font-weight: 400;
+}
+
+.score-draw {
+  color: #999 !important;
+  font-weight: 400;
+}
