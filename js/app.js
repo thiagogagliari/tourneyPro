@@ -4253,81 +4253,118 @@ class TournamentManager {
       matchesByRound[match.round].push(match);
     });
 
-    container.innerHTML = Object.keys(matchesByRound)
-      .sort((a, b) => parseInt(a) - parseInt(b))
-      .map((round) => {
-        const roundMatches = matchesByRound[round];
-        return `
-          <div class="round-section">
-            <div class="round-header">
-              <div class="round-title">Rodada ${round}</div>
-            </div>
-            <div class="round-matches">
-              ${roundMatches
-                .map((match) => {
-                  const homeTeam = this.data.clubs.find(
-                    (c) => c.id == match.homeTeamId
-                  );
-                  const awayTeam = this.data.clubs.find(
-                    (c) => c.id == match.awayTeamId
-                  );
-                  const isFinished = match.status === "finished";
+    const rounds = Object.keys(matchesByRound).sort((a, b) => parseInt(a) - parseInt(b));
+    
+    // Encontrar próxima rodada
+    let currentRound = null;
+    for (const round of rounds) {
+      const roundMatches = matchesByRound[round];
+      const hasUnfinished = roundMatches.some(m => m.status !== 'finished');
+      if (hasUnfinished) {
+        currentRound = round;
+        break;
+      }
+    }
+    
+    // Se não há rodada atual, usar a última
+    if (!currentRound && rounds.length > 0) {
+      currentRound = rounds[rounds.length - 1];
+    }
 
-                  return `
-                  <div class="tournament-match-item">
-                    <div class="tournament-match-time">${new Date(
-                      match.date
-                    ).toLocaleDateString("pt-BR")}</div>
-                    <div class="tournament-match-teams">
-                      <div class="tournament-match-team home">
-                        <span class="tournament-match-team-name">${
-                          homeTeam?.name
-                        }</span>
-                        <img src="${
-                          homeTeam?.logo || "https://via.placeholder.com/25"
-                        }" class="tournament-match-team-logo" alt="${
-                    homeTeam?.name
-                  }">
+    let html = '';
+    
+    // Rodada atual em destaque
+    if (currentRound) {
+      const currentMatches = matchesByRound[currentRound];
+      const hasUnfinished = currentMatches.some(m => m.status !== 'finished');
+      
+      html += `
+        <div class="rounds-carousel">
+          <div class="current-round-section">
+            <div class="current-round-header">
+              <div class="current-round-title">Rodada ${currentRound}</div>
+              <div class="current-round-subtitle">${hasUnfinished ? 'Em andamento' : 'Finalizada'}</div>
+            </div>
+            <div class="current-round-matches">
+              ${currentMatches.map(match => {
+                const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
+                const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
+                const isFinished = match.status === 'finished';
+                
+                return `
+                  <div class="current-match-item" ${isFinished ? `onclick="app.showMatchDetails(${match.id})" style="cursor: pointer;"` : ''}>
+                    <div class="current-match-teams">
+                      <div class="current-match-team home">
+                        <img src="${homeTeam?.logo || 'https://via.placeholder.com/30'}" class="current-match-logo" alt="${homeTeam?.name}">
+                        <span class="current-match-name">${homeTeam?.name}</span>
                       </div>
-                      <div class="tournament-match-score">
-                        ${
-                          isFinished
-                            ? `${match.homeScore} - ${match.awayScore}`
-                            : "vs"
-                        }
+                      <div class="current-match-vs">${isFinished ? `${match.homeScore} - ${match.awayScore}` : 'vs'}</div>
+                      <div class="current-match-team away">
+                        <img src="${awayTeam?.logo || 'https://via.placeholder.com/30'}" class="current-match-logo" alt="${awayTeam?.name}">
+                        <span class="current-match-name">${awayTeam?.name}</span>
                       </div>
-                      <div class="tournament-match-team">
-                        <img src="${
-                          awayTeam?.logo || "https://via.placeholder.com/25"
-                        }" class="tournament-match-team-logo" alt="${
-                    awayTeam?.name
-                  }">
-                        <span class="tournament-match-team-name">${
-                          awayTeam?.name
-                        }</span>
-                      </div>
-                    </div>
-                    <div class="tournament-match-actions">
-                      <div class="match-status-badge ${
-                        isFinished ? "status-finished" : "status-scheduled"
-                      }">
-                        ${isFinished ? "Finalizada" : "Agendada"}
-                      </div>
-                      ${
-                        isFinished
-                          ? `<button class="btn-match-details" onclick="app.showMatchDetails(${match.id})">Ver Detalhes</button>`
-                          : ""
-                      }
                     </div>
                   </div>
                 `;
-                })
-                .join("")}
+              }).join('')}
             </div>
           </div>
-        `;
-      })
-      .join("");
+        </div>
+      `;
+    }
+    
+    // Rodadas finalizadas (colapsáveis)
+    const finishedRounds = rounds.filter(r => r !== currentRound);
+    if (finishedRounds.length > 0) {
+      html += `
+        <div class="finished-rounds-section">
+          <div class="finished-rounds-header">
+            <div class="finished-rounds-title">Rodadas Anteriores (${finishedRounds.length})</div>
+            <button class="toggle-finished-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('expanded'); this.textContent = this.textContent === 'Mostrar' ? 'Ocultar' : 'Mostrar'">Mostrar</button>
+          </div>
+          <div class="finished-rounds-list">
+            ${finishedRounds.reverse().map(round => {
+              const roundMatches = matchesByRound[round];
+              return `
+                <div class="finished-round-card">
+                  <div class="round-header">
+                    <div class="round-title">Rodada ${round}</div>
+                  </div>
+                  <div class="round-matches">
+                    ${roundMatches.map(match => {
+                      const homeTeam = this.data.clubs.find(c => c.id == match.homeTeamId);
+                      const awayTeam = this.data.clubs.find(c => c.id == match.awayTeamId);
+                      const isFinished = match.status === 'finished';
+                      
+                      return `
+                        <div class="tournament-match-item">
+                          <div class="tournament-match-teams">
+                            <div class="tournament-match-team home">
+                              <span class="tournament-match-team-name">${homeTeam?.name}</span>
+                              <img src="${homeTeam?.logo || 'https://via.placeholder.com/25'}" class="tournament-match-team-logo" alt="${homeTeam?.name}">
+                            </div>
+                            <div class="tournament-match-score">
+                              ${isFinished ? `${match.homeScore} - ${match.awayScore}` : 'vs'}
+                            </div>
+                            <div class="tournament-match-team">
+                              <img src="${awayTeam?.logo || 'https://via.placeholder.com/25'}" class="tournament-match-team-logo" alt="${awayTeam?.name}">
+                              <span class="tournament-match-team-name">${awayTeam?.name}</span>
+                            </div>
+                          </div>
+                          ${isFinished ? `<div class="tournament-match-actions"><button class="btn-match-details" onclick="app.showMatchDetails(${match.id})">Ver Detalhes</button></div>` : ''}
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+    
+    container.innerHTML = html;
   }
 
   loadTournamentStatistics(matches) {

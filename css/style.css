@@ -5352,7 +5352,7 @@ body {
 /* Resumo dos gols */
 .match-goals-summary {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   margin-top: 15px;
   padding: 10px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -5386,5 +5386,170 @@ body {
   .match-goals-summary {
     flex-direction: column;
     gap: 10px;
+  }
+}
+/* Carrossel de rodadas */
+.rounds-carousel {
+  margin-bottom: 30px;
+}
+
+.current-round-section {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.current-round-header {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.current-round-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.current-round-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.current-round-matches {
+  display: grid;
+  gap: 15px;
+}
+
+.current-match-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.current-match-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.current-match-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.current-match-team.away {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.current-match-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.current-match-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.current-match-vs {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0 15px;
+}
+
+.finished-rounds-section {
+  margin-top: 30px;
+}
+
+.finished-rounds-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.finished-rounds-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.toggle-finished-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.toggle-finished-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.finished-rounds-list {
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.finished-rounds-list.expanded {
+  display: flex;
+}
+
+.finished-round-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.finished-round-card:hover {
+  opacity: 1;
+  border-color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+  .current-round-section {
+    padding: 15px;
+  }
+  
+  .current-round-title {
+    font-size: 1.3rem;
+  }
+  
+  .current-match-teams {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .current-match-team {
+    justify-content: center;
+  }
+  
+  .current-match-team.away {
+    flex-direction: row;
+    text-align: center;
+  }
+  
+  .current-match-vs {
+    margin: 0;
   }
 }
