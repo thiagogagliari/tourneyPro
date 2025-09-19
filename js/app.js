@@ -1127,7 +1127,9 @@ class TournamentManager {
                   </div>
                 </div>
               </div>
-              <div class="event-team">${team}</div>
+              <div class="event-team">
+                <img src="${isHomeTeam ? homeTeam?.logo : awayTeam?.logo || 'https://via.placeholder.com/25'}" class="event-team-logo" alt="${team}">
+              </div>
             </div>
           `;
         } else {
@@ -1180,7 +1182,9 @@ class TournamentManager {
                     </div>
                   </div>
                 </div>
-                <div class="event-team">${team}</div>
+                <div class="event-team">
+                  <img src="${isHomeTeam ? homeTeam?.logo : awayTeam?.logo || 'https://via.placeholder.com/25'}" class="event-team-logo" alt="${team}">
+                </div>
               </div>
             `;
           });

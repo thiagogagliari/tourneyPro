@@ -5565,3 +5565,9 @@ body {
   color: #999 !important;
   font-weight: 400;
 }
+.event-team-logo {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  object-fit: cover;
+}
