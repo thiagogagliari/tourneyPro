@@ -3080,7 +3080,7 @@ body {
 }
 
 .player-name {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: white;
     text-align: center;
     margin-top: 2px;
@@ -3210,7 +3210,7 @@ body {
     }
     
     .player-name {
-        font-size: 0.5rem;
+        font-size: 1rem;
         max-width: 35px;
     }
     
@@ -4972,7 +4972,7 @@ body {
 
 .player-name {
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .event-team {
@@ -5323,7 +5323,7 @@ body {
 .assist-info .player-name {
   font-weight: 500;
   color: #8ca2b1;
-  font-size: 1.40rem;
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
@@ -5346,7 +5346,7 @@ body {
   }
   
   .assist-info .player-name {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 }
 /* Resumo dos gols */
