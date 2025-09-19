@@ -5571,3 +5571,147 @@ body {
   border-radius: 50%;
   object-fit: cover;
 }
+/* Equipe da Rodada */
+.round-team-selector {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.round-team-selector select {
+  padding: 10px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 1rem;
+  min-width: 200px;
+}
+
+.round-team-formation {
+  background: linear-gradient(135deg, #2c5530, #4a7c59);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  position: relative;
+  min-height: 400px;
+}
+
+.round-team-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.round-team-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.round-team-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.round-team-field {
+  position: relative;
+  height: 350px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.round-team-positions {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.round-team-line {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.round-team-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 80px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.round-team-player:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.round-team-player-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.round-team-player-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.round-team-player-club {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.round-team-player-rating {
+  background: var(--primary-color);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .round-team-formation {
+    padding: 15px;
+    min-height: 300px;
+  }
+  
+  .round-team-field {
+    height: 280px;
+  }
+  
+  .round-team-positions {
+    padding: 15px;
+  }
+  
+  .round-team-player {
+    min-width: 60px;
+    padding: 6px;
+  }
+  
+  .round-team-player-photo {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .round-team-player-name {
+    font-size: 0.6rem;
+  }
+}

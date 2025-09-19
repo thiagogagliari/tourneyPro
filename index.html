@@ -768,6 +768,12 @@
             >
               Clubes
             </button>
+            <button
+              class="tournament-tab"
+              onclick="app.showTournamentTab('roundteam')"
+            >
+              Equipe da Rodada
+            </button>
           </div>
 
           <!-- Classificação -->
@@ -836,6 +842,13 @@
           <div id="tournament-clubs" class="tournament-tab-content">
             <div class="tournament-clubs-grid" id="tournament-clubs-list">
               <div class="no-data">Nenhum clube encontrado</div>
+            </div>
+          </div>
+
+          <!-- Equipe da Rodada -->
+          <div id="tournament-roundteam" class="tournament-tab-content">
+            <div class="round-team-container" id="round-team-container">
+              <div class="no-data">Selecione uma rodada finalizada para ver a equipe da rodada</div>
             </div>
           </div>
         </div>

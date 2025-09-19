@@ -4091,6 +4091,7 @@ class TournamentManager {
     this.loadTournamentStatistics(tournamentMatches);
     this.loadTournamentClubs(tournamentClubs, tournamentMatches);
 
+    document.getElementById("tournament-profile-modal").dataset.tournamentId = tournamentId;
     document.getElementById("tournament-profile-modal").style.display = "block";
   }
 
@@ -4591,6 +4592,173 @@ class TournamentManager {
 
     event.target.classList.add("active");
     document.getElementById(`tournament-${tabName}`).classList.add("active");
+    
+    if (tabName === 'roundteam') {
+      this.loadRoundTeams();
+    }
+  }
+
+  loadRoundTeams() {
+    const tournamentId = document.getElementById('tournament-profile-modal').dataset.tournamentId;
+    if (!tournamentId) return;
+    
+    const matches = this.getUserData('matches').filter(m => 
+      m.tournamentId == tournamentId && m.status === 'finished'
+    );
+    
+    const roundNumbers = [...new Set(matches.map(m => m.round))].sort((a, b) => b - a);
+    
+    const container = document.getElementById('round-team-container');
+    
+    if (roundNumbers.length === 0) {
+      container.innerHTML = '<div class="no-data">Nenhuma rodada finalizada encontrada</div>';
+      return;
+    }
+    
+    container.innerHTML = `
+      <div class="round-team-selector">
+        <select id="round-team-select" onchange="app.generateRoundTeam()">
+          <option value="">Selecione uma rodada</option>
+          ${roundNumbers.map(round => `<option value="${round}">Rodada ${round}</option>`).join('')}
+        </select>
+      </div>
+      <div id="round-team-display"></div>
+    `;
+  }
+  
+  generateRoundTeam() {
+    const roundNumber = document.getElementById('round-team-select').value;
+    if (!roundNumber) {
+      document.getElementById('round-team-display').innerHTML = '';
+      return;
+    }
+    
+    const tournamentId = document.getElementById('tournament-profile-modal').dataset.tournamentId;
+    const matches = this.getUserData('matches').filter(m => 
+      m.tournamentId == tournamentId && m.round == roundNumber && m.status === 'finished'
+    );
+    
+    const playerStats = {};
+    
+    matches.forEach(match => {
+      // Calcular notas defensivas
+      this.calculateDefensiveRatings(match);
+      
+      // Coletar estatísticas dos jogadores
+      if (match.events) {
+        match.events.forEach(event => {
+          const player = this.data.players.find(p => p.id == event.playerId || p.name === event.player);
+          if (player) {
+            if (!playerStats[player.id]) {
+              playerStats[player.id] = {
+                player,
+                goals: 0,
+                assists: 0,
+                cards: 0,
+                rating: 6.0
+              };
+            }
+            
+            if (event.type === 'Gol') playerStats[player.id].goals++;
+            if (event.type === 'Assistência') playerStats[player.id].assists++;
+            if (event.type.includes('Cartão')) playerStats[player.id].cards++;
+          }
+        });
+      }
+      
+      // Adicionar notas defensivas
+      if (match.defensiveRatings) {
+        Object.keys(match.defensiveRatings).forEach(playerId => {
+          const player = this.data.players.find(p => p.id == playerId);
+          if (player) {
+            if (!playerStats[playerId]) {
+              playerStats[playerId] = {
+                player,
+                goals: 0,
+                assists: 0,
+                cards: 0,
+                rating: match.defensiveRatings[playerId]
+              };
+            } else {
+              playerStats[playerId].rating = match.defensiveRatings[playerId];
+            }
+          }
+        });
+      }
+    });
+    
+    // Calcular notas finais
+    Object.values(playerStats).forEach(stats => {
+      let finalRating = stats.rating;
+      finalRating += stats.goals * 1.5;
+      finalRating += stats.assists * 1.0;
+      finalRating -= stats.cards * 0.5;
+      stats.finalRating = Math.max(4.0, Math.min(10.0, finalRating));
+    });
+    
+    // Selecionar melhores por posição
+    const positions = {
+      Goleiro: 1,
+      Zagueiro: 2,
+      Lateral: 2,
+      Volante: 2,
+      Meia: 2,
+      Atacante: 2
+    };
+    
+    const bestPlayers = {};
+    Object.keys(positions).forEach(position => {
+      const positionPlayers = Object.values(playerStats)
+        .filter(stats => stats.player.position === position)
+        .sort((a, b) => b.finalRating - a.finalRating)
+        .slice(0, positions[position]);
+      bestPlayers[position] = positionPlayers;
+    });
+    
+    this.renderRoundTeam(roundNumber, bestPlayers);
+  }
+  
+  renderRoundTeam(roundNumber, bestPlayers) {
+    const container = document.getElementById('round-team-display');
+    
+    container.innerHTML = `
+      <div class="round-team-formation">
+        <div class="round-team-header">
+          <div class="round-team-title">⭐ Equipe da Rodada ${roundNumber}</div>
+          <div class="round-team-subtitle">Formação 4-4-2</div>
+        </div>
+        <div class="round-team-field">
+          <div class="round-team-positions">
+            <div class="round-team-line">
+              ${(bestPlayers.Atacante || []).map(stats => this.renderRoundTeamPlayer(stats)).join('')}
+            </div>
+            <div class="round-team-line">
+              ${(bestPlayers.Meia || []).map(stats => this.renderRoundTeamPlayer(stats)).join('')}
+              ${(bestPlayers.Volante || []).map(stats => this.renderRoundTeamPlayer(stats)).join('')}
+            </div>
+            <div class="round-team-line">
+              ${(bestPlayers.Lateral || []).map(stats => this.renderRoundTeamPlayer(stats)).join('')}
+              ${(bestPlayers.Zagueiro || []).map(stats => this.renderRoundTeamPlayer(stats)).join('')}
+            </div>
+            <div class="round-team-line">
+              ${(bestPlayers.Goleiro || []).map(stats => this.renderRoundTeamPlayer(stats)).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  renderRoundTeamPlayer(stats) {
+    const club = this.data.clubs.find(c => c.id == stats.player.clubId);
+    return `
+      <div class="round-team-player" onclick="app.showPlayerProfile(${stats.player.id})">
+        <img src="${stats.player.photo || 'https://static.flashscore.com/res/image/empty-face-man-share.gif'}" class="round-team-player-photo" alt="${stats.player.name}">
+        <div class="round-team-player-name">${this.formatPlayerName(stats.player.name)}</div>
+        <img src="${club?.logo || 'https://via.placeholder.com/16'}" class="round-team-player-club" alt="${club?.name}">
+        <div class="round-team-player-rating">${stats.finalRating.toFixed(1)}</div>
+      </div>
+    `;
   }
 
   closeTournamentProfile() {
