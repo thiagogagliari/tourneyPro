@@ -4325,10 +4325,40 @@ class TournamentManager {
       `;
     }
     
-    // Rodadas em ordem cronológica (mais recente para mais antiga)
-    const otherRounds = rounds.filter(r => r !== currentRound).sort((a, b) => parseInt(b) - parseInt(a));
+    // Separar rodadas finalizadas e futuras
+    const otherRounds = rounds.filter(r => r !== currentRound);
+    const finishedRounds = [];
+    const futureRounds = [];
     
     otherRounds.forEach(round => {
+      const roundMatches = matchesByRound[round];
+      const allFinished = roundMatches.every(m => m.status === 'finished');
+      if (allFinished) {
+        finishedRounds.push(round);
+      } else {
+        futureRounds.push(round);
+      }
+    });
+    
+    // Última rodada finalizada primeiro, depois futuras em ordem crescente
+    const lastFinished = finishedRounds.sort((a, b) => parseInt(b) - parseInt(a))[0];
+    const orderedRounds = [];
+    
+    if (lastFinished) {
+      orderedRounds.push(lastFinished);
+    }
+    
+    // Adicionar rodadas futuras em ordem crescente
+    futureRounds.sort((a, b) => parseInt(a) - parseInt(b)).forEach(round => {
+      orderedRounds.push(round);
+    });
+    
+    // Adicionar outras rodadas finalizadas (exceto a última)
+    finishedRounds.filter(r => r !== lastFinished).sort((a, b) => parseInt(b) - parseInt(a)).forEach(round => {
+      orderedRounds.push(round);
+    });
+    
+    orderedRounds.forEach(round => {
       const roundMatches = matchesByRound[round];
       const allFinished = roundMatches.every(m => m.status === 'finished');
       
