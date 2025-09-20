@@ -4696,14 +4696,14 @@ class TournamentManager {
       stats.finalRating = Math.max(4.0, Math.min(10.0, finalRating));
     });
     
-    // Selecionar melhores por posição
+    // Selecionar melhores por posição (1 goleiro, 4 defensores, 3 meias, 3 atacantes)
     const positions = {
       Goleiro: 1,
       Zagueiro: 2,
       Lateral: 2,
-      Volante: 2,
+      Volante: 1,
       Meia: 2,
-      Atacante: 2
+      Atacante: 3
     };
     
     const bestPlayers = {};
