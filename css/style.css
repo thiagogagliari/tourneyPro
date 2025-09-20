@@ -5615,7 +5615,7 @@ body {
 
 .round-team-field {
   position: relative;
-  height: 350px;
+  height: 700px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -5642,10 +5642,10 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(233, 213, 31, 0.932), rgba(207, 206, 202, 0.1));
   border-radius: 8px;
-  padding: 8px;
-  min-width: 80px;
+  padding: 15;
+  min-width: 128px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -5656,15 +5656,13 @@ body {
 }
 
 .round-team-player-photo {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
-  border: 2px solid #fff;
 }
 
 .round-team-player-name {
-  font-size: 0.7rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
   text-align: center;
@@ -5672,16 +5670,15 @@ body {
 }
 
 .round-team-player-club {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
 }
 
 .round-team-player-rating {
   background: var(--primary-color);
   color: white;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
@@ -5703,7 +5700,7 @@ body {
   
   .round-team-player {
     min-width: 60px;
-    padding: 6px;
+    padding: 10px;
   }
   
   .round-team-player-photo {
