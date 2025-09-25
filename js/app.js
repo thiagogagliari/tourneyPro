@@ -1570,7 +1570,9 @@ class TournamentManager {
     }
 
     const clubs = this.getUserData("clubs").filter(
-      (c) => c.tournamentId == tournamentId
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(parseInt(tournamentId))
     );
     const players = this.getUserData("players").filter((p) => {
       const club = clubs.find((c) => c.id == p.clubId);
@@ -1847,7 +1849,9 @@ class TournamentManager {
       (r) => r.tournamentId == tournamentId
     );
     const clubs = this.getUserData("clubs").filter(
-      (c) => c.tournamentId == tournamentId
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(parseInt(tournamentId))
     );
 
     if (clubs.length < 2) {
@@ -2065,7 +2069,9 @@ class TournamentManager {
   generateTournamentStructure(tournamentId) {
     const tournament = this.data.tournaments.find((t) => t.id == tournamentId);
     const clubs = this.getUserData("clubs").filter(
-      (c) => c.tournamentId == tournamentId
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(parseInt(tournamentId))
     );
 
     if (tournament.type === "champions") {
@@ -5145,7 +5151,10 @@ class TournamentManager {
   showTeamHistoryOptions(clubId, tournamentId) {
     const club = this.data.clubs.find((c) => c.id == clubId);
     const otherClubs = this.getUserData("clubs").filter(
-      (c) => c.tournamentId == tournamentId && c.id != clubId
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(parseInt(tournamentId)) &&
+        c.id != clubId
     );
 
     if (otherClubs.length === 0) {
