@@ -1569,6 +1569,7 @@ class TournamentManager {
       return;
     }
 
+    // ALTERAÇÃO: filtrar clubes por array tournamentIds
     const clubs = this.getUserData("clubs").filter(
       (c) =>
         Array.isArray(c.tournamentIds) &&
@@ -1848,6 +1849,7 @@ class TournamentManager {
     const rounds = this.getUserData("rounds").filter(
       (r) => r.tournamentId == tournamentId
     );
+    // ALTERAÇÃO: filtrar clubes por array tournamentIds
     const clubs = this.getUserData("clubs").filter(
       (c) =>
         Array.isArray(c.tournamentIds) &&
@@ -2068,6 +2070,7 @@ class TournamentManager {
 
   generateTournamentStructure(tournamentId) {
     const tournament = this.data.tournaments.find((t) => t.id == tournamentId);
+    // ALTERAÇÃO: filtrar clubes por array tournamentIds
     const clubs = this.getUserData("clubs").filter(
       (c) =>
         Array.isArray(c.tournamentIds) &&
@@ -2292,8 +2295,11 @@ class TournamentManager {
   generateMatches() {
     const tournamentId =
       document.getElementById("round-form").dataset.tournamentId;
+    // ALTERAÇÃO: filtrar clubes por array tournamentIds
     const clubs = this.getUserData("clubs").filter(
-      (c) => c.tournamentId == tournamentId
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(parseInt(tournamentId))
     );
     const container = document.getElementById("round-matches");
 
@@ -2353,8 +2359,11 @@ class TournamentManager {
   addMatchPair() {
     const tournamentId =
       document.getElementById("round-form").dataset.tournamentId;
+    // ALTERAÇÃO: filtrar clubes por array tournamentIds
     const clubs = this.getUserData("clubs").filter(
-      (c) => c.tournamentId == tournamentId
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(parseInt(tournamentId))
     );
     const container = document.getElementById("round-matches");
     const index = container.querySelectorAll(".match-pair").length;
@@ -4232,8 +4241,11 @@ class TournamentManager {
     const tournament = this.data.tournaments.find((t) => t.id === tournamentId);
     if (!tournament) return;
 
+    // ALTERAÇÃO: filtrar clubes por array tournamentIds
     const tournamentClubs = this.getUserData("clubs").filter(
-      (c) => c.tournamentId == tournament.id
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(tournament.id)
     );
     const tournamentMatches = this.getUserData("matches").filter(
       (m) => m.tournamentId == tournament.id
@@ -5150,6 +5162,7 @@ class TournamentManager {
 
   showTeamHistoryOptions(clubId, tournamentId) {
     const club = this.data.clubs.find((c) => c.id == clubId);
+    // ALTERAÇÃO: filtrar clubes por array tournamentIds
     const otherClubs = this.getUserData("clubs").filter(
       (c) =>
         Array.isArray(c.tournamentIds) &&
