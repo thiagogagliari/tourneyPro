@@ -2769,6 +2769,19 @@ class TournamentManager {
       "Coréia do Sul": "https://flagcdn.com/w20/kr.png",
       "Coréia do Norte": "https://flagcdn.com/w20/kp.png",
       "Bósnia e Herzegovina": "https://flagcdn.com/w20/ba.png",
+      Gâmbia: "https://flagcdn.com/w20/gm.png",
+      Libéria: "https://flagcdn.com/w20/lr.png",
+      Seychelles: "https://flagcdn.com/w20/sc.png",
+      Suriname: "https://flagcdn.com/w20/sr.png",
+      Guiana: "https://flagcdn.com/w20/gy.png",
+      Belize: "https://flagcdn.com/w20/bz.png",
+      "El Salvador": "https://flagcdn.com/w20/sv.png",
+      "Guiné-Bissau": "https://flagcdn.com/w20/gw.png",
+      "São Tomé e Príncipe": "https://flagcdn.com/w20/st.png",
+      "Timor-Leste": "https://flagcdn.com/w20/tl.png",
+      "Guinea Equatorial": "https://flagcdn.com/w20/gq.png",
+      "Ilhas Salomão": "https://flagcdn.com/w20/sb.png",
+      "Papua Nova Guiné": "https://flagcdn.com/w20/pg.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
