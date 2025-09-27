@@ -2782,6 +2782,8 @@ class TournamentManager {
       "Guinea Equatorial": "https://flagcdn.com/w20/gq.png",
       "Ilhas Salomão": "https://flagcdn.com/w20/sb.png",
       "Papua Nova Guiné": "https://flagcdn.com/w20/pg.png",
+      "Cabo Verde": "https://flagcdn.com/w20/cv.png",
+      Zimbábue: "https://flagcdn.com/w20/zw.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
