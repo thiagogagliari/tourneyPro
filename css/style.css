@@ -1217,7 +1217,6 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 120px;
 }
 
 .team-score {
@@ -5178,7 +5177,8 @@ body {
 .recent-results {
   display: flex;
   gap: 2px;
-  justify-content: center;
+  justify-content: flex-end;
+  flex-direction: row-reverse;
 }
 
 .recent-result {
@@ -5418,7 +5418,9 @@ body {
 
 .current-round-matches {
   display: grid;
-  gap: 15px;
+  gap: 13px;
+  align-content: center;
+  justify-content: center;
 }
 
 .current-match-item {

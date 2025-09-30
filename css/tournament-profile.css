@@ -169,11 +169,11 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: aliceblue;
+    color: black;
 }
 
 .position-champion {
-    background: #f1c40f;
+    background: #27ae60;
     color: white;
 }
 

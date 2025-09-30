@@ -2708,6 +2708,7 @@ class TournamentManager {
       Suíça: "https://flagcdn.com/w20/ch.png",
       Áustria: "https://flagcdn.com/w20/at.png",
       Irlanda: "https://flagcdn.com/w20/ie.png",
+      "Irlanda do Norte": "https://flagcdn.com/w20/gb-nir.png",
       "País de Gales": "https://flagcdn.com/w20/gb-wls.png",
       Islândia: "https://flagcdn.com/w20/is.png",
       Lituânia: "https://flagcdn.com/w20/lt.png",
