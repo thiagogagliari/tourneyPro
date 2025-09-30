@@ -4344,7 +4344,6 @@ body {
 
 .standings-table th {
     background: var(--border-light);
-    padding: 12px;
     color: var(--text-primary);
     font-weight: 600;
     position: sticky;
@@ -5195,14 +5194,17 @@ body {
 
 .recent-result.result-win {
   background: #28a745;
+  color: #fff
 }
 
 .recent-result.result-draw {
   background: #6c757d;
+  color: #fff;
 }
 
 .recent-result.result-loss {
   background: #dc3545;
+  color: #fff;
 }
 
 /* Responsividade da tabela de classificação */
@@ -5218,6 +5220,7 @@ body {
   .pos-col {
     width: 40px;
     text-align: center;
+    font-size: 1.20rem;
   }
   
   .team-col {

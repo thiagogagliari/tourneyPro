@@ -138,10 +138,9 @@
 
 .standings-table th {
     background: var(--bg-secondary);
-    padding: 15px 12px;
     color: var(--text-primary);
     font-weight: 600;
-    text-align: left;
+    text-align: center;
     border-bottom: 2px solid var(--border-color);
 }
 
@@ -151,7 +150,6 @@
 }
 
 .standings-table td {
-    padding: 15px 12px;
     border-bottom: 1px solid var(--border-light);
     color: var(--text-primary);
 }
