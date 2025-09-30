@@ -331,7 +331,7 @@
 }
 
 .result-loss {
-    color: #fff;
+    background: rgb(228, 6, 6);
 }
 
 /* Estatísticas */
