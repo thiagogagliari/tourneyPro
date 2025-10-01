@@ -4612,7 +4612,6 @@ body {
     right: -5px;
     width: 24px;
     height: 24px;
-    border-radius: 50%;
     border: 2px solid var(--card-bg);
     object-fit: cover;
     background: var(--card-bg);
