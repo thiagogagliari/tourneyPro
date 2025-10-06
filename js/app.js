@@ -3082,7 +3082,7 @@ class TournamentManager {
                   break;
                 case "Assistência":
                   className = "event-assist";
-                  icon = "🅰️";
+                  icon = "🅰👟";
                   title = `Assistência aos ${event.minute}'`;
                   break;
                 case "Cartão Amarelo":
@@ -3094,6 +3094,16 @@ class TournamentManager {
                   className = "event-red";
                   icon = "🟥";
                   title = `Cartão vermelho aos ${event.minute}'`;
+                  break;
+                case "Gol Contra":
+                  className = "event-own-goal";
+                  icon = "⭕";
+                  title = `Gol contra aos ${event.minute}'`;
+                  break;
+                case "Pênalti Perdido":
+                  className = "event-penalty-missed";
+                  icon = "❌";
+                  title = `Pênalti perdido aos ${event.minute}'`;
                   break;
                 default:
                   return "";
@@ -3652,6 +3662,8 @@ class TournamentManager {
         '<div class="no-data">Nenhuma partida encontrada</div>';
       return;
     }
+
+    matches.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     container.innerHTML = matches
       .map((match) => {
