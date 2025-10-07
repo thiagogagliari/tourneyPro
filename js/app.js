@@ -1181,6 +1181,14 @@ class TournamentManager {
                 eventIcon = "⚽";
                 eventClass = "goal-event";
                 break;
+              case "Gol Contra":
+                eventIcon = "⭕";
+                eventClass = "own-goal-event";
+                break;
+              case "Pênalti Perdido":
+                eventIcon = "❌";
+                eventClass = "missed-penalty-event";
+                break;
               case "Assistência":
                 eventIcon = "🅰️";
                 eventClass = "assist-event";
@@ -1192,6 +1200,10 @@ class TournamentManager {
               case "Cartão Vermelho":
                 eventIcon = "🟥";
                 eventClass = "red-card-event";
+                break;
+              case "Substituição":
+                eventIcon = "🔄";
+                eventClass = "substitution-event";
                 break;
               default:
                 eventIcon = "⚪";
