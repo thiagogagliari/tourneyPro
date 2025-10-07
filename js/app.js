@@ -2431,9 +2431,12 @@ class TournamentManager {
         <select name="event_type_${eventIndex}" required>
           <option value="">Tipo de evento</option>
           <option value="Gol">Gol</option>
+          <option value="Gol Contra">Gol Contra</option>
+          <option value="Pênalti Perdido">Pênalti Perdido</option>
           <option value="Assistência">Assistência</option>
           <option value="Cartão Amarelo">Cartão Amarelo</option>
           <option value="Cartão Vermelho">Cartão Vermelho</option>
+          <option value="Substituição">Substituição</option>
         </select>
         <select name="event_team_${eventIndex}" onchange="app.updateEventPlayers(${eventIndex})" required>
           <option value="">Selecione o time</option>
