@@ -2776,6 +2776,7 @@ class TournamentManager {
       "Sri Lanka": "https://flagcdn.com/w20/lk.png",
       Bolívia: "https://flagcdn.com/w20/bo.png",
       "República Dominicana": "https://flagcdn.com/w20/do.png",
+      "República Centro Africana": "https://flagcdn.com/w20/cf.png",
       Haiti: "https://flagcdn.com/w20/ht.png",
       Cuba: "https://flagcdn.com/w20/cu.png",
       "Burkina Faso": "https://flagcdn.com/w20/bf.png",
