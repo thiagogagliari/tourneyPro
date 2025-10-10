@@ -3065,7 +3065,12 @@ class TournamentManager {
       return;
     }
 
-    timeline.innerHTML = matchHistory
+    // ALTERAÇÃO: ordenar do mais recente para o mais antigo
+    const orderedHistory = [...matchHistory].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+
+    timeline.innerHTML = orderedHistory
       .map(
         (match) => `
       <div class="match-timeline-item">
