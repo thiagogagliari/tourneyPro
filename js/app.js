@@ -2805,6 +2805,9 @@ class TournamentManager {
       Moldávia: "https://flagcdn.com/w20/md.png",
       Burundi: "https://flagcdn.com/w20/bi.png",
       Ruanda: "https://flagcdn.com/w20/rw.png",
+      Honduras: "https://flagcdn.com/w20/hn.png",
+      Nicarágua: "https://flagcdn.com/w20/ni.png",
+      "El Salvador": "https://flagcdn.com/w20/sv.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
