@@ -635,6 +635,13 @@ class TournamentManager {
       club.secondaryColor || "#000000";
     document.getElementById("club-text-color").value =
       club.textColor || "#000000";
+    // NOVO: Estádio
+    document.getElementById("club-stadium-name").value = club.stadiumName || "";
+    document.getElementById("club-stadium-photo").value =
+      club.stadiumPhoto || "";
+    document.getElementById("club-stadium-capacity").value =
+      club.stadiumCapacity || "";
+
     // Marcar checkboxes dos torneios do clube
     const clubTournaments = club.tournamentIds || [];
     document
@@ -3571,6 +3578,32 @@ class TournamentManager {
     document.getElementById("club-profile-tournament").textContent =
       tournament?.name || "Nenhum torneio";
 
+    // NOVO: Exibir informações do estádio
+    const stadiumContainer = document.getElementById("club-profile-stadium");
+    if (stadiumContainer) {
+      stadiumContainer.innerHTML = `
+        <div class="club-stadium-info">
+          <h4>Estádio</h4>
+          <div class="club-stadium-details">
+            <img src="${
+              club.stadiumPhoto || "https://via.placeholder.com/120"
+            }" 
+                 alt="${club.stadiumName || "Estádio"}" 
+                 class="club-stadium-photo" 
+                 style="width:120px; height:80px; object-fit:cover; border-radius:8px; margin-bottom:8px;">
+            <div>
+              <strong>${club.stadiumName || "Não informado"}</strong><br>
+              Capacidade: ${
+                club.stadiumCapacity
+                  ? club.stadiumCapacity.toLocaleString() + " pessoas"
+                  : "Não informado"
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     // Estatísticas gerais
     document.getElementById("club-total-matches").textContent =
       clubStats.matches;
@@ -5707,14 +5740,20 @@ class TournamentManager {
           secondaryColor: document.getElementById("club-secondary-color").value,
           textColor: document.getElementById("club-text-color").value,
           tournamentIds: selectedTournaments,
+          // NOVO: Estádio
+          stadiumName: document.getElementById("club-stadium-name").value,
+          stadiumPhoto: document.getElementById("club-stadium-photo").value,
+          stadiumCapacity:
+            parseInt(document.getElementById("club-stadium-capacity").value) ||
+            null,
         };
 
         const editId = e.target.dataset.editId;
         if (editId) {
-          await this.updateClub(parseInt(editId), data);
+          await app.updateClub(parseInt(editId), data);
           delete e.target.dataset.editId;
         } else {
-          await this.createClub(data);
+          await app.createClub(data);
         }
 
         document.getElementById("club-modal").style.display = "none";
