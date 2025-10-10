@@ -2801,6 +2801,10 @@ class TournamentManager {
       "Papua Nova Guiné": "https://flagcdn.com/w20/pg.png",
       "Cabo Verde": "https://flagcdn.com/w20/cv.png",
       Zimbábue: "https://flagcdn.com/w20/zw.png",
+      Líbia: "https://flagcdn.com/w20/ly.png",
+      Moldávia: "https://flagcdn.com/w20/md.png",
+      Burundi: "https://flagcdn.com/w20/bi.png",
+      Ruanda: "https://flagcdn.com/w20/rw.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
