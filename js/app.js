@@ -2808,6 +2808,7 @@ class TournamentManager {
       Honduras: "https://flagcdn.com/w20/hn.png",
       Nicarágua: "https://flagcdn.com/w20/ni.png",
       "El Salvador": "https://flagcdn.com/w20/sv.png",
+      "Serra Leoa": "https://flagcdn.com/w20/sl.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
