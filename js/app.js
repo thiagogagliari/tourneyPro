@@ -2813,6 +2813,7 @@ class TournamentManager {
       "Ilhas Maurício": "https://flagcdn.com/w20/mu.png",
       "Ilhas Fiji": "https://flagcdn.com/w20/fj.png",
       Madagascar: "https://flagcdn.com/w20/mg.png",
+      Guadalupe: "https://flagcdn.com/w20/gp.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
