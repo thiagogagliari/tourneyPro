@@ -2812,6 +2812,7 @@ class TournamentManager {
       Comores: "https://flagcdn.com/w20/km.png",
       "Ilhas Maurício": "https://flagcdn.com/w20/mu.png",
       "Ilhas Fiji": "https://flagcdn.com/w20/fj.png",
+      Madagascar: "https://flagcdn.com/w20/mg.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
