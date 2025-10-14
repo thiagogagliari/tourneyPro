@@ -2809,6 +2809,9 @@ class TournamentManager {
       Nicarágua: "https://flagcdn.com/w20/ni.png",
       "El Salvador": "https://flagcdn.com/w20/sv.png",
       "Serra Leoa": "https://flagcdn.com/w20/sl.png",
+      Comores: "https://flagcdn.com/w20/km.png",
+      "Ilhas Maurício": "https://flagcdn.com/w20/mu.png",
+      "Ilhas Fiji": "https://flagcdn.com/w20/fj.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
