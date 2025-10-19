@@ -4610,12 +4610,9 @@ body {
     position: absolute;
     bottom: -5px;
     right: -5px;
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--card-bg);
+    width: 30px;
+    height: 30px;
     object-fit: cover;
-    background: var(--card-bg);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Champions League Structure */
