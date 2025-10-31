@@ -4222,30 +4222,20 @@ class TournamentManager {
       return;
     }
 
-    // ...existing code...
-    const club = this.data.clubs.find((c) => c.id === clubId);
     const playerList = availablePlayers
       .map(
-        (p) => `
-      <div class="player-option" onclick="app.selectPlayer('${position}', ${index}, ${
-          p.id
-        })">
-        <div class="player-option-photo-container" style="position:relative; width:40px; height:40px; display:inline-block; margin-right:8px;">
-          <img src="${
-            p.photo ||
-            "https://static.flashscore.com/res/image/empty-face-man-share.gif"
-          }" alt="${
-          p.name
-        }" class="player-option-photo" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-          <img src="${club?.logo || "https://via.placeholder.com/22"}" alt="${
-          club?.name || "Clube"
-        }" class="player-option-crest" style="position:absolute; right:-6px; bottom:-6px; width:20px; height:20px; border-radius:50%; border:2px solid #fff; object-fit:cover;">
-        </div>
+        (p) =>
+          `<div class="player-option" onclick="app.selectPlayer('${position}', ${index}, ${
+            p.id
+          })">
+        <img src="${
+          p.photo ||
+          "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+        }" alt="${p.name}">
         <span>${p.name} (${p.number || "?"})</span>
       </div>`
       )
       .join("");
-    // ...existing code...
 
     document.body.insertAdjacentHTML(
       "beforeend",
