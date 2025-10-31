@@ -4769,11 +4769,15 @@ class TournamentManager {
           scorer.player.id
         })">
           <div class="tournament-player-info">
-            <img src="${
-              scorer.player.photo ||
-              scorer.club?.logo ||
-              "https://static.flashscore.com/res/image/empty-face-man-share.gif"
-            }" class="tournament-player-photo" alt="${scorer.player.name}">
+            <div class="tournament-player-photo-container">
+              <img src="${
+                scorer.player.photo ||
+                "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+              }" class="tournament-player-photo" alt="${scorer.player.name}">
+              <img src="${scorer.club?.logo || "https://via.placeholder.com/24"}" alt="${
+                scorer.club?.name || "Clube"
+              }" class="tournament-player-club-badge">
+            </div>
             <div class="tournament-player-details">
               <div class="tournament-player-name">${scorer.player.name}</div>
               <div class="tournament-player-club">${
@@ -4806,11 +4810,15 @@ class TournamentManager {
           assist.player.id
         })">
           <div class="tournament-player-info">
-            <img src="${
-              assist.player.photo ||
-              assist.club?.logo ||
-              "https://static.flashscore.com/res/image/empty-face-man-share.gif"
-            }" class="tournament-player-photo" alt="${assist.player.name}">
+            <div class="tournament-player-photo-container">
+              <img src="${
+                assist.player.photo ||
+                "https://static.flashscore.com/res/image/empty-face-man-share.gif"
+              }" class="tournament-player-photo" alt="${assist.player.name}">
+              <img src="${assist.club?.logo || "https://via.placeholder.com/24"}" alt="${
+                assist.club?.name || "Clube"
+              }" class="tournament-player-club-badge">
+            </div>
             <div class="tournament-player-details">
               <div class="tournament-player-name">${assist.player.name}</div>
               <div class="tournament-player-club">${
