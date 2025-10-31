@@ -341,6 +341,13 @@
     box-shadow: var(--shadow);
 }
 
+.tournament-player-club-badge{
+    width: 45px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .tournament-stats-card h3 {
     color: var(--text-primary);
     margin-bottom: 20px;
