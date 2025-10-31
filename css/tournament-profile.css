@@ -150,6 +150,7 @@
 }
 
 .standings-table td {
+    text-align: center;
     border-bottom: 1px solid var(--border-light);
     color: var(--text-primary);
 }
@@ -355,6 +356,43 @@
     gap: 12px;
 }
 
+/*Novo: container para foto do atleta com escudo do clube */
+.tournament-player-photo-container{
+    position: relative;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+}
+
+.tournament-player-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* Escudo do clube posicionado sobre a foto do jogador (canto inferior direito) */
+.tournament-player-crest {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--card-bg);
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* Ajustes para telas menores */
+@media (max-width: 480px) {
+    .tournament-player-photo-container { width: 36px; height: 36px; }
+    .tournament-player-photo { width: 36px; height: 36px; }
+    .tournament-player-crest { width: 18px; height: 18px; right: -5px; bottom: -5px; }
+
 .tournament-player-item {
     display: flex;
     align-items: center;
@@ -375,6 +413,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    cursor: pointer;
 }
 
 .tournament-player-photo {
@@ -382,6 +421,8 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    display: block;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
 .tournament-player-details {
@@ -517,6 +558,7 @@
     
     .standings-table th,
     .standings-table td {
+        text-align: center;
         padding: 10px 8px;
     }
     

@@ -1638,7 +1638,7 @@ body {
 .standings-table th,
 .standings-table td {
     padding: 7px;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
 }
@@ -4351,6 +4351,7 @@ body {
 }
 
 .standings-table td {
+    text-align: center;
     padding: 12px;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);

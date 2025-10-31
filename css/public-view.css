@@ -259,7 +259,7 @@
 .standings-table th,
 .standings-table td {
     padding: 1.20rem;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
 }
