@@ -4771,6 +4771,7 @@ class TournamentManager {
           <div class="tournament-player-info">
             <img src="${
               scorer.player.photo ||
+              scorer.club?.logo ||
               "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="tournament-player-photo" alt="${scorer.player.name}">
             <div class="tournament-player-details">
@@ -4807,6 +4808,7 @@ class TournamentManager {
           <div class="tournament-player-info">
             <img src="${
               assist.player.photo ||
+              assist.club?.logo ||
               "https://static.flashscore.com/res/image/empty-face-man-share.gif"
             }" class="tournament-player-photo" alt="${assist.player.name}">
             <div class="tournament-player-details">
