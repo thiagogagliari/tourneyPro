@@ -177,6 +177,7 @@
 }
 
 .match-timeline-item {
+    height: 50px;
     display: flex;
     align-items: center;
     padding: 15px;
@@ -410,6 +411,7 @@
     }
     
     .match-timeline-item {
+        height: 50px;
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
