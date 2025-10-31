@@ -342,10 +342,9 @@
 }
 
 .tournament-player-club-badge{
-    width: 45px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
+    width: 30px;
+    height: 30px;
+    object-fit: none;
 }
 
 .tournament-stats-card h3 {
