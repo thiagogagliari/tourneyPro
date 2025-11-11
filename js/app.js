@@ -2814,6 +2814,11 @@ class TournamentManager {
       "Ilhas Fiji": "https://flagcdn.com/w20/fj.png",
       Madagascar: "https://flagcdn.com/w20/mg.png",
       Guadalupe: "https://flagcdn.com/w20/gp.png",
+      Mauritânia: "https://flagcdn.com/w20/mr.png",
+      "Porto Rico": "https://flagcdn.com/w20/pr.png",
+      Curaçao: "https://flagcdn.com/w20/cw.png",
+      "Guiana-Francesa": "https://flagcdn.com/w20/gf.png",
+      Guiana: "https://flagcdn.com/w20/gy.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
@@ -4774,9 +4779,11 @@ class TournamentManager {
                 scorer.player.photo ||
                 "https://static.flashscore.com/res/image/empty-face-man-share.gif"
               }" class="tournament-player-photo" alt="${scorer.player.name}">
-              <img src="${scorer.club?.logo || "https://via.placeholder.com/24"}" alt="${
-                scorer.club?.name || "Clube"
-              }" class="tournament-player-club-badge">
+              <img src="${
+                scorer.club?.logo || "https://via.placeholder.com/24"
+              }" alt="${
+            scorer.club?.name || "Clube"
+          }" class="tournament-player-club-badge">
             </div>
             <div class="tournament-player-details">
               <div class="tournament-player-name">${scorer.player.name}</div>
@@ -4815,9 +4822,11 @@ class TournamentManager {
                 assist.player.photo ||
                 "https://static.flashscore.com/res/image/empty-face-man-share.gif"
               }" class="tournament-player-photo" alt="${assist.player.name}">
-              <img src="${assist.club?.logo || "https://via.placeholder.com/24"}" alt="${
-                assist.club?.name || "Clube"
-              }" class="tournament-player-club-badge">
+              <img src="${
+                assist.club?.logo || "https://via.placeholder.com/24"
+              }" alt="${
+            assist.club?.name || "Clube"
+          }" class="tournament-player-club-badge">
             </div>
             <div class="tournament-player-details">
               <div class="tournament-player-name">${assist.player.name}</div>
