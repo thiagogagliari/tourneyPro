@@ -78,23 +78,71 @@ class CloudStorage {
     }
 
     try {
-      // Limpar dados removendo undefined
       const cleanedData = this.cleanData(data);
       console.log(`Salvando ${key} na nuvem:`, cleanedData.length, "itens");
-      await this.db
-        .collection("users")
-        .doc(this.currentUser.uid)
-        .collection("data")
-        .doc(key)
-        .set({
-          data: cleanedData,
-          lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+      
+      // Para players, dividir em chunks para evitar limite de 1MB
+      if (key === 'players' && cleanedData.length > 50) {
+        await this.savePlayersInChunks(cleanedData);
+      } else {
+        await this.db
+          .collection("users")
+          .doc(this.currentUser.uid)
+          .collection("data")
+          .doc(key)
+          .set({
+            data: cleanedData,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+      }
       console.log(`${key} salvo com sucesso na nuvem`);
     } catch (error) {
       console.error("Erro ao salvar na nuvem:", error);
       throw error;
     }
+  }
+
+  // Salvar jogadores em chunks
+  async savePlayersInChunks(players) {
+    const chunkSize = 50;
+    const chunks = [];
+    
+    for (let i = 0; i < players.length; i += chunkSize) {
+      chunks.push(players.slice(i, i + chunkSize));
+    }
+    
+    const batch = this.db.batch();
+    
+    // Limpar documentos antigos
+    const existingDocs = await this.db
+      .collection("users")
+      .doc(this.currentUser.uid)
+      .collection("data")
+      .where(firebase.firestore.FieldPath.documentId(), '>=', 'players')
+      .where(firebase.firestore.FieldPath.documentId(), '<', 'playerz')
+      .get();
+    
+    existingDocs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    
+    // Salvar novos chunks
+    chunks.forEach((chunk, index) => {
+      const docRef = this.db
+        .collection("users")
+        .doc(this.currentUser.uid)
+        .collection("data")
+        .doc(`players_${index}`);
+      
+      batch.set(docRef, {
+        data: chunk,
+        chunkIndex: index,
+        totalChunks: chunks.length,
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    });
+    
+    await batch.commit();
   }
 
   // Carregar da nuvem
@@ -103,6 +151,12 @@ class CloudStorage {
 
     try {
       console.log(`Carregando ${key} da nuvem...`);
+      
+      // Para players, carregar de múltiplos chunks
+      if (key === 'players') {
+        return await this.loadPlayersFromChunks();
+      }
+      
       const doc = await this.db
         .collection("users")
         .doc(this.currentUser.uid)
@@ -121,6 +175,47 @@ class CloudStorage {
     } catch (error) {
       console.error("Erro ao carregar da nuvem:", error);
       throw error;
+    }
+  }
+
+  // Carregar jogadores de chunks
+  async loadPlayersFromChunks() {
+    try {
+      const playerDocs = await this.db
+        .collection("users")
+        .doc(this.currentUser.uid)
+        .collection("data")
+        .where(firebase.firestore.FieldPath.documentId(), '>=', 'players_')
+        .where(firebase.firestore.FieldPath.documentId(), '<', 'players`')
+        .orderBy(firebase.firestore.FieldPath.documentId())
+        .get();
+      
+      if (playerDocs.empty) {
+        // Tentar carregar do documento único antigo
+        const oldDoc = await this.db
+          .collection("users")
+          .doc(this.currentUser.uid)
+          .collection("data")
+          .doc('players')
+          .get();
+        
+        if (oldDoc.exists) {
+          return oldDoc.data().data || [];
+        }
+        return [];
+      }
+      
+      let allPlayers = [];
+      playerDocs.forEach(doc => {
+        const data = doc.data().data || [];
+        allPlayers = allPlayers.concat(data);
+      });
+      
+      console.log(`players carregado da nuvem:`, allPlayers.length, "itens");
+      return allPlayers;
+    } catch (error) {
+      console.error("Erro ao carregar players da nuvem:", error);
+      return [];
     }
   }
 
