@@ -35,8 +35,6 @@ class CloudStorage {
     }
   }
 
-
-
   // Salvar dados apenas no Firebase
   async saveData(key, data) {
     if (!this.firebaseReady || !this.currentUser) {
@@ -57,9 +55,9 @@ class CloudStorage {
   // Remover campos undefined de um objeto
   cleanData(obj) {
     if (Array.isArray(obj)) {
-      return obj.map(item => this.cleanData(item));
+      return obj.map((item) => this.cleanData(item));
     }
-    if (obj && typeof obj === 'object') {
+    if (obj && typeof obj === "object") {
       const cleaned = {};
       for (const [key, value] of Object.entries(obj)) {
         if (value !== undefined) {
@@ -80,9 +78,9 @@ class CloudStorage {
     try {
       const cleanedData = this.cleanData(data);
       console.log(`Salvando ${key} na nuvem:`, cleanedData.length, "itens");
-      
+
       // Para players, dividir em chunks para evitar limite de 1MB
-      if (key === 'players' && cleanedData.length > 50) {
+      if (key === "players" && cleanedData.length > 50) {
         await this.savePlayersInChunks(cleanedData);
       } else {
         await this.db
@@ -106,26 +104,26 @@ class CloudStorage {
   async savePlayersInChunks(players) {
     const chunkSize = 50;
     const chunks = [];
-    
+
     for (let i = 0; i < players.length; i += chunkSize) {
       chunks.push(players.slice(i, i + chunkSize));
     }
-    
+
     const batch = this.db.batch();
-    
+
     // Limpar documentos antigos
     const existingDocs = await this.db
       .collection("users")
       .doc(this.currentUser.uid)
       .collection("data")
-      .where(firebase.firestore.FieldPath.documentId(), '>=', 'players')
-      .where(firebase.firestore.FieldPath.documentId(), '<', 'playerz')
+      .where(firebase.firestore.FieldPath.documentId(), ">=", "players")
+      .where(firebase.firestore.FieldPath.documentId(), "<", "playerz")
       .get();
-    
-    existingDocs.forEach(doc => {
+
+    existingDocs.forEach((doc) => {
       batch.delete(doc.ref);
     });
-    
+
     // Salvar novos chunks
     chunks.forEach((chunk, index) => {
       const docRef = this.db
@@ -133,7 +131,7 @@ class CloudStorage {
         .doc(this.currentUser.uid)
         .collection("data")
         .doc(`players_${index}`);
-      
+
       batch.set(docRef, {
         data: chunk,
         chunkIndex: index,
@@ -141,7 +139,7 @@ class CloudStorage {
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
       });
     });
-    
+
     await batch.commit();
   }
 
@@ -151,12 +149,12 @@ class CloudStorage {
 
     try {
       console.log(`Carregando ${key} da nuvem...`);
-      
+
       // Para players, carregar de múltiplos chunks
-      if (key === 'players') {
+      if (key === "players") {
         return await this.loadPlayersFromChunks();
       }
-      
+
       const doc = await this.db
         .collection("users")
         .doc(this.currentUser.uid)
@@ -185,32 +183,32 @@ class CloudStorage {
         .collection("users")
         .doc(this.currentUser.uid)
         .collection("data")
-        .where(firebase.firestore.FieldPath.documentId(), '>=', 'players_')
-        .where(firebase.firestore.FieldPath.documentId(), '<', 'players`')
+        .where(firebase.firestore.FieldPath.documentId(), ">=", "players_")
+        .where(firebase.firestore.FieldPath.documentId(), "<", "players`")
         .orderBy(firebase.firestore.FieldPath.documentId())
         .get();
-      
+
       if (playerDocs.empty) {
         // Tentar carregar do documento único antigo
         const oldDoc = await this.db
           .collection("users")
           .doc(this.currentUser.uid)
           .collection("data")
-          .doc('players')
+          .doc("players")
           .get();
-        
+
         if (oldDoc.exists) {
           return oldDoc.data().data || [];
         }
         return [];
       }
-      
+
       let allPlayers = [];
-      playerDocs.forEach(doc => {
+      playerDocs.forEach((doc) => {
         const data = doc.data().data || [];
         allPlayers = allPlayers.concat(data);
       });
-      
+
       console.log(`players carregado da nuvem:`, allPlayers.length, "itens");
       return allPlayers;
     } catch (error) {
@@ -218,8 +216,6 @@ class CloudStorage {
       return [];
     }
   }
-
-
 
   // Autenticação
   async signIn(email, password) {

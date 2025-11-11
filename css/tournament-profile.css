@@ -412,6 +412,140 @@
     font-size: 1.2rem;
 }
 
+/* Top 3 Jogadores */
+.tournament-top-players {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.top-player-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.top-player-item:hover {
+    background: var(--border-light);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.top-player-item:first-child {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #333;
+}
+
+.top-player-item:nth-child(2) {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    color: #333;
+}
+
+.top-player-item:nth-child(3) {
+    background: linear-gradient(135deg, #cd7f32, #daa520);
+    color: #333;
+}
+
+.top-player-rank {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-right: 15px;
+    min-width: 30px;
+    text-align: center;
+}
+
+.top-player-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    margin-right: 15px;
+}
+
+.top-player-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.top-player-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.top-player-club-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.top-player-club-logo {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+.top-player-club-name {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.top-player-stats {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.top-player-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+}
+
+.top-player-rating-value {
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.top-player-rating-label {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+.top-player-points {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+}
+
+.top-player-points-value {
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+.top-player-points-label {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
 /* Clubes */
 .tournament-clubs-grid {
     display: grid;
@@ -537,5 +671,16 @@
     .tournament-match-teams {
         margin: 0;
         width: 100%;
+    }
+    
+    .top-player-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .top-player-stats {
+        margin-left: 0;
+        justify-content: center;
     }
 }
