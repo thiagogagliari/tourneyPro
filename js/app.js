@@ -4747,7 +4747,7 @@ class TournamentManager {
                 assists: 0,
                 matches: new Set(),
                 totalRating: 0,
-                motmCount: 0
+                motmCount: 0,
               };
             }
 
@@ -4776,9 +4776,11 @@ class TournamentManager {
 
       // Adicionar MOTM
       if (match.motm && match.motm.playerId) {
-        const player = this.data.players.find((p) => p.id == match.motm.playerId);
+        const player = this.data.players.find(
+          (p) => p.id == match.motm.playerId
+        );
         const club = this.data.clubs.find((c) => c.id == player?.clubId);
-        
+
         if (player) {
           if (!playerStats[player.id]) {
             playerStats[player.id] = {
@@ -4788,10 +4790,10 @@ class TournamentManager {
               assists: 0,
               matches: new Set(),
               totalRating: 0,
-              motmCount: 0
+              motmCount: 0,
             };
           }
-          
+
           playerStats[player.id].motmCount++;
           playerStats[player.id].totalRating += parseFloat(match.motm.rating);
         }
@@ -4799,27 +4801,38 @@ class TournamentManager {
     });
 
     // Calcular pontuação final para cada jogador
-    Object.values(playerStats).forEach(stats => {
+    Object.values(playerStats).forEach((stats) => {
       stats.matchCount = stats.matches.size;
-      stats.avgRating = stats.motmCount > 0 ? (stats.totalRating / stats.motmCount) : 0;
-      
+      stats.avgRating =
+        stats.motmCount > 0 ? stats.totalRating / stats.motmCount : 0;
+
       // Sistema de pontuação: gols (3pts) + assistências (2pts) + MOTM (5pts) + nota média
-      stats.totalPoints = (stats.goals * 3) + (stats.assists * 2) + (stats.motmCount * 5) + stats.avgRating;
+      stats.totalPoints =
+        stats.goals * 3 +
+        stats.assists * 2 +
+        stats.motmCount * 5 +
+        stats.avgRating;
     });
 
     // Top 3 jogadores da temporada
     const topPlayers = Object.values(playerStats)
-      .filter(stats => stats.totalPoints > 0)
+      .filter((stats) => stats.totalPoints > 0)
       .sort((a, b) => b.totalPoints - a.totalPoints)
       .slice(0, 3);
 
-    const topPlayersContainer = document.getElementById("tournament-top-players-list");
+    const topPlayersContainer = document.getElementById(
+      "tournament-top-players-list"
+    );
     if (topPlayers.length === 0) {
-      topPlayersContainer.innerHTML = '<div class="no-data">Nenhum jogador encontrado</div>';
+      topPlayersContainer.innerHTML =
+        '<div class="no-data">Nenhum jogador encontrado</div>';
     } else {
       topPlayersContainer.innerHTML = topPlayers
-        .map((stats, index) => `
-          <div class="top-player-item" onclick="app.showPlayerProfile(${stats.player.id})">
+        .map(
+          (stats, index) => `
+          <div class="top-player-item" onclick="app.showPlayerProfile(${
+            stats.player.id
+          })">
             <div class="top-player-rank">${index + 1}</div>
             <img src="${
               stats.player.photo ||
@@ -4830,22 +4843,31 @@ class TournamentManager {
               <div class="top-player-club-info">
                 <img src="${
                   stats.club?.logo || "https://via.placeholder.com/20"
-                }" class="top-player-club-logo" alt="${stats.club?.name || "Clube"}">
-                <span class="top-player-club-name">${stats.club?.name || "Sem clube"}</span>
+                }" class="top-player-club-logo" alt="${
+            stats.club?.name || "Clube"
+          }">
+                <span class="top-player-club-name">${
+                  stats.club?.name || "Sem clube"
+                }</span>
               </div>
             </div>
             <div class="top-player-stats">
               <div class="top-player-rating">
-                <div class="top-player-rating-value">${stats.avgRating > 0 ? stats.avgRating.toFixed(1) : '-'}</div>
+                <div class="top-player-rating-value">${
+                  stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "-"
+                }</div>
                 <div class="top-player-rating-label">Nota</div>
               </div>
               <div class="top-player-points">
-                <div class="top-player-points-value">${stats.totalPoints.toFixed(1)}</div>
+                <div class="top-player-points-value">${stats.totalPoints.toFixed(
+                  1
+                )}</div>
                 <div class="top-player-points-label">Pontos</div>
               </div>
             </div>
           </div>
-        `)
+        `
+        )
         .join("");
     }
 
