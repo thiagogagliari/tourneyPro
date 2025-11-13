@@ -1,72 +1,239 @@
-/* Estilos para Chaveamento do Mata-mata */
+/* Estilos para Chaveamento Eliminatório */
+
 .bracket-container {
   padding: 20px;
   background: var(--card-bg);
   border-radius: 12px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .bracket-container h3 {
   text-align: center;
-  color: var(--text-primary);
+  color: var(--primary-color);
   margin-bottom: 30px;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
-/* Ajustes para o chaveamento no perfil do torneio */
-.bracket-container .knockout-phase {
-  margin-bottom: 25px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+.bracket-phases {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
-.bracket-container .phase-header {
+.bracket-phase {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bracket-phase-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.bracket-phase-header h3 {
+  color: var(--accent-color);
+  font-size: 1.3rem;
+  margin: 0;
+  padding: 10px 20px;
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  border-radius: 25px;
   color: white;
-  padding: 12px 20px;
-  margin: 0;
+  display: inline-block;
 }
 
-.bracket-container .phase-header h2 {
-  font-size: 1.2rem;
-  margin: 0;
+.bracket-matches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
 }
 
-.bracket-container .knockout-round {
+.bracket-matchup {
   background: var(--card-bg);
-  margin: 10px;
-  border-radius: 6px;
+  border-radius: 10px;
+  padding: 15px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.bracket-container .knockout-match {
-  padding: 8px 12px;
-  margin: 8px 0;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+.bracket-matchup.scheduled {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.bracket-container .knockout-team .team-name {
+.bracket-matchup.in-progress {
+  border-color: var(--warning-color);
+  background: linear-gradient(135deg, var(--card-bg), rgba(255, 193, 7, 0.1));
+}
+
+.bracket-matchup.completed {
+  border-color: var(--success-color);
+  background: linear-gradient(135deg, var(--card-bg), rgba(40, 167, 69, 0.1));
+}
+
+.bracket-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.bracket-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bracket-team.winner {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.1));
+  border: 1px solid var(--success-color);
+  font-weight: bold;
+}
+
+.bracket-team.loser {
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.bracket-team img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bracket-team .team-name {
+  font-weight: 500;
+  color: var(--text-color);
+  flex: 1;
+}
+
+.bracket-team .aggregate-score {
+  background: var(--primary-color);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  min-width: 25px;
+  text-align: center;
+}
+
+.bracket-vs {
+  color: var(--text-muted);
+  font-weight: bold;
+  padding: 0 15px;
   font-size: 0.9rem;
 }
 
-.bracket-container .knockout-team img {
-  width: 20px;
-  height: 20px;
+.bracket-legs {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.bracket-leg {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bracket-leg .leg-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.bracket-leg .leg-result {
+  font-weight: bold;
+  color: var(--text-color);
+  font-size: 0.9rem;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
+  .bracket-matches {
+    grid-template-columns: 1fr;
+  }
+  
+  .bracket-team .team-name {
+    font-size: 0.9rem;
+  }
+  
+  .bracket-team img {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .bracket-legs {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .bracket-leg {
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
   .bracket-container {
     padding: 15px;
   }
   
-  .bracket-container h3 {
-    font-size: 1.3rem;
-    margin-bottom: 20px;
+  .bracket-phase {
+    padding: 15px;
   }
   
-  .bracket-container .phase-rounds {
-    grid-template-columns: 1fr;
+  .bracket-matchup {
+    padding: 12px;
   }
+  
+  .bracket-teams {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .bracket-vs {
+    padding: 5px 0;
+  }
+  
+  .bracket-team {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* Animações */
+.bracket-matchup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.bracket-team.winner .aggregate-score {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Estados especiais */
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-style: italic;
 }
