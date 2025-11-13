@@ -1877,6 +1877,7 @@ class TournamentManager {
     const tournamentType = tournament?.type;
     const isChampions = tournamentType === "champions";
     const isNational = tournamentType === "national";
+    const isKnockout = tournamentType === "knockout";
 
     container.innerHTML = `
       <div class="rounds-header">
@@ -1886,11 +1887,11 @@ class TournamentManager {
           }
         </button>
         ${
-          isChampions || isNational
+          isChampions || isNational || isKnockout
             ? `
           <button class="btn-secondary" onclick="app.generateTournamentStructure(${tournamentId})">
             <i class="fas fa-trophy"></i> Gerar Estrutura ${
-              isChampions ? "Champions" : "Liga Nacional"
+              isChampions ? "Champions" : isNational ? "Liga Nacional" : "Mata-mata"
             }
           </button>
         `
@@ -1912,6 +1913,8 @@ class TournamentManager {
       return this.renderChampionsLeagueRounds(rounds, clubs);
     } else if (tournamentType === "national") {
       return this.renderNationalLeagueRounds(rounds, clubs);
+    } else if (tournamentType === "knockout") {
+      return this.renderKnockoutRounds(rounds, clubs);
     }
 
     return rounds
@@ -2101,6 +2104,13 @@ class TournamentManager {
         return;
       }
       this.generateNationalStructure(tournamentId, clubs);
+    } else if (tournament.type === "knockout") {
+      const validSizes = [8, 16, 32];
+      if (!validSizes.includes(clubs.length)) {
+        alert(`Mata-mata requer exatamente 8, 16 ou 32 clubes! Você tem ${clubs.length} clubes.`);
+        return;
+      }
+      this.generateKnockoutStructure(tournamentId, clubs);
     }
   }
 
@@ -2113,7 +2123,7 @@ class TournamentManager {
     );
 
     this.generateChampionsGroupStage(tournamentId, clubs);
-    this.generateKnockoutStructure(tournamentId);
+    this.generateKnockoutStructure_Original(tournamentId);
 
     this.saveData("rounds");
     this.saveData("matches");
@@ -2257,7 +2267,212 @@ class TournamentManager {
     }
   }
 
-  generateKnockoutStructure(tournamentId) {
+  // Gerar estrutura completa do mata-mata
+  generateKnockoutStructure(tournamentId, clubs) {
+    this.data.rounds = this.data.rounds.filter(
+      (r) => r.tournamentId != tournamentId
+    );
+    this.data.matches = this.data.matches.filter(
+      (m) => m.tournamentId != tournamentId
+    );
+
+    const baseDate = new Date();
+    const phases = this.calculateKnockoutPhases(clubs.length);
+    
+    // Embaralhar clubes para sorteio aleatório
+    const shuffledClubs = [...clubs].sort(() => Math.random() - 0.5);
+    
+    // Gerar primeira fase com clubes reais
+    this.generateKnockoutPhase(tournamentId, phases[0], shuffledClubs, baseDate);
+    
+    // Gerar fases subsequentes (sem clubes definidos)
+    for (let i = 1; i < phases.length; i++) {
+      const phaseDate = new Date(baseDate);
+      phaseDate.setDate(baseDate.getDate() + (i * 14)); // 2 semanas entre fases
+      this.generateKnockoutPhase(tournamentId, phases[i], [], phaseDate);
+    }
+
+    this.saveData("rounds");
+    this.saveData("matches");
+    this.loadRounds();
+
+    alert("Estrutura do mata-mata gerada com sucesso!");
+  }
+
+  // Calcular fases do mata-mata baseado no número de clubes
+  calculateKnockoutPhases(clubCount) {
+    const phases = [];
+    let currentTeams = clubCount;
+    let roundNumber = 1;
+    
+    while (currentTeams > 1) {
+      const matchCount = currentTeams / 2;
+      const phaseName = this.getKnockoutPhaseName(currentTeams);
+      
+      // Ida
+      phases.push({
+        round: roundNumber,
+        name: `${phaseName} - Ida`,
+        matches: matchCount,
+        teams: currentTeams,
+        isReturn: false
+      });
+      
+      // Volta
+      phases.push({
+        round: roundNumber + 1,
+        name: `${phaseName} - Volta`,
+        matches: matchCount,
+        teams: currentTeams,
+        isReturn: true
+      });
+      
+      currentTeams = currentTeams / 2;
+      roundNumber += 2;
+    }
+    
+    return phases;
+  }
+
+  // Obter nome da fase baseado no número de times
+  getKnockoutPhaseName(teamCount) {
+    switch (teamCount) {
+      case 32: return "Primeira Fase";
+      case 16: return "Oitavas de Final";
+      case 8: return "Quartas de Final";
+      case 4: return "Semifinal";
+      case 2: return "Final";
+      default: return `Fase de ${teamCount} times`;
+    }
+  }
+
+  // Gerar uma fase específica do mata-mata
+  generateKnockoutPhase(tournamentId, phase, clubs, baseDate) {
+    const matches = [];
+    
+    if (clubs.length > 0) {
+      // Primeira fase - criar confrontos com clubes reais
+      for (let i = 0; i < clubs.length; i += 2) {
+        matches.push({
+          homeTeamId: clubs[i].id,
+          awayTeamId: clubs[i + 1].id,
+        });
+      }
+    } else {
+      // Fases subsequentes - criar confrontos vazios
+      for (let i = 0; i < phase.matches; i++) {
+        matches.push({
+          homeTeamId: null,
+          awayTeamId: null,
+        });
+      }
+    }
+
+    const roundData = {
+      id: Date.now() + phase.round + Math.random() * 1000,
+      userId: this.currentUser.id,
+      tournamentId: tournamentId,
+      number: phase.round,
+      name: phase.name,
+      date: baseDate.toISOString().split("T")[0],
+      matches: matches,
+      isReturn: phase.isReturn,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.data.rounds.push(roundData);
+
+    // Criar partidas para esta rodada
+    matches.forEach((match) => {
+      if (match.homeTeamId && match.awayTeamId) {
+        this.createMatch({
+          homeTeamId: match.homeTeamId,
+          awayTeamId: match.awayTeamId,
+          tournamentId: tournamentId,
+          round: phase.round,
+          date: baseDate.toISOString().split("T")[0] + "T20:00:00",
+        });
+      }
+    });
+  }
+
+  // Renderizar rodadas do mata-mata
+  renderKnockoutRounds(rounds, clubs) {
+    if (rounds.length === 0) {
+      return '<div class="no-data">Nenhuma rodada criada ainda.</div>';
+    }
+
+    // Agrupar rodadas por fase (ida e volta)
+    const phaseGroups = {};
+    rounds.forEach(round => {
+      const baseName = round.name ? round.name.replace(/ - (Ida|Volta)$/, '') : `Rodada ${round.number}`;
+      if (!phaseGroups[baseName]) {
+        phaseGroups[baseName] = [];
+      }
+      phaseGroups[baseName].push(round);
+    });
+
+    let html = '';
+    Object.keys(phaseGroups).forEach(phaseName => {
+      const phaseRounds = phaseGroups[phaseName].sort((a, b) => a.number - b.number);
+      
+      html += `
+        <div class="knockout-phase">
+          <div class="phase-header">
+            <h2><i class="fas fa-trophy"></i> ${phaseName}</h2>
+          </div>
+          <div class="phase-rounds">
+      `;
+      
+      phaseRounds.forEach(round => {
+        const isReturn = round.isReturn || round.name?.includes('Volta');
+        const legType = isReturn ? 'Volta' : 'Ida';
+        
+        html += `
+          <div class="knockout-round ${isReturn ? 'return-leg' : 'first-leg'}">
+            <div class="knockout-header">
+              <h3>${legType}</h3>
+              <span class="round-date">${new Date(round.date).toLocaleDateString('pt-BR')}</span>
+            </div>
+            <div class="knockout-matches">
+        `;
+        
+        round.matches.forEach(match => {
+          const homeTeam = clubs.find(c => c.id == match.homeTeamId);
+          const awayTeam = clubs.find(c => c.id == match.awayTeamId);
+          
+          html += `
+            <div class="knockout-match">
+              <div class="knockout-team home">
+                <img src="${homeTeam?.logo || 'https://via.placeholder.com/30'}" alt="${homeTeam?.name || 'A definir'}">
+                <span class="team-name">${homeTeam?.name || 'A definir'}</span>
+              </div>
+              <div class="knockout-vs">vs</div>
+              <div class="knockout-team away">
+                <img src="${awayTeam?.logo || 'https://via.placeholder.com/30'}" alt="${awayTeam?.name || 'A definir'}">
+                <span class="team-name">${awayTeam?.name || 'A definir'}</span>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+      });
+      
+      html += `
+          </div>
+        </div>
+      `;
+    });
+
+    return html;
+  }
+
+  // Função original para Champions League (mantida para compatibilidade)
+  generateKnockoutStructure_Original(tournamentId) {
     const baseDate = new Date();
     baseDate.setDate(baseDate.getDate() + 60);
 

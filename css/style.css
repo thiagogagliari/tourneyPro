@@ -19,6 +19,12 @@
     --input-bg: white;
     --input-border: #e1e5e9;
     --primary-color: #1130bd;
+    --accent-color: #ff6b35;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --success-bg: rgba(40, 167, 69, 0.1);
+    --warning-bg: rgba(255, 193, 7, 0.1);
+    --hover-bg: rgba(102, 126, 234, 0.05);
     --card-bg: white;
 }
 
@@ -36,6 +42,12 @@
     --input-bg: #2a2a2a;
     --input-border: #404040;
     --primary-color: #87ceeb;
+    --accent-color: #ff6b35;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --success-bg: rgba(40, 167, 69, 0.2);
+    --warning-bg: rgba(255, 193, 7, 0.2);
+    --hover-bg: rgba(135, 206, 235, 0.1);
     --card-bg: #2a2a2a;
 }
 

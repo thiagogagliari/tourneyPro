@@ -1,0 +1,257 @@
+/* Estilos para Mata-mata */
+.knockout-phase {
+  margin-bottom: 30px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.phase-header {
+  text-align: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.phase-header h2 {
+  color: var(--primary-color);
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.phase-header i {
+  margin-right: 10px;
+  color: var(--accent-color);
+}
+
+.phase-rounds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.knockout-round {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 15px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.knockout-round.first-leg {
+  border-color: var(--primary-color);
+}
+
+.knockout-round.return-leg {
+  border-color: var(--accent-color);
+}
+
+.knockout-round:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.knockout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.knockout-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.first-leg .knockout-header h3 {
+  color: var(--primary-color);
+}
+
+.return-leg .knockout-header h3 {
+  color: var(--accent-color);
+}
+
+.round-date {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.knockout-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.knockout-match {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.knockout-match:hover {
+  border-color: var(--primary-color);
+  background: var(--hover-bg);
+}
+
+.knockout-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.knockout-team.away {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.knockout-team img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.knockout-team .team-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.knockout-vs {
+  padding: 0 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Indicadores de ida e volta */
+.first-leg::before {
+  content: "IDA";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--primary-color);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.return-leg::before {
+  content: "VOLTA";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--accent-color);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.knockout-round {
+  position: relative;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .phase-rounds {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .knockout-match {
+    padding: 10px;
+  }
+  
+  .knockout-team .team-name {
+    font-size: 0.9rem;
+  }
+  
+  .knockout-vs {
+    padding: 0 10px;
+    font-size: 0.8rem;
+  }
+  
+  .phase-header h2 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .knockout-phase {
+    padding: 15px;
+  }
+  
+  .knockout-round {
+    padding: 12px;
+  }
+  
+  .knockout-team img {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .knockout-team .team-name {
+    font-size: 0.8rem;
+  }
+}
+
+/* Animações */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.knockout-phase {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.knockout-round {
+  animation: slideInUp 0.3s ease-out;
+}
+
+/* Estados especiais */
+.knockout-match.completed {
+  background: var(--success-bg);
+  border-color: var(--success-color);
+}
+
+.knockout-match.pending {
+  background: var(--warning-bg);
+  border-color: var(--warning-color);
+}
+
+.knockout-team.winner {
+  font-weight: 600;
+  color: var(--success-color);
+}
+
+.knockout-team.eliminated {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
