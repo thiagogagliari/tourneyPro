@@ -1,0 +1,72 @@
+/* Estilos para Chaveamento do Mata-mata */
+.bracket-container {
+  padding: 20px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.bracket-container h3 {
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 30px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Ajustes para o chaveamento no perfil do torneio */
+.bracket-container .knockout-phase {
+  margin-bottom: 25px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.bracket-container .phase-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  padding: 12px 20px;
+  margin: 0;
+}
+
+.bracket-container .phase-header h2 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.bracket-container .knockout-round {
+  background: var(--card-bg);
+  margin: 10px;
+  border-radius: 6px;
+}
+
+.bracket-container .knockout-match {
+  padding: 8px 12px;
+  margin: 8px 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.bracket-container .knockout-team .team-name {
+  font-size: 0.9rem;
+}
+
+.bracket-container .knockout-team img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .bracket-container {
+    padding: 15px;
+  }
+  
+  .bracket-container h3 {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+  
+  .bracket-container .phase-rounds {
+    grid-template-columns: 1fr;
+  }
+}

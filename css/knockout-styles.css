@@ -255,3 +255,61 @@
   opacity: 0.6;
   text-decoration: line-through;
 }
+
+/* Modal para definir confrontos */
+.matchup-pair {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.matchup-pair select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.matchup-pair span {
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 30px;
+  text-align: center;
+}
+
+#matchups-container {
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 20px 0;
+}
+
+/* Botão para definir confrontos */
+.phase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.phase-header .btn-secondary {
+  background: var(--warning-color);
+  color: #333;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.phase-header .btn-secondary:hover {
+  background: #e0a800;
+  transform: translateY(-1px);
+}

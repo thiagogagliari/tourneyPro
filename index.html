@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/rating-colors.css" />
     <link rel="stylesheet" href="css/formation-styles.css" />
     <link rel="stylesheet" href="css/knockout-styles.css" />
+    <link rel="stylesheet" href="css/bracket-styles.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -749,6 +750,7 @@
             <button
               class="tournament-tab active"
               onclick="app.showTournamentTab('standings')"
+              id="standings-tab"
             >
               Classificação
             </button>
@@ -780,7 +782,7 @@
 
           <!-- Classificação -->
           <div id="tournament-standings" class="tournament-tab-content active">
-            <div class="standings-container">
+            <div class="standings-container" id="standings-or-bracket">
               <table class="standings-table" id="tournament-standings-table">
                 <thead>
                   <tr>

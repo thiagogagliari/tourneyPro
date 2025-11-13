@@ -2282,21 +2282,51 @@ class TournamentManager {
     // Embaralhar clubes para sorteio aleatório
     const shuffledClubs = [...clubs].sort(() => Math.random() - 0.5);
     
-    // Gerar primeira fase com clubes reais
+    // Gerar apenas a primeira fase com clubes reais (ida e volta automáticas)
     this.generateKnockoutPhase(tournamentId, phases[0], shuffledClubs, baseDate);
     
-    // Gerar fases subsequentes (sem clubes definidos)
-    for (let i = 1; i < phases.length; i++) {
+    // Criar estrutura das fases seguintes (vazias para preenchimento manual)
+    for (let i = 2; i < phases.length; i += 2) { // Pular volta da primeira fase
       const phaseDate = new Date(baseDate);
-      phaseDate.setDate(baseDate.getDate() + (i * 14)); // 2 semanas entre fases
-      this.generateKnockoutPhase(tournamentId, phases[i], [], phaseDate);
+      phaseDate.setDate(baseDate.getDate() + (i * 7)); // 1 semana entre fases
+      
+      // Criar rodada de ida
+      const idaRound = {
+        id: Date.now() + i + Math.random() * 1000,
+        userId: this.currentUser.id,
+        tournamentId: tournamentId,
+        number: i + 1,
+        name: phases[i].name,
+        date: phaseDate.toISOString().split("T")[0],
+        matches: Array(phases[i].matches).fill().map(() => ({ homeTeamId: null, awayTeamId: null })),
+        isReturn: false,
+        createdAt: new Date().toISOString(),
+      };
+      
+      // Criar rodada de volta
+      const voltaDate = new Date(phaseDate);
+      voltaDate.setDate(phaseDate.getDate() + 7);
+      
+      const voltaRound = {
+        id: Date.now() + i + 1 + Math.random() * 1000,
+        userId: this.currentUser.id,
+        tournamentId: tournamentId,
+        number: i + 2,
+        name: phases[i + 1].name,
+        date: voltaDate.toISOString().split("T")[0],
+        matches: Array(phases[i].matches).fill().map(() => ({ homeTeamId: null, awayTeamId: null })),
+        isReturn: true,
+        createdAt: new Date().toISOString(),
+      };
+      
+      this.data.rounds.push(idaRound, voltaRound);
     }
 
     this.saveData("rounds");
     this.saveData("matches");
     this.loadRounds();
 
-    alert("Estrutura do mata-mata gerada com sucesso!");
+    alert("Estrutura do mata-mata gerada! Primeira fase com jogos automáticos (ida e volta). Próximas fases para preenchimento manual.");
   }
 
   // Calcular fases do mata-mata baseado no número de clubes
@@ -2382,9 +2412,10 @@ class TournamentManager {
 
     this.data.rounds.push(roundData);
 
-    // Criar partidas para esta rodada
-    matches.forEach((match) => {
-      if (match.homeTeamId && match.awayTeamId) {
+    // Criar partidas apenas para a primeira fase (ida e volta)
+    if (clubs.length > 0) {
+      matches.forEach((match) => {
+        // Jogo de ida
         this.createMatch({
           homeTeamId: match.homeTeamId,
           awayTeamId: match.awayTeamId,
@@ -2392,8 +2423,22 @@ class TournamentManager {
           round: phase.round,
           date: baseDate.toISOString().split("T")[0] + "T20:00:00",
         });
-      }
-    });
+        
+        // Jogo de volta (invertendo mando de campo)
+        if (!phase.isReturn) {
+          const returnDate = new Date(baseDate);
+          returnDate.setDate(baseDate.getDate() + 7); // 1 semana depois
+          
+          this.createMatch({
+            homeTeamId: match.awayTeamId, // Inverter mando
+            awayTeamId: match.homeTeamId, // Inverter mando
+            tournamentId: tournamentId,
+            round: phase.round + 1, // Próxima rodada (volta)
+            date: returnDate.toISOString().split("T")[0] + "T20:00:00",
+          });
+        }
+      });
+    }
   }
 
   // Renderizar rodadas do mata-mata
@@ -2415,11 +2460,15 @@ class TournamentManager {
     let html = '';
     Object.keys(phaseGroups).forEach(phaseName => {
       const phaseRounds = phaseGroups[phaseName].sort((a, b) => a.number - b.number);
+      const hasEmptyMatches = phaseRounds.some(round => 
+        round.matches.some(match => !match.homeTeamId || !match.awayTeamId)
+      );
       
       html += `
         <div class="knockout-phase">
           <div class="phase-header">
             <h2><i class="fas fa-trophy"></i> ${phaseName}</h2>
+            ${hasEmptyMatches ? `<button class="btn-secondary" onclick="app.showDefineMatchupsModal(${phaseRounds[0].tournamentId}, '${phaseName}')">Definir Confrontos</button>` : ''}
           </div>
           <div class="phase-rounds">
       `;
@@ -2437,7 +2486,7 @@ class TournamentManager {
             <div class="knockout-matches">
         `;
         
-        round.matches.forEach(match => {
+        round.matches.forEach((match, matchIndex) => {
           const homeTeam = clubs.find(c => c.id == match.homeTeamId);
           const awayTeam = clubs.find(c => c.id == match.awayTeamId);
           
@@ -2469,6 +2518,119 @@ class TournamentManager {
     });
 
     return html;
+  }
+
+  // Mostrar modal para definir confrontos manualmente
+  showDefineMatchupsModal(tournamentId, phaseName) {
+    // Buscar times classificados da fase anterior
+    const qualifiedTeams = this.getQualifiedTeams(tournamentId, phaseName);
+    
+    if (qualifiedTeams.length === 0) {
+      alert('Finalize a fase anterior primeiro para definir os confrontos.');
+      return;
+    }
+    
+    // Criar modal simples para definir confrontos
+    const modalHtml = `
+      <div id="define-matchups-modal" class="modal" style="display: block;">
+        <div class="modal-content">
+          <span class="close" onclick="document.getElementById('define-matchups-modal').remove()">&times;</span>
+          <h3>Definir Confrontos - ${phaseName}</h3>
+          <p>Times classificados: ${qualifiedTeams.map(t => t.name).join(', ')}</p>
+          <div id="matchups-container"></div>
+          <button onclick="app.saveMatchups(${tournamentId}, '${phaseName}')" class="btn-primary">Salvar Confrontos</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    this.generateMatchupSelectors(qualifiedTeams, phaseName);
+  }
+
+  // Gerar seletores para os confrontos
+  generateMatchupSelectors(teams, phaseName) {
+    const container = document.getElementById('matchups-container');
+    const matchCount = teams.length / 2;
+    
+    let html = '';
+    for (let i = 0; i < matchCount; i++) {
+      html += `
+        <div class="matchup-pair">
+          <select id="home-${i}">
+            <option value="">Selecione time casa</option>
+            ${teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+          </select>
+          <span>vs</span>
+          <select id="away-${i}">
+            <option value="">Selecione time visitante</option>
+            ${teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+          </select>
+        </div>
+      `;
+    }
+    
+    container.innerHTML = html;
+  }
+
+  // Obter times classificados da fase anterior
+  getQualifiedTeams(tournamentId, currentPhase) {
+    // Implementação simplificada - retorna todos os clubes do torneio
+    // Em uma implementação completa, analisaria os resultados da fase anterior
+    return this.getUserData("clubs").filter(
+      (c) => Array.isArray(c.tournamentIds) && c.tournamentIds.includes(parseInt(tournamentId))
+    );
+  }
+
+  // Salvar confrontos definidos manualmente
+  saveMatchups(tournamentId, phaseName) {
+    const rounds = this.data.rounds.filter(r => 
+      r.tournamentId == tournamentId && r.name?.includes(phaseName)
+    );
+    
+    if (rounds.length === 0) return;
+    
+    const matchCount = rounds[0].matches.length;
+    const matchups = [];
+    
+    for (let i = 0; i < matchCount; i++) {
+      const homeId = document.getElementById(`home-${i}`)?.value;
+      const awayId = document.getElementById(`away-${i}`)?.value;
+      
+      if (homeId && awayId && homeId !== awayId) {
+        matchups.push({ homeTeamId: parseInt(homeId), awayTeamId: parseInt(awayId) });
+      }
+    }
+    
+    if (matchups.length !== matchCount) {
+      alert('Defina todos os confrontos corretamente.');
+      return;
+    }
+    
+    // Atualizar rodadas com os confrontos
+    rounds.forEach((round, roundIndex) => {
+      round.matches = matchups.map(matchup => ({
+        homeTeamId: round.isReturn ? matchup.awayTeamId : matchup.homeTeamId,
+        awayTeamId: round.isReturn ? matchup.homeTeamId : matchup.awayTeamId
+      }));
+      
+      // Criar partidas
+      round.matches.forEach(match => {
+        this.createMatch({
+          homeTeamId: match.homeTeamId,
+          awayTeamId: match.awayTeamId,
+          tournamentId: tournamentId,
+          round: round.number,
+          date: round.date + "T20:00:00",
+        });
+      });
+    });
+    
+    this.saveData("rounds");
+    this.saveData("matches");
+    this.loadRounds();
+    
+    document.getElementById('define-matchups-modal').remove();
+    alert('Confrontos definidos com sucesso!');
   }
 
   // Função original para Champions League (mantida para compatibilidade)
@@ -4533,6 +4695,14 @@ class TournamentManager {
       (m) => m.tournamentId == tournament.id
     );
 
+    // Alterar texto da aba baseado no tipo de torneio
+    const standingsTab = document.getElementById('standings-tab');
+    if (tournament.type === 'knockout') {
+      standingsTab.textContent = 'Chaveamento';
+    } else {
+      standingsTab.textContent = 'Classificação';
+    }
+
     // Preencher dados do modal
     document.getElementById("tournament-profile-logo").src =
       tournament.logo || "https://via.placeholder.com/120";
@@ -4565,6 +4735,14 @@ class TournamentManager {
   }
 
   loadTournamentStandings(clubs, matches, tournamentId) {
+    const tournament = this.data.tournaments.find(t => t.id == tournamentId);
+    
+    // Se for mata-mata, mostrar chaveamento ao invés de classificação
+    if (tournament?.type === 'knockout') {
+      this.loadTournamentBracket(tournamentId, clubs);
+      return;
+    }
+    
     if (clubs.length === 0) {
       document.querySelector("#tournament-standings-table tbody").innerHTML =
         '<tr><td colspan="10" class="no-data">Nenhum clube encontrado</td></tr>';
@@ -5454,6 +5632,26 @@ class TournamentManager {
         <div class="round-team-player-rating">${stats.finalRating.toFixed(
           1
         )}</div>
+      </div>
+    `;
+  }
+
+  // Carregar chaveamento do mata-mata
+  loadTournamentBracket(tournamentId, clubs) {
+    const rounds = this.getUserData("rounds").filter(r => r.tournamentId == tournamentId);
+    const matches = this.getUserData("matches").filter(m => m.tournamentId == tournamentId);
+    
+    const container = document.getElementById('standings-or-bracket');
+    
+    if (rounds.length === 0) {
+      container.innerHTML = '<div class="no-data">Chaveamento não gerado ainda. Use a aba Rodadas para gerar a estrutura.</div>';
+      return;
+    }
+    
+    container.innerHTML = `
+      <div class="bracket-container">
+        <h3>Chaveamento do Mata-mata</h3>
+        ${this.renderKnockoutRounds(rounds, clubs)}
       </div>
     `;
   }
