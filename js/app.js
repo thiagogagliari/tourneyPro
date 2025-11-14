@@ -291,19 +291,18 @@ class TournamentManager {
 
     const container = document.getElementById("tournaments-list");
     container.innerHTML = tournaments
-      .map(
-        (tournament) => {
-          const isKnockout = tournament.type === "knockout";
-          const clubs = this.getUserData("clubs").filter(
-            (c) =>
-              Array.isArray(c.tournamentIds) &&
-              c.tournamentIds.includes(tournament.id)
-          );
-          const rounds = this.getUserData("rounds").filter(
-            (r) => r.tournamentId == tournament.id
-          );
-          
-          return `
+      .map((tournament) => {
+        const isKnockout = tournament.type === "knockout";
+        const clubs = this.getUserData("clubs").filter(
+          (c) =>
+            Array.isArray(c.tournamentIds) &&
+            c.tournamentIds.includes(tournament.id)
+        );
+        const rounds = this.getUserData("rounds").filter(
+          (r) => r.tournamentId == tournament.id
+        );
+
+        return `
         <div class="card">
           <h3>${tournament.name}</h3>
           <p><strong>Jogo:</strong> ${
@@ -326,12 +325,16 @@ class TournamentManager {
             tournament.startDate
           ).toLocaleDateString("pt-BR")}</p>
           <p><strong>Clubes:</strong> ${clubs.length}</p>
-          ${isKnockout && rounds.length > 0 ? `
+          ${
+            isKnockout && rounds.length > 0
+              ? `
           <div class="tournament-bracket-preview">
             <h4>🏆 Chaveamento</h4>
             ${this.renderTournamentBracketPreview(tournament.id, clubs)}
           </div>
-          ` : ''}
+          `
+              : ""
+          }
           <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="app.showTournamentProfile(${
               tournament.id
@@ -345,8 +348,7 @@ class TournamentManager {
           </div>
         </div>
       `;
-        }
-      )
+      })
       .join("");
 
     this.updateTournamentSelects();
@@ -3270,6 +3272,8 @@ class TournamentManager {
       Curaçao: "https://flagcdn.com/w20/cw.png",
       "Guiana-Francesa": "https://flagcdn.com/w20/gf.png",
       Guiana: "https://flagcdn.com/w20/gy.png",
+      "Nova Caledônia": "https://flagcdn.com/w20/nc.png",
+      Bahamas: "https://flagcdn.com/w20/bs.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
@@ -5778,9 +5782,17 @@ class TournamentManager {
           }
           const isReturn = round.isReturn || round.name?.includes("Volta");
           if (isReturn) {
-            matchups[index].volta = { ...match, roundId: round.id, date: round.date };
+            matchups[index].volta = {
+              ...match,
+              roundId: round.id,
+              date: round.date,
+            };
           } else {
-            matchups[index].ida = { ...match, roundId: round.id, date: round.date };
+            matchups[index].ida = {
+              ...match,
+              roundId: round.id,
+              date: round.date,
+            };
           }
         });
       });
@@ -5788,68 +5800,117 @@ class TournamentManager {
       Object.values(matchups).forEach((matchup) => {
         const idaMatch = matchup.ida;
         const voltaMatch = matchup.volta;
-        
+
         const homeTeam = clubs.find((c) => c.id == idaMatch?.homeTeamId);
         const awayTeam = clubs.find((c) => c.id == idaMatch?.awayTeamId);
 
         // Buscar resultados das partidas
-        const idaResult = matches.find((m) => 
-          m.homeTeamId == idaMatch?.homeTeamId && 
-          m.awayTeamId == idaMatch?.awayTeamId &&
-          m.round == phaseRounds.find(r => !r.isReturn && !r.name?.includes("Volta"))?.number
+        const idaResult = matches.find(
+          (m) =>
+            m.homeTeamId == idaMatch?.homeTeamId &&
+            m.awayTeamId == idaMatch?.awayTeamId &&
+            m.round ==
+              phaseRounds.find((r) => !r.isReturn && !r.name?.includes("Volta"))
+                ?.number
         );
-        
-        const voltaResult = matches.find((m) => 
-          m.homeTeamId == voltaMatch?.homeTeamId && 
-          m.awayTeamId == voltaMatch?.awayTeamId &&
-          m.round == phaseRounds.find(r => r.isReturn || r.name?.includes("Volta"))?.number
+
+        const voltaResult = matches.find(
+          (m) =>
+            m.homeTeamId == voltaMatch?.homeTeamId &&
+            m.awayTeamId == voltaMatch?.awayTeamId &&
+            m.round ==
+              phaseRounds.find((r) => r.isReturn || r.name?.includes("Volta"))
+                ?.number
         );
 
         // Calcular placar agregado
-        let aggregateHome = 0, aggregateAway = 0;
+        let aggregateHome = 0,
+          aggregateAway = 0;
         let hasResults = false;
-        
+
         if (idaResult?.status === "finished") {
           aggregateHome += idaResult.homeScore;
           aggregateAway += idaResult.awayScore;
           hasResults = true;
         }
-        
+
         if (voltaResult?.status === "finished") {
           aggregateHome += voltaResult.awayScore;
           aggregateAway += voltaResult.homeScore;
           hasResults = true;
         }
 
-        const isComplete = idaResult?.status === "finished" && voltaResult?.status === "finished";
-        const winner = isComplete ? (aggregateHome > aggregateAway ? homeTeam : aggregateAway > aggregateHome ? awayTeam : null) : null;
+        const isComplete =
+          idaResult?.status === "finished" &&
+          voltaResult?.status === "finished";
+        const winner = isComplete
+          ? aggregateHome > aggregateAway
+            ? homeTeam
+            : aggregateAway > aggregateHome
+            ? awayTeam
+            : null
+          : null;
 
         html += `
-          <div class="bracket-matchup ${isComplete ? 'completed' : hasResults ? 'in-progress' : 'scheduled'}">
+          <div class="bracket-matchup ${
+            isComplete ? "completed" : hasResults ? "in-progress" : "scheduled"
+          }">
             <div class="bracket-teams">
-              <div class="bracket-team ${winner?.id == homeTeam?.id ? 'winner' : isComplete ? 'loser' : ''}">
-                <img src="${homeTeam?.logo || "https://via.placeholder.com/30"}" alt="${homeTeam?.name || "A definir"}">
+              <div class="bracket-team ${
+                winner?.id == homeTeam?.id
+                  ? "winner"
+                  : isComplete
+                  ? "loser"
+                  : ""
+              }">
+                <img src="${
+                  homeTeam?.logo || "https://via.placeholder.com/30"
+                }" alt="${homeTeam?.name || "A definir"}">
                 <span class="team-name">${homeTeam?.name || "A definir"}</span>
-                ${hasResults ? `<span class="aggregate-score">${aggregateHome}</span>` : ''}
+                ${
+                  hasResults
+                    ? `<span class="aggregate-score">${aggregateHome}</span>`
+                    : ""
+                }
               </div>
               <div class="bracket-vs">vs</div>
-              <div class="bracket-team ${winner?.id == awayTeam?.id ? 'winner' : isComplete ? 'loser' : ''}">
-                <img src="${awayTeam?.logo || "https://via.placeholder.com/30"}" alt="${awayTeam?.name || "A definir"}">
+              <div class="bracket-team ${
+                winner?.id == awayTeam?.id
+                  ? "winner"
+                  : isComplete
+                  ? "loser"
+                  : ""
+              }">
+                <img src="${
+                  awayTeam?.logo || "https://via.placeholder.com/30"
+                }" alt="${awayTeam?.name || "A definir"}">
                 <span class="team-name">${awayTeam?.name || "A definir"}</span>
-                ${hasResults ? `<span class="aggregate-score">${aggregateAway}</span>` : ''}
+                ${
+                  hasResults
+                    ? `<span class="aggregate-score">${aggregateAway}</span>`
+                    : ""
+                }
               </div>
             </div>
             <div class="bracket-legs">
               <div class="bracket-leg">
                 <span class="leg-label">Ida:</span>
                 <span class="leg-result">
-                  ${idaResult?.status === "finished" ? `${idaResult.homeScore} - ${idaResult.awayScore}` : 'A jogar'}
+                  ${
+                    idaResult?.status === "finished"
+                      ? `${idaResult.homeScore} - ${idaResult.awayScore}`
+                      : "A jogar"
+                  }
                 </span>
               </div>
               <div class="bracket-leg">
                 <span class="leg-label">Volta:</span>
                 <span class="leg-result">
-                  ${voltaResult?.status === "finished" ? `${voltaResult.homeScore} - ${voltaResult.awayScore}` : 'A jogar'}
+                  ${
+                    voltaResult?.status === "finished"
+                      ? `${voltaResult.homeScore} - ${voltaResult.awayScore}`
+                      : "A jogar"
+                  }
                 </span>
               </div>
             </div>
@@ -6695,55 +6756,73 @@ class TournamentManager {
     }
 
     // Pegar apenas a primeira fase para preview
-    const firstPhaseRounds = rounds.filter(r => r.number <= 2).sort((a, b) => a.number - b.number);
-    
+    const firstPhaseRounds = rounds
+      .filter((r) => r.number <= 2)
+      .sort((a, b) => a.number - b.number);
+
     if (firstPhaseRounds.length === 0) {
       return '<div class="bracket-preview-empty">Nenhuma fase encontrada</div>';
     }
 
     const firstRound = firstPhaseRounds[0];
-    const phaseName = firstRound.name ? firstRound.name.replace(/ - (Ida|Volta)$/, "") : "Primeira Fase";
+    const phaseName = firstRound.name
+      ? firstRound.name.replace(/ - (Ida|Volta)$/, "")
+      : "Primeira Fase";
 
     return `
       <div class="bracket-preview">
         <div class="bracket-preview-header">
           <span class="bracket-phase-name">${phaseName}</span>
-          <span class="bracket-matches-count">${firstRound.matches.length} confrontos</span>
+          <span class="bracket-matches-count">${
+            firstRound.matches.length
+          } confrontos</span>
         </div>
         <div class="bracket-preview-matches">
-          ${firstRound.matches.slice(0, 3).map(match => {
-            const homeTeam = clubs.find(c => c.id == match.homeTeamId);
-            const awayTeam = clubs.find(c => c.id == match.awayTeamId);
-            
-            // Buscar resultado da partida
-            const matchResult = matches.find(m => 
-              m.homeTeamId == match.homeTeamId && 
-              m.awayTeamId == match.awayTeamId &&
-              m.round == firstRound.number
-            );
-            
-            return `
+          ${firstRound.matches
+            .slice(0, 3)
+            .map((match) => {
+              const homeTeam = clubs.find((c) => c.id == match.homeTeamId);
+              const awayTeam = clubs.find((c) => c.id == match.awayTeamId);
+
+              // Buscar resultado da partida
+              const matchResult = matches.find(
+                (m) =>
+                  m.homeTeamId == match.homeTeamId &&
+                  m.awayTeamId == match.awayTeamId &&
+                  m.round == firstRound.number
+              );
+
+              return `
               <div class="bracket-preview-match">
                 <div class="bracket-preview-team">
-                  <img src="${homeTeam?.logo || "https://via.placeholder.com/20"}" alt="${homeTeam?.name || "A definir"}">
+                  <img src="${
+                    homeTeam?.logo || "https://via.placeholder.com/20"
+                  }" alt="${homeTeam?.name || "A definir"}">
                   <span>${homeTeam?.name || "A definir"}</span>
                 </div>
                 <div class="bracket-preview-vs">
-                  ${matchResult?.status === "finished" ? 
-                    `${matchResult.homeScore}-${matchResult.awayScore}` : 
-                    "vs"
+                  ${
+                    matchResult?.status === "finished"
+                      ? `${matchResult.homeScore}-${matchResult.awayScore}`
+                      : "vs"
                   }
                 </div>
                 <div class="bracket-preview-team">
-                  <img src="${awayTeam?.logo || "https://via.placeholder.com/20"}" alt="${awayTeam?.name || "A definir"}">
+                  <img src="${
+                    awayTeam?.logo || "https://via.placeholder.com/20"
+                  }" alt="${awayTeam?.name || "A definir"}">
                   <span>${awayTeam?.name || "A definir"}</span>
                 </div>
               </div>
             `;
-          }).join('')}
-          ${firstRound.matches.length > 3 ? 
-            `<div class="bracket-preview-more">+${firstRound.matches.length - 3} confrontos</div>` : 
-            ''
+            })
+            .join("")}
+          ${
+            firstRound.matches.length > 3
+              ? `<div class="bracket-preview-more">+${
+                  firstRound.matches.length - 3
+                } confrontos</div>`
+              : ""
           }
         </div>
       </div>
