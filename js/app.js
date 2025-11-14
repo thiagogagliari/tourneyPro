@@ -292,7 +292,18 @@ class TournamentManager {
     const container = document.getElementById("tournaments-list");
     container.innerHTML = tournaments
       .map(
-        (tournament) => `
+        (tournament) => {
+          const isKnockout = tournament.type === "knockout";
+          const clubs = this.getUserData("clubs").filter(
+            (c) =>
+              Array.isArray(c.tournamentIds) &&
+              c.tournamentIds.includes(tournament.id)
+          );
+          const rounds = this.getUserData("rounds").filter(
+            (r) => r.tournamentId == tournament.id
+          );
+          
+          return `
         <div class="card">
           <h3>${tournament.name}</h3>
           <p><strong>Jogo:</strong> ${
@@ -302,12 +313,25 @@ class TournamentManager {
               ? "FIFA"
               : tournament.game
           }</p>
+          <p><strong>Tipo:</strong> ${
+            tournament.type === "champions"
+              ? "Liga dos Campeões"
+              : tournament.type === "national"
+              ? "Liga Nacional"
+              : tournament.type === "knockout"
+              ? "Mata-mata"
+              : "Personalizado"
+          }</p>
           <p><strong>Início:</strong> ${new Date(
             tournament.startDate
           ).toLocaleDateString("pt-BR")}</p>
-          <p><strong>Descrição:</strong> ${
-            tournament.description || "Sem descrição"
-          }</p>
+          <p><strong>Clubes:</strong> ${clubs.length}</p>
+          ${isKnockout && rounds.length > 0 ? `
+          <div class="tournament-bracket-preview">
+            <h4>🏆 Chaveamento</h4>
+            ${this.renderTournamentBracketPreview(tournament.id, clubs)}
+          </div>
+          ` : ''}
           <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="app.showTournamentProfile(${
               tournament.id
@@ -320,7 +344,8 @@ class TournamentManager {
             })">Excluir</button>
           </div>
         </div>
-      `
+      `;
+        }
       )
       .join("");
 
@@ -6654,6 +6679,75 @@ class TournamentManager {
         e.target.reset();
         document.getElementById("round-matches").innerHTML = "";
       });
+  }
+
+  // Renderizar preview do chaveamento na aba torneios
+  renderTournamentBracketPreview(tournamentId, clubs) {
+    const rounds = this.getUserData("rounds").filter(
+      (r) => r.tournamentId == tournamentId
+    );
+    const matches = this.getUserData("matches").filter(
+      (m) => m.tournamentId == tournamentId
+    );
+
+    if (rounds.length === 0) {
+      return '<div class="bracket-preview-empty">Chaveamento não gerado</div>';
+    }
+
+    // Pegar apenas a primeira fase para preview
+    const firstPhaseRounds = rounds.filter(r => r.number <= 2).sort((a, b) => a.number - b.number);
+    
+    if (firstPhaseRounds.length === 0) {
+      return '<div class="bracket-preview-empty">Nenhuma fase encontrada</div>';
+    }
+
+    const firstRound = firstPhaseRounds[0];
+    const phaseName = firstRound.name ? firstRound.name.replace(/ - (Ida|Volta)$/, "") : "Primeira Fase";
+
+    return `
+      <div class="bracket-preview">
+        <div class="bracket-preview-header">
+          <span class="bracket-phase-name">${phaseName}</span>
+          <span class="bracket-matches-count">${firstRound.matches.length} confrontos</span>
+        </div>
+        <div class="bracket-preview-matches">
+          ${firstRound.matches.slice(0, 3).map(match => {
+            const homeTeam = clubs.find(c => c.id == match.homeTeamId);
+            const awayTeam = clubs.find(c => c.id == match.awayTeamId);
+            
+            // Buscar resultado da partida
+            const matchResult = matches.find(m => 
+              m.homeTeamId == match.homeTeamId && 
+              m.awayTeamId == match.awayTeamId &&
+              m.round == firstRound.number
+            );
+            
+            return `
+              <div class="bracket-preview-match">
+                <div class="bracket-preview-team">
+                  <img src="${homeTeam?.logo || "https://via.placeholder.com/20"}" alt="${homeTeam?.name || "A definir"}">
+                  <span>${homeTeam?.name || "A definir"}</span>
+                </div>
+                <div class="bracket-preview-vs">
+                  ${matchResult?.status === "finished" ? 
+                    `${matchResult.homeScore}-${matchResult.awayScore}` : 
+                    "vs"
+                  }
+                </div>
+                <div class="bracket-preview-team">
+                  <img src="${awayTeam?.logo || "https://via.placeholder.com/20"}" alt="${awayTeam?.name || "A definir"}">
+                  <span>${awayTeam?.name || "A definir"}</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+          ${firstRound.matches.length > 3 ? 
+            `<div class="bracket-preview-more">+${firstRound.matches.length - 3} confrontos</div>` : 
+            ''
+          }
+        </div>
+      </div>
+    `;
   }
 
   // Função para determinar classe de cor da nota

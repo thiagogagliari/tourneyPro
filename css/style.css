@@ -5726,3 +5726,121 @@ body {
     font-size: 0.6rem;
   }
 }
+/* Tournament Bracket Preview Styles */
+.tournament-bracket-preview {
+  margin-top: 15px;
+  padding: 15px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.tournament-bracket-preview h4 {
+  margin: 0 0 10px 0;
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bracket-preview {
+  background: white;
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.bracket-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.bracket-phase-name {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 13px;
+}
+
+.bracket-matches-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.bracket-preview-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bracket-preview-match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.bracket-preview-team {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.bracket-preview-team img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bracket-preview-team span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 10px;
+}
+
+.bracket-preview-vs {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 10px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.bracket-preview-more {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-style: italic;
+  padding: 4px;
+}
+
+.bracket-preview-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-style: italic;
+  padding: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tournament-bracket-preview {
+    padding: 10px;
+  }
+  
+  .bracket-preview-team span {
+    max-width: 60px;
+  }
+}
