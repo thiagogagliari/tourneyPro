@@ -6765,6 +6765,7 @@ class TournamentManager {
     }
 
     const firstRound = firstPhaseRounds[0];
+    const secondRound = firstPhaseRounds[1]; // Rodada de volta
     const phaseName = firstRound.name
       ? firstRound.name.replace(/ - (Ida|Volta)$/, "")
       : "Primeira Fase";
@@ -6784,14 +6785,40 @@ class TournamentManager {
               const homeTeam = clubs.find((c) => c.id == match.homeTeamId);
               const awayTeam = clubs.find((c) => c.id == match.awayTeamId);
 
-              // Buscar resultado da partida
-              const matchResult = matches.find(
+              // Buscar resultado da partida de ida
+              const idaResult = matches.find(
                 (m) =>
                   m.homeTeamId == match.homeTeamId &&
                   m.awayTeamId == match.awayTeamId &&
                   m.round == firstRound.number
               );
 
+              // Buscar resultado da partida de volta
+              const voltaResult = secondRound ? matches.find(
+                (m) =>
+                  m.homeTeamId == match.awayTeamId &&
+                  m.awayTeamId == match.homeTeamId &&
+                  m.round == secondRound.number
+              ) : null;
+
+              // Calcular placar agregado
+              let aggregateHome = 0, aggregateAway = 0;
+              let hasResults = false;
+
+              if (idaResult?.status === "finished") {
+                aggregateHome += idaResult.homeScore;
+                aggregateAway += idaResult.awayScore;
+                hasResults = true;
+              }
+
+              if (voltaResult?.status === "finished") {
+                aggregateHome += voltaResult.awayScore; // Invertido porque é jogo de volta
+                aggregateAway += voltaResult.homeScore; // Invertido porque é jogo de volta
+                hasResults = true;
+              }
+
+              const isComplete = idaResult?.status === "finished" && voltaResult?.status === "finished";
+              
               return `
               <div class="bracket-preview-match">
                 <div class="bracket-preview-team">
@@ -6802,8 +6829,10 @@ class TournamentManager {
                 </div>
                 <div class="bracket-preview-vs">
                   ${
-                    matchResult?.status === "finished"
-                      ? `${matchResult.homeScore}-${matchResult.awayScore}`
+                    hasResults
+                      ? isComplete
+                        ? `${aggregateHome}-${aggregateAway}`
+                        : `${aggregateHome}-${aggregateAway}*`
                       : "vs"
                   }
                 </div>
