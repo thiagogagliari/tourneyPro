@@ -3274,6 +3274,7 @@ class TournamentManager {
       Guiana: "https://flagcdn.com/w20/gy.png",
       "Nova Caledônia": "https://flagcdn.com/w20/nc.png",
       Bahamas: "https://flagcdn.com/w20/bs.png",
+      Congo: "https://flagcdn.com/w20/cg.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
