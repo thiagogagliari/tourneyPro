@@ -14,104 +14,42 @@ class CloudStorage {
       appId: "1:769236217387:web:7f188f16c93da66a99446e",
     };
 
-    // Verificar usuário local primeiro
-    this.checkLocalUser();
-    
-    // Inicializar Firebase
     this.initFirebase();
   }
 
   async initFirebase() {
     try {
-      // Verificar se Firebase está disponível
-      if (typeof firebase === "undefined") {
-        console.warn("Firebase não carregado - modo offline");
-        return;
-      }
-
-      // Verificar se já foi inicializado
-      if (firebase.apps.length === 0) {
+      if (typeof firebase !== "undefined") {
         firebase.initializeApp(this.firebaseConfig);
-      }
-      
-      this.db = firebase.firestore();
-      this.auth = firebase.auth();
-      
-      // Testar conectividade
-      await this.testConnection();
-      
-      this.firebaseReady = true;
-      console.log("Firebase inicializado com sucesso");
+        this.db = firebase.firestore();
+        this.auth = firebase.auth();
+        this.firebaseReady = true;
 
-      // Listener de autenticação
-      this.auth.onAuthStateChanged((user) => {
-        this.currentUser = user;
-      });
+        // Listener de autenticação
+        this.auth.onAuthStateChanged((user) => {
+          this.currentUser = user;
+        });
+      }
     } catch (error) {
       console.error("Erro ao inicializar Firebase:", error);
-      this.firebaseReady = false;
     }
   }
 
-  async testConnection() {
-    try {
-      // Teste simples de conectividade
-      await this.db.collection('test').limit(1).get();
-    } catch (error) {
-      if (error.code === 'unavailable' || error.message.includes('network')) {
-        throw new Error('Sem conexão com a internet');
-      }
-      throw error;
-    }
-  }
-
-  // Salvar dados (Firebase ou localStorage como fallback)
+  // Salvar dados apenas no Firebase
   async saveData(key, data) {
-    if (this.firebaseReady && this.currentUser) {
-      try {
-        return await this.saveToCloud(key, data);
-      } catch (error) {
-        console.warn('Erro ao salvar no Firebase, usando localStorage:', error);
-        return this.saveToLocal(key, data);
-      }
-    } else {
-      return this.saveToLocal(key, data);
+    if (!this.firebaseReady || !this.currentUser) {
+      throw new Error("Usuário não logado ou Firebase não disponível");
     }
+    return await this.saveToCloud(key, data);
   }
 
-  // Carregar dados (Firebase ou localStorage como fallback)
+  // Carregar dados apenas do Firebase
   async loadData(key) {
-    if (this.firebaseReady && this.currentUser) {
-      try {
-        const data = await this.loadFromCloud(key);
-        return data || [];
-      } catch (error) {
-        console.warn('Erro ao carregar do Firebase, usando localStorage:', error);
-        return this.loadFromLocal(key);
-      }
-    } else {
-      return this.loadFromLocal(key);
-    }
-  }
-
-  // Métodos de localStorage como fallback
-  saveToLocal(key, data) {
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-      console.log(`${key} salvo no localStorage`);
-    } catch (error) {
-      console.error('Erro ao salvar no localStorage:', error);
-    }
-  }
-
-  loadFromLocal(key) {
-    try {
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error('Erro ao carregar do localStorage:', error);
+    if (!this.firebaseReady || !this.currentUser) {
       return [];
     }
+    const data = await this.loadFromCloud(key);
+    return data || [];
   }
 
   // Remover campos undefined de um objeto
@@ -281,68 +219,41 @@ class CloudStorage {
 
   // Autenticação
   async signIn(email, password) {
-    if (this.firebaseReady) {
-      try {
-        const result = await this.auth.signInWithEmailAndPassword(email, password);
-        return { success: true, user: result.user };
-      } catch (error) {
-        return { success: false, error: error.message };
-      }
-    } else {
-      // Autenticação local como fallback
-      return this.signInLocal(email, password);
+    if (!this.firebaseReady) {
+      return {
+        success: false,
+        error: "Firebase não disponível",
+      };
+    }
+
+    try {
+      const result = await this.auth.signInWithEmailAndPassword(
+        email,
+        password
+      );
+      return { success: true, user: result.user };
+    } catch (error) {
+      return { success: false, error: error.message };
     }
   }
 
   async signUp(email, password) {
-    if (this.firebaseReady) {
-      try {
-        const result = await this.auth.createUserWithEmailAndPassword(email, password);
-        return { success: true, user: result.user };
-      } catch (error) {
-        return { success: false, error: error.message };
-      }
-    } else {
-      // Registro local como fallback
-      return this.signUpLocal(email, password);
+    if (!this.firebaseReady) {
+      return {
+        success: false,
+        error: "Firebase não disponível",
+      };
     }
-  }
 
-  // Autenticação local
-  signInLocal(email, password) {
-    const users = JSON.parse(localStorage.getItem('localUsers') || '[]');
-    const user = users.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-      this.currentUser = { uid: user.id, email: user.email };
-      localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-      return { success: true, user: this.currentUser };
-    } else {
-      return { success: false, error: 'Email ou senha inválidos' };
+    try {
+      const result = await this.auth.createUserWithEmailAndPassword(
+        email,
+        password
+      );
+      return { success: true, user: result.user };
+    } catch (error) {
+      return { success: false, error: error.message };
     }
-  }
-
-  signUpLocal(email, password) {
-    const users = JSON.parse(localStorage.getItem('localUsers') || '[]');
-    
-    if (users.find(u => u.email === email)) {
-      return { success: false, error: 'Email já cadastrado' };
-    }
-    
-    const newUser = {
-      id: Date.now().toString(),
-      email,
-      password,
-      createdAt: new Date().toISOString()
-    };
-    
-    users.push(newUser);
-    localStorage.setItem('localUsers', JSON.stringify(users));
-    
-    this.currentUser = { uid: newUser.id, email: newUser.email };
-    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-    
-    return { success: true, user: this.currentUser };
   }
 
   async signOut() {
@@ -350,26 +261,14 @@ class CloudStorage {
       await this.auth.signOut();
     }
     this.currentUser = null;
-    localStorage.removeItem('currentUser');
-  }
-
-  // Verificar se há usuário logado localmente
-  checkLocalUser() {
-    if (!this.currentUser) {
-      const localUser = localStorage.getItem('currentUser');
-      if (localUser) {
-        this.currentUser = JSON.parse(localUser);
-      }
-    }
   }
 
   // Status da conexão
   getStatus() {
-    this.checkLocalUser();
     return {
       firebaseReady: this.firebaseReady,
       loggedIn: !!this.currentUser,
-      mode: this.firebaseReady ? "Firebase Online" : "Modo Local",
+      mode: "Firebase Online",
     };
   }
 }

@@ -1371,15 +1371,9 @@
     </div>
 
     <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script>
-      // Verificar se Firebase carregou corretamente
-      if (typeof firebase === 'undefined') {
-        console.warn('Firebase não pôde ser carregado - funcionando em modo offline');
-      }
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     
     <!-- App Scripts -->
     <script src="js/cloud-storage.js"></script>
