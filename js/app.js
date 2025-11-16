@@ -2315,7 +2315,7 @@ class TournamentManager {
     // Embaralhar clubes para sorteio aleatório
     const shuffledClubs = [...clubs].sort(() => Math.random() - 0.5);
 
-    // Gerar primeira fase - ida
+    // Gerar apenas a primeira fase com clubes reais (ida e volta automáticas)
     this.generateKnockoutPhase(
       tournamentId,
       phases[0],
@@ -2323,37 +2323,9 @@ class TournamentManager {
       baseDate
     );
 
-    // Gerar primeira fase - volta
-    if (phases[1]) {
-      const voltaDate = new Date(baseDate);
-      voltaDate.setDate(baseDate.getDate() + 7);
-      
-      const voltaRound = {
-        id: Date.now() + 1 + Math.random() * 1000,
-        userId: this.currentUser.id,
-        tournamentId: tournamentId,
-        number: phases[1].round,
-        name: phases[1].name,
-        date: voltaDate.toISOString().split("T")[0],
-        matches: phases[0].matches ? shuffledClubs.map((_, i) => {
-          if (i % 2 === 0 && i + 1 < shuffledClubs.length) {
-            return {
-              homeTeamId: shuffledClubs[i + 1].id, // Invertido para volta
-              awayTeamId: shuffledClubs[i].id      // Invertido para volta
-            };
-          }
-          return null;
-        }).filter(Boolean) : [],
-        isReturn: true,
-        createdAt: new Date().toISOString(),
-      };
-      
-      this.data.rounds.push(voltaRound);
-    }
-
     // Criar estrutura das fases seguintes (vazias para preenchimento manual)
     for (let i = 2; i < phases.length; i += 2) {
-      // Fases subsequentes
+      // Pular volta da primeira fase
       const phaseDate = new Date(baseDate);
       phaseDate.setDate(baseDate.getDate() + i * 7); // 1 semana entre fases
 
@@ -2491,10 +2463,10 @@ class TournamentManager {
 
     this.data.rounds.push(roundData);
 
-    // Criar partidas apenas para a primeira fase
+    // Criar partidas apenas para a primeira fase (ida e volta)
     if (clubs.length > 0) {
       matches.forEach((match) => {
-        // Criar partida (ida ou volta dependendo da fase)
+        // Jogo de ida
         this.createMatch({
           homeTeamId: match.homeTeamId,
           awayTeamId: match.awayTeamId,
@@ -2502,6 +2474,20 @@ class TournamentManager {
           round: phase.round,
           date: baseDate.toISOString().split("T")[0] + "T20:00:00",
         });
+
+        // Jogo de volta (invertendo mando de campo)
+        if (!phase.isReturn) {
+          const returnDate = new Date(baseDate);
+          returnDate.setDate(baseDate.getDate() + 7); // 1 semana depois
+
+          this.createMatch({
+            homeTeamId: match.awayTeamId, // Inverter mando
+            awayTeamId: match.homeTeamId, // Inverter mando
+            tournamentId: tournamentId,
+            round: phase.round + 1, // Próxima rodada (volta)
+            date: returnDate.toISOString().split("T")[0] + "T20:00:00",
+          });
+        }
       });
     }
   }
