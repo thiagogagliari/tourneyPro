@@ -3275,6 +3275,13 @@ class TournamentManager {
       "Nova Caledônia": "https://flagcdn.com/w20/nc.png",
       Bahamas: "https://flagcdn.com/w20/bs.png",
       Congo: "https://flagcdn.com/w20/cg.png",
+      FIFA: "https://flagcdn.com/w20/fifa.png",
+      CONMEBOL: "https://flagcdn.com/w20/conmebol.png",
+      CONCACAF: "https://flagcdn.com/w20/concacaf.png",
+      AFC: "https://flagcdn.com/w20/afc.png",
+      CAF: "https://flagcdn.com/w20/caf.png",
+      OFC: "https://flagcdn.com/w20/ofc.png",
+      UEFA: "https://flagcdn.com/w20/uefa.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
@@ -6795,15 +6802,18 @@ class TournamentManager {
               );
 
               // Buscar resultado da partida de volta
-              const voltaResult = secondRound ? matches.find(
-                (m) =>
-                  m.homeTeamId == match.awayTeamId &&
-                  m.awayTeamId == match.homeTeamId &&
-                  m.round == secondRound.number
-              ) : null;
+              const voltaResult = secondRound
+                ? matches.find(
+                    (m) =>
+                      m.homeTeamId == match.awayTeamId &&
+                      m.awayTeamId == match.homeTeamId &&
+                      m.round == secondRound.number
+                  )
+                : null;
 
               // Calcular placar agregado
-              let aggregateHome = 0, aggregateAway = 0;
+              let aggregateHome = 0,
+                aggregateAway = 0;
               let hasResults = false;
 
               if (idaResult?.status === "finished") {
@@ -6818,8 +6828,10 @@ class TournamentManager {
                 hasResults = true;
               }
 
-              const isComplete = idaResult?.status === "finished" && voltaResult?.status === "finished";
-              
+              const isComplete =
+                idaResult?.status === "finished" &&
+                voltaResult?.status === "finished";
+
               return `
               <div class="bracket-preview-match">
                 <div class="bracket-preview-team">
