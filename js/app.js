@@ -3275,7 +3275,7 @@ class TournamentManager {
       "Nova Caledônia": "https://flagcdn.com/w20/nc.png",
       Bahamas: "https://flagcdn.com/w20/bs.png",
       Congo: "https://flagcdn.com/w20/cg.png",
-      ONU: "https://flagcdn.com/w20/un.png",
+      FIFA: "https://cdn-img.zerozero.pt/img/logos/confederacoes/7_transp_fifa.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
