@@ -3275,13 +3275,7 @@ class TournamentManager {
       "Nova Caledônia": "https://flagcdn.com/w20/nc.png",
       Bahamas: "https://flagcdn.com/w20/bs.png",
       Congo: "https://flagcdn.com/w20/cg.png",
-      FIFA: "https://flagcdn.com/w20/fifa.png",
-      CONMEBOL: "https://flagcdn.com/w20/conmebol.png",
-      CONCACAF: "https://flagcdn.com/w20/concacaf.png",
-      AFC: "https://flagcdn.com/w20/afc.png",
-      CAF: "https://flagcdn.com/w20/caf.png",
-      OFC: "https://flagcdn.com/w20/ofc.png",
-      UEFA: "https://flagcdn.com/w20/uefa.png",
+      ONU: "https://flagcdn.com/w20/un.png",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
