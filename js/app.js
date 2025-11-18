@@ -3275,7 +3275,14 @@ class TournamentManager {
       "Nova Caledônia": "https://flagcdn.com/w20/nc.png",
       Bahamas: "https://flagcdn.com/w20/bs.png",
       Congo: "https://flagcdn.com/w20/cg.png",
-      FIFA: "https://cdn-img.zerozero.pt/img/logos/confederacoes/7_transp_fifa.png",
+      UEFA: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZP1mQZa3mJngyadCmDM6KFijvemaeL21h8w&s",
+      CONMEBOL:
+        "https://www.vhv.rs/dpng/d/417-4177504_conmebol-logo-png-conmebol-logo-transparent-png.png",
+      CONCACAF:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Concacaf_logo.svg/2356px-Concacaf_logo.svg.png",
+      CAF: "https://png.pngtree.com/element_our/png/20180927/caf-football-logo-png_101195.jpg",
+      AFC: "https://1000logos.net/wp-content/uploads/2016/10/AFC-Logo-2001.png",
+      OFC: "https://i0.wp.com/www.oceaniafootball.com/cms/wp-content/uploads/2011/01/OFC_Logo_WEB.jpg?fit=400%2C320&ssl=1",
     };
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
