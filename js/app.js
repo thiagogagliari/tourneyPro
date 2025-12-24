@@ -3260,6 +3260,7 @@ class TournamentManager {
       Ruanda: "https://flagcdn.com/w20/rw.png",
       Honduras: "https://flagcdn.com/w20/hn.png",
       Nicarágua: "https://flagcdn.com/w20/ni.png",
+      Botswana: "https://flagcdn.com/w20/bw.png",
       "El Salvador": "https://flagcdn.com/w20/sv.png",
       "Serra Leoa": "https://flagcdn.com/w20/sl.png",
       Comores: "https://flagcdn.com/w20/km.png",
