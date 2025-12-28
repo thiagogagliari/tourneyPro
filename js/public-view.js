@@ -695,6 +695,118 @@ class PublicTournamentViewer {
   }
 
   loadTournamentStandings() {
+    // Se AFCON: mostrar por grupos + melhores terceiros
+    if (this.currentTournament.type === "afcon") {
+      const groups = this.currentTournament.groups || {};
+      const groupNames = Object.keys(groups).sort();
+
+      let html = `<div class="afcon-standings">`;
+
+      groupNames.forEach((g) => {
+        const standings = this.calculateGroupStandings(
+          this.currentTournament.id,
+          g
+        );
+        html += `
+          <div class="group-standings">
+            <h3>Grupo ${g}</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Pos</th>
+                  <th>Clube</th>
+                  <th>Pts</th>
+                  <th>J</th>
+                  <th>V</th>
+                  <th>E</th>
+                  <th>D</th>
+                  <th>GP</th>
+                  <th>GC</th>
+                  <th>SG</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${standings
+                  .map(
+                    (team, idx) => `
+                      <tr>
+                        <td>${idx + 1}</td>
+                        <td class="team-cell"><img src="${
+                          team.logo || "https://via.placeholder.com/20"
+                        }" class="team-logo"/> ${team.name}</td>
+                        <td><strong>${team.points}</strong></td>
+                        <td>${team.matches}</td>
+                        <td>${team.wins}</td>
+                        <td>${team.draws}</td>
+                        <td>${team.losses}</td>
+                        <td>${team.goalsFor}</td>
+                        <td>${team.goalsAgainst}</td>
+                        <td>${team.goalDifference}</td>
+                      </tr>
+                    `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      });
+
+      // melhores terceiros
+      const thirds = [];
+      groupNames.forEach((g) => {
+        const s = this.calculateGroupStandings(this.currentTournament.id, g);
+        if (s[2]) thirds.push(s[2]);
+      });
+
+      thirds.sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDifference !== a.goalDifference)
+          return b.goalDifference - a.goalDifference;
+        return b.goalsFor - a.goalsFor;
+      });
+
+      html += `
+        <div class="best-thirds">
+          <h3>Melhores Terceiros (Top 4)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Pos</th>
+                <th>Clube</th>
+                <th>Pts</th>
+                <th>SG</th>
+                <th>GP</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${thirds
+                .slice(0, 4)
+                .map(
+                  (t, i) => `
+                  <tr>
+                    <td>${i + 1}</td>
+                    <td class="team-cell"><img src="${
+                      t.logo || "https://via.placeholder.com/20"
+                    }" class="team-logo"/> ${t.name}</td>
+                    <td><strong>${t.points}</strong></td>
+                    <td>${t.goalDifference}</td>
+                    <td>${t.goalsFor}</td>
+                  </tr>
+                `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      html += `</div>`;
+
+      document.getElementById("standings-tab").innerHTML = html;
+      return;
+    }
+
     const standings = this.calculateStandings(this.currentTournament.id);
 
     document.getElementById("standings-tab").innerHTML = `
@@ -878,12 +990,101 @@ class PublicTournamentViewer {
       team.goalDifference = team.goalsFor - team.goalsAgainst;
     });
 
-    return standings.sort((a, b) => {
+    const sorted = standings.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       if (b.goalDifference !== a.goalDifference)
         return b.goalDifference - a.goalDifference;
       return b.goalsFor - a.goalsFor;
     });
+
+    return sorted;
+  }
+
+  // Calcular classificação de um grupo específico (usado para torneios com grupos)
+  calculateGroupStandings(tournamentId, groupName) {
+    const tournament = this.data.tournaments.find((t) => t.id == tournamentId);
+    const clubs = this.data.clubs.filter((c) => c.tournamentId == tournamentId);
+
+    let groupClubIds = [];
+    if (tournament && tournament.groups && tournament.groups[groupName]) {
+      groupClubIds = tournament.groups[groupName];
+    } else {
+      groupClubIds = this.data.matches
+        .filter((m) => m.tournamentId == tournamentId && m.group == groupName)
+        .reduce((acc, m) => {
+          if (m.homeTeamId && !acc.includes(m.homeTeamId))
+            acc.push(m.homeTeamId);
+          if (m.awayTeamId && !acc.includes(m.awayTeamId))
+            acc.push(m.awayTeamId);
+          return acc;
+        }, []);
+    }
+
+    const standings = (groupClubIds || []).map((clubId) => {
+      const club = this.data.clubs.find((c) => c.id == clubId) || {
+        id: clubId,
+        name: "Time",
+      };
+      return {
+        id: clubId,
+        name: club.name,
+        logo: club.logo,
+        matches: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        points: 0,
+      };
+    });
+
+    this.data.matches
+      .filter(
+        (m) =>
+          m.tournamentId == tournamentId &&
+          m.group == groupName &&
+          (m.status === "finished" || m.status === "Finalizada")
+      )
+      .forEach((match) => {
+        const home = standings.find((s) => s.id == match.homeTeamId);
+        const away = standings.find((s) => s.id == match.awayTeamId);
+        if (!home || !away) return;
+
+        home.matches++;
+        away.matches++;
+        home.goalsFor += match.homeScore || 0;
+        home.goalsAgainst += match.awayScore || 0;
+        away.goalsFor += match.awayScore || 0;
+        away.goalsAgainst += match.homeScore || 0;
+
+        if (match.homeScore > match.awayScore) {
+          home.wins++;
+          home.points += 3;
+          away.losses++;
+        } else if (match.homeScore < match.awayScore) {
+          away.wins++;
+          away.points += 3;
+          home.losses++;
+        } else {
+          home.draws++;
+          away.draws++;
+          home.points += 1;
+          away.points += 1;
+        }
+      });
+
+    standings.forEach((t) => (t.goalDifference = t.goalsFor - t.goalsAgainst));
+
+    standings.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.goalDifference !== a.goalDifference)
+        return b.goalDifference - a.goalDifference;
+      return b.goalsFor - a.goalsFor;
+    });
+
+    return standings;
   }
 
   getPlayerStats(playerId) {

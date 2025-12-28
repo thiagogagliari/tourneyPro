@@ -1652,14 +1652,14 @@ body {
     padding: 7px;
     text-align: center;
     border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
+    color: black;
 }
 
 
 
 .standings-table th {
     background: #667eea;
-    color: white;
+    color: rgb(20, 1, 1);
     font-weight: 600;
 }
 
@@ -1678,7 +1678,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
+    color: rgb(22, 12, 12);
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -1709,7 +1709,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
+    color: rgb(17, 6, 6);
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -1726,7 +1726,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
+    color: rgb(17, 4, 4);
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -1742,7 +1742,8 @@ body {
 .standings-table tr:nth-child(n+17):nth-child(-n+20) td:first-child {
     text-align: center;
     width: 40px;
-    color: transparent;
+    color: black;
+    font-weight: 900;
 }
 
 
@@ -1935,7 +1936,7 @@ body {
 
 .scorers-container .standings-table th,
 .scorers-container .standings-table td {
-    color: var(--text-primary);
+    color: black;
 }
 
 .scorers-container .standings-table tr:hover {
@@ -4356,7 +4357,7 @@ body {
 
 .standings-table th {
     background: var(--border-light);
-    color: var(--text-primary);
+    color: black;
     font-weight: 600;
     position: sticky;
     top: 0;
@@ -4366,7 +4367,7 @@ body {
     text-align: center;
     padding: 12px;
     border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
+    color: black;
 }
 
 .standings-table tr:hover {

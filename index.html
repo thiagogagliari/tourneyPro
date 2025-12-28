@@ -443,6 +443,7 @@
             <option value="champions">Liga dos Campeões (36 clubes)</option>
             <option value="national">Liga Nacional (20 clubes)</option>
             <option value="knockout">Mata-mata (8, 16 ou 32 clubes)</option>
+            <option value="afcon">Copa Africana de Nações (24 clubes)</option>
           </select>
           <input type="date" id="tournament-start" required />
           <textarea
@@ -611,6 +612,34 @@
           <button type="button" id="generate-matches-btn">Gerar Jogos</button>
           <button type="submit">Salvar Rodada</button>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal: Atribuir Times aos Grupos (AFCON) -->
+    <div id="assign-groups-modal" class="modal" style="display:none">
+      <div class="modal-content large">
+        <span class="close" onclick="document.getElementById('assign-groups-modal').style.display='none'">&times;</span>
+        <h3>Atribuir Times aos Grupos - Copa Africana</h3>
+        <p>Selecione manualmente 4 clubes para cada grupo (A-F).</p>
+        <div id="assign-groups-container"></div>
+        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn-secondary" onclick="document.getElementById('assign-groups-modal').style.display='none'">Cancelar</button>
+          <button class="btn-primary" id="save-assigned-groups-btn">Salvar Grupos</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Definir Confrontos dos Grupos (AFCON) -->
+    <div id="afcon-pairings-modal" class="modal" style="display:none">
+      <div class="modal-content large">
+        <span class="close" onclick="document.getElementById('afcon-pairings-modal').style.display='none'">&times;</span>
+        <h3>Definir Confrontos - Grupos AFCON</h3>
+        <p>Defina os confrontos por rodada para cada grupo. Se não definir, o padrão será utilizado.</p>
+        <div id="afcon-pairings-container"></div>
+        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn-secondary" onclick="document.getElementById('afcon-pairings-modal').style.display='none'">Cancelar</button>
+          <button class="btn-primary" id="save-afcon-pairings-btn">Salvar Confrontos</button>
+        </div>
       </div>
     </div>
 

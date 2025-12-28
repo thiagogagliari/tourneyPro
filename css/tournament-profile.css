@@ -152,7 +152,7 @@
 .standings-table td {
     text-align: center;
     border-bottom: 1px solid var(--border-light);
-    color: var(--text-primary);
+    color: black;
 }
 
 .standings-table tr:hover {

@@ -184,7 +184,33 @@ class TournamentManager {
         currentUser: !!cloudStorage.currentUser,
         dataLength: this.data[type].length,
       });
-      await cloudStorage.saveData(type, this.data[type]);
+
+      // Para tournaments, normalizar possíveis arrays aninhados (ex: pareamentos antigos como arrays) para objetos
+      let toSave = this.data[type];
+      if (type === "tournaments") {
+        // Deep clone para não modificar referências até confirmarmos
+        toSave = JSON.parse(JSON.stringify(this.data[type]));
+        toSave = toSave.map((t) => {
+          if (t && t.afconPairings) {
+            for (const g of Object.keys(t.afconPairings)) {
+              for (const r of Object.keys(t.afconPairings[g])) {
+                t.afconPairings[g][r] = t.afconPairings[g][r].map((p) => {
+                  if (Array.isArray(p)) {
+                    return { home: p[0], away: p[1] };
+                  }
+                  return p;
+                });
+              }
+            }
+          }
+          return t;
+        });
+
+        // Atualizar a cópia na memória para garantir consistência local
+        this.data[type] = JSON.parse(JSON.stringify(toSave));
+      }
+
+      await cloudStorage.saveData(type, toSave);
       console.log(`${type} salvo com sucesso`);
     } catch (error) {
       console.error(`Erro ao salvar ${type}:`, error);
@@ -317,6 +343,8 @@ class TournamentManager {
               ? "Liga dos Campeões"
               : tournament.type === "national"
               ? "Liga Nacional"
+              : tournament.type === "afcon"
+              ? "Copa Africana"
               : tournament.type === "knockout"
               ? "Mata-mata"
               : "Personalizado"
@@ -1905,6 +1933,7 @@ class TournamentManager {
     const isChampions = tournamentType === "champions";
     const isNational = tournamentType === "national";
     const isKnockout = tournamentType === "knockout";
+    const isAfcon = tournamentType === "afcon";
 
     container.innerHTML = `
       <div class="rounds-header">
@@ -1914,7 +1943,7 @@ class TournamentManager {
           }
         </button>
         ${
-          isChampions || isNational || isKnockout
+          isChampions || isNational || isKnockout || isAfcon
             ? `
           <button class="btn-secondary" onclick="app.generateTournamentStructure(${tournamentId})">
             <i class="fas fa-trophy"></i> Gerar Estrutura ${
@@ -1922,6 +1951,8 @@ class TournamentManager {
                 ? "Champions"
                 : isNational
                 ? "Liga Nacional"
+                : isAfcon
+                ? "Copa Africana"
                 : "Mata-mata"
             }
           </button>
@@ -1946,6 +1977,8 @@ class TournamentManager {
       return this.renderNationalLeagueRounds(rounds, clubs);
     } else if (tournamentType === "knockout") {
       return this.renderKnockoutRounds(rounds, clubs);
+    } else if (tournamentType === "afcon") {
+      return this.renderAfconRounds(rounds, clubs);
     }
 
     return rounds
@@ -2082,6 +2115,203 @@ class TournamentManager {
     return html;
   }
 
+  // Renderização dos torneios AFCON (grupos + mata-mata único)
+  renderAfconRounds(rounds, clubs) {
+    const groupStageRounds = rounds.filter((r) => r.number <= 3);
+    const knockoutRounds = rounds.filter((r) => r.number > 3);
+
+    let html = "";
+
+    if (groupStageRounds.length > 0) {
+      html += `
+        <div class="afcon-phase">
+          <div class="phase-header">
+            <h2><i class="fas fa-users"></i> Fase de Grupos (A-F)</h2>
+          </div>
+          ${groupStageRounds
+            .map(
+              (round) => `
+            <div class="round-card group-stage">
+              <div class="round-header">
+                <h3>Rodada ${round.number}</h3>
+                <span class="round-date">${new Date(
+                  round.date
+                ).toLocaleDateString("pt-BR")}</span>
+              </div>
+              <div class="round-matches">
+                ${round.matches
+                  .map((match) => {
+                    const homeTeam = clubs.find(
+                      (c) => c.id == match.homeTeamId
+                    );
+                    const awayTeam = clubs.find(
+                      (c) => c.id == match.awayTeamId
+                    );
+                    return `
+                    <div class="round-match">
+                      <span class="group-label">Grupo ${match.group}</span>
+                      <span class="team">${homeTeam?.name || "Time"}</span>
+                      <span class="vs">-</span>
+                      <span class="team">${awayTeam?.name || "Time"}</span>
+                    </div>
+                  `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      `;
+    }
+
+    if (knockoutRounds.length > 0) {
+      const phases = {
+        4: "Oitavas de Final",
+        5: "Quartas de Final",
+        6: "Semifinal",
+        7: "Final",
+      };
+
+      html += `
+        <div class="afcon-phase">
+          <div class="phase-header">
+            <h2><i class="fas fa-trophy"></i> Mata-mata (Partidas Únicas)</h2>
+          </div>
+          ${knockoutRounds
+            .map(
+              (round) => `
+            <div class="knockout-round">
+              <div class="knockout-header">
+                <h3>${phases[round.number] || `Fase ${round.number}`}</h3>
+                <span class="round-date">${new Date(
+                  round.date
+                ).toLocaleDateString("pt-BR")}</span>
+              </div>
+              <div class="knockout-matches">
+                ${round.matches
+                  .map((match) => {
+                    const homeTeam = clubs.find(
+                      (c) => c.id == match.homeTeamId
+                    );
+                    const awayTeam = clubs.find(
+                      (c) => c.id == match.awayTeamId
+                    );
+                    return `
+                    <div class="knockout-match">
+                      <span class="team">${homeTeam?.name || "A definir"}</span>
+                      <span class="vs">vs</span>
+                      <span class="team">${awayTeam?.name || "A definir"}</span>
+                    </div>
+                  `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      `;
+    }
+
+    return html;
+  }
+
+  // Calcular classificação de um grupo específico
+  calculateGroupStandings(tournamentId, groupName) {
+    const tournament = this.data.tournaments.find((t) => t.id == tournamentId);
+    const clubs = this.getUserData("clubs").filter(
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(parseInt(tournamentId))
+    );
+
+    // Determinar clubes do grupo (se estiver salvo no objeto do torneio, usar; senão inferir)
+    let groupClubIds = [];
+    if (tournament && tournament.groups && tournament.groups[groupName]) {
+      groupClubIds = tournament.groups[groupName];
+    } else {
+      // Inferir a partir das partidas
+      groupClubIds = this.getUserData("matches")
+        .filter((m) => m.tournamentId == tournamentId && m.group == groupName)
+        .reduce((acc, m) => {
+          if (m.homeTeamId && !acc.includes(m.homeTeamId))
+            acc.push(m.homeTeamId);
+          if (m.awayTeamId && !acc.includes(m.awayTeamId))
+            acc.push(m.awayTeamId);
+          return acc;
+        }, []);
+    }
+
+    const standings = (groupClubIds || []).map((clubId) => {
+      const club = this.getUserData("clubs").find((c) => c.id == clubId) || {
+        id: clubId,
+        name: "Time",
+      };
+      return {
+        id: clubId,
+        name: club.name,
+        matches: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        points: 0,
+      };
+    });
+
+    // Agregar resultados das partidas do grupo
+    this.data.matches
+      .filter(
+        (m) =>
+          m.tournamentId == tournamentId &&
+          m.group == groupName &&
+          (m.status === "finished" || m.status === "Finalizada")
+      )
+      .forEach((match) => {
+        const home = standings.find((s) => s.id == match.homeTeamId);
+        const away = standings.find((s) => s.id == match.awayTeamId);
+        if (!home || !away) return;
+
+        home.matches++;
+        away.matches++;
+        home.goalsFor += match.homeScore || 0;
+        home.goalsAgainst += match.awayScore || 0;
+        away.goalsFor += match.awayScore || 0;
+        away.goalsAgainst += match.homeScore || 0;
+
+        if (match.homeScore > match.awayScore) {
+          home.wins++;
+          home.points += 3;
+          away.losses++;
+        } else if (match.homeScore < match.awayScore) {
+          away.wins++;
+          away.points += 3;
+          home.losses++;
+        } else {
+          home.draws++;
+          away.draws++;
+          home.points += 1;
+          away.points += 1;
+        }
+      });
+
+    standings.forEach((t) => (t.goalDifference = t.goalsFor - t.goalsAgainst));
+
+    standings.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.goalDifference !== a.goalDifference)
+        return b.goalDifference - a.goalDifference;
+      return b.goalsFor - a.goalsFor;
+    });
+
+    return standings;
+  }
+
   renderNationalLeagueRounds(rounds, clubs) {
     return rounds
       .map(
@@ -2135,6 +2365,13 @@ class TournamentManager {
         return;
       }
       this.generateNationalStructure(tournamentId, clubs);
+    } else if (tournament.type === "afcon") {
+      if (clubs.length !== 24) {
+        alert("Copa Africana requer exatamente 24 clubes!");
+        return;
+      }
+      // Abrir modal para atribuir grupos manualmente
+      this.showAssignGroupsModal(tournamentId, clubs);
     } else if (tournament.type === "knockout") {
       const validSizes = [8, 16, 32];
       if (!validSizes.includes(clubs.length)) {
@@ -2225,6 +2462,425 @@ class TournamentManager {
         });
       });
     }
+  }
+
+  // Gerar estrutura da Copa Africana de Nações (AFCON)
+  generateAfconStructure(tournamentId, clubs) {
+    // Limpar rodadas e partidas existentes do torneio
+    this.data.rounds = this.data.rounds.filter(
+      (r) => r.tournamentId != tournamentId
+    );
+    this.data.matches = this.data.matches.filter(
+      (m) => m.tournamentId != tournamentId
+    );
+
+    const baseDate = new Date();
+
+    // Preparar grupos A-F (usar grupos salvos no torneio se existirem, senão embaralhar e gerar)
+    const groupNames = ["A", "B", "C", "D", "E", "F"];
+    let groups = {};
+    const tournament = this.data.tournaments.find((t) => t.id == tournamentId);
+
+    if (tournament && tournament.groups) {
+      groups = tournament.groups;
+    } else {
+      const shuffled = [...clubs].sort(() => Math.random() - 0.5);
+      for (let i = 0; i < 6; i++) {
+        groups[groupNames[i]] = shuffled
+          .slice(i * 4, i * 4 + 4)
+          .map((c) => c.id);
+      }
+
+      // Salvar grupos gerados automaticamente
+      const tIndex = this.data.tournaments.findIndex(
+        (t) => t.id == tournamentId
+      );
+      if (tIndex !== -1) {
+        this.data.tournaments[tIndex].groups = groups;
+        this.saveData("tournaments");
+      }
+    }
+
+    // Gerar 3 rodadas de grupos (cada time joga 3 jogos)
+    for (let round = 1; round <= 3; round++) {
+      const roundDate = new Date(baseDate);
+      roundDate.setDate(baseDate.getDate() + (round - 1) * 7);
+
+      const matches = [];
+
+      // Para cada grupo, permitir pareamentos manuais se existirem
+      const tournament = this.data.tournaments.find(
+        (t) => t.id == tournamentId
+      );
+      const manualPairings =
+        tournament && tournament.afconPairings
+          ? tournament.afconPairings
+          : null;
+
+      groupNames.forEach((gName) => {
+        const groupClubIds = groups[gName];
+        if (!groupClubIds || groupClubIds.length !== 4) return;
+
+        // Se houver pairings manuais para este grupo e rodada, use-as
+        if (
+          manualPairings &&
+          manualPairings[gName] &&
+          manualPairings[gName][round]
+        ) {
+          manualPairings[gName][round].forEach((p) => {
+            const homeId = Array.isArray(p) ? p[0] : p.home;
+            const awayId = Array.isArray(p) ? p[1] : p.away;
+            matches.push({
+              homeTeamId: homeId,
+              awayTeamId: awayId,
+              group: gName,
+            });
+          });
+          return;
+        }
+
+        // Padrão de confrontos por rodada para 4 equipes
+        // Rodada 1: 0x1, 2x3
+        // Rodada 2: 0x2, 1x3
+        // Rodada 3: 0x3, 1x2
+        let pairings = [];
+        if (round === 1)
+          pairings = [
+            [0, 1],
+            [2, 3],
+          ];
+        if (round === 2)
+          pairings = [
+            [0, 2],
+            [1, 3],
+          ];
+        if (round === 3)
+          pairings = [
+            [0, 3],
+            [1, 2],
+          ];
+
+        pairings.forEach((p) => {
+          const home = groupClubIds[p[0]];
+          const away = groupClubIds[p[1]];
+          matches.push({ homeTeamId: home, awayTeamId: away, group: gName });
+        });
+      });
+
+      const roundData = {
+        id: Date.now() + round,
+        userId: this.currentUser.id,
+        tournamentId: tournamentId,
+        number: round,
+        date: roundDate.toISOString().split("T")[0],
+        matches: matches,
+        createdAt: new Date().toISOString(),
+      };
+
+      this.data.rounds.push(roundData);
+
+      // Criar partidas
+      matches.forEach((match) => {
+        this.createMatch({
+          homeTeamId: match.homeTeamId,
+          awayTeamId: match.awayTeamId,
+          tournamentId: tournamentId,
+          round: round,
+          group: match.group,
+          date: roundDate.toISOString().split("T")[0] + "T20:00:00",
+        });
+      });
+    }
+
+    // Gerar mata-mata único: Oitavas (8 jogos), Quartas (4), Semi (2), Final (1)
+    const knockoutPhases = [
+      { number: 4, name: "Oitavas de Final", matches: 8 },
+      { number: 5, name: "Quartas de Final", matches: 4 },
+      { number: 6, name: "Semifinal", matches: 2 },
+      { number: 7, name: "Final", matches: 1 },
+    ];
+
+    knockoutPhases.forEach((phase, idx) => {
+      const phaseDate = new Date(baseDate);
+      phaseDate.setDate(baseDate.getDate() + (3 + idx) * 7);
+
+      const roundData = {
+        id: Date.now() + phase.number + Math.random() * 1000,
+        userId: this.currentUser.id,
+        tournamentId: tournamentId,
+        number: phase.number,
+        name: phase.name,
+        date: phaseDate.toISOString().split("T")[0],
+        matches: Array(phase.matches)
+          .fill()
+          .map(() => ({ homeTeamId: null, awayTeamId: null })),
+        isReturn: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      this.data.rounds.push(roundData);
+    });
+
+    this.saveData("rounds");
+    this.saveData("matches");
+    this.loadRounds();
+
+    alert(
+      "Estrutura da Copa Africana gerada! Grupos A-F e mata-mata único criado."
+    );
+  }
+
+  // ---------- AFCON: Modais e helpers para atribuição manual de grupos e definição de confrontos ----------
+  showAssignGroupsModal(tournamentId, clubs) {
+    const container = document.getElementById("assign-groups-container");
+    container.innerHTML = "";
+    const groupNames = ["A", "B", "C", "D", "E", "F"];
+
+    // Gerar selects (4 por grupo), pré-selecionar se já houver grupos salvos
+    const tournament = this.data.tournaments.find((t) => t.id == tournamentId);
+
+    groupNames.forEach((g) => {
+      let html = `<div class="group-assign">
+        <h4>Grupo ${g}</h4>
+        <div class="group-slots" data-group="${g}">`;
+
+      for (let i = 0; i < 4; i++) {
+        const preSelected =
+          tournament && tournament.groups && tournament.groups[g]
+            ? tournament.groups[g][i]
+            : null;
+        html += `<select class="group-slot" data-index="${i}">
+          <option value="">Selecione clube</option>
+          ${clubs
+            .map(
+              (c) =>
+                `<option value="${c.id}" ${
+                  preSelected == c.id ? "selected" : ""
+                }>${c.name}</option>`
+            )
+            .join("")}
+        </select>`;
+      }
+
+      html += `</div></div>`;
+      container.insertAdjacentHTML("beforeend", html);
+    });
+
+    document.getElementById("assign-groups-modal").style.display = "block";
+
+    // Conectar handler de salvar
+    const saveBtn = document.getElementById("save-assigned-groups-btn");
+    saveBtn.onclick = () => this.saveAssignedGroups(tournamentId);
+  }
+
+  saveAssignedGroups(tournamentId) {
+    const container = document.getElementById("assign-groups-container");
+    const tournamentIndex = this.data.tournaments.findIndex(
+      (t) => t.id == tournamentId
+    );
+    if (tournamentIndex === -1) return alert("Torneio não encontrado");
+
+    const groups = {};
+    const groupDivs = container.querySelectorAll(".group-assign");
+
+    for (const gDiv of groupDivs) {
+      const gName = gDiv.querySelector(".group-slots").dataset.group;
+      const selects = Array.from(gDiv.querySelectorAll(".group-slot"));
+      const ids = selects.map((s) => parseInt(s.value)).filter(Boolean);
+      if (ids.length !== 4)
+        return alert(`Preencha os 4 clubes do Grupo ${gName}`);
+      // Check duplicates across groups
+      const allAssigned = Object.values(groups).flat();
+      for (const id of ids) {
+        if (allAssigned.includes(id))
+          return alert(
+            "Um clube foi atribuído a mais de um grupo. Revise as seleções."
+          );
+      }
+      groups[gName] = ids;
+    }
+
+    this.data.tournaments[tournamentIndex].groups = groups;
+    this.saveData("tournaments");
+
+    document.getElementById("assign-groups-modal").style.display = "none";
+    this.showDefineAfconPairingsModal(tournamentId);
+  }
+
+  showDefineAfconPairingsModal(tournamentId) {
+    const tournament = this.data.tournaments.find((t) => t.id == tournamentId);
+    if (!tournament || !tournament.groups)
+      return alert("Grupos não definidos.");
+
+    const container = document.getElementById("afcon-pairings-container");
+    container.innerHTML = "";
+
+    const groupNames = Object.keys(tournament.groups).sort();
+    groupNames.forEach((g) => {
+      const clubs = tournament.groups[g];
+      let html = `<div class="group-pairings"><h4>Grupo ${g}</h4>`;
+      for (let round = 1; round <= 3; round++) {
+        html += `<div class="pairings-round"><h5>Rodada ${round}</h5>`;
+        const defaults =
+          round === 1
+            ? [
+                [0, 1],
+                [2, 3],
+              ]
+            : round === 2
+            ? [
+                [0, 2],
+                [1, 3],
+              ]
+            : [
+                [0, 3],
+                [1, 2],
+              ];
+        const existing =
+          (tournament.afconPairings &&
+            tournament.afconPairings[g] &&
+            tournament.afconPairings[g][round]) ||
+          null;
+        const pairings = existing || defaults;
+        pairings.forEach((p, idx) => {
+          const homeVal = existing
+            ? Array.isArray(p)
+              ? p[0]
+              : p.home
+            : clubs[p[0]];
+          const awayVal = existing
+            ? Array.isArray(p)
+              ? p[1]
+              : p.away
+            : clubs[p[1]];
+          html += `
+            <div class="pairing-item">
+              <select class="pair-home" data-group="${g}" data-round="${round}" data-index="${idx}">
+                ${clubs
+                  .map(
+                    (id) =>
+                      `<option value="${id}" ${
+                        homeVal == id ? "selected" : ""
+                      }>${
+                        this.getUserData("clubs").find((c) => c.id == id)
+                          ?.name || "Time"
+                      }</option>`
+                  )
+                  .join("")}
+              </select>
+              <span>vs</span>
+              <select class="pair-away" data-group="${g}" data-round="${round}" data-index="${idx}">
+                ${clubs
+                  .map(
+                    (id) =>
+                      `<option value="${id}" ${
+                        awayVal == id ? "selected" : ""
+                      }>${
+                        this.getUserData("clubs").find((c) => c.id == id)
+                          ?.name || "Time"
+                      }</option>`
+                  )
+                  .join("")}
+              </select>
+            </div>`;
+        });
+        html += `</div>`;
+      }
+      html += `</div>`;
+      container.insertAdjacentHTML("beforeend", html);
+    });
+
+    document.getElementById("afcon-pairings-modal").style.display = "block";
+    document.getElementById("save-afcon-pairings-btn").onclick = () =>
+      this.saveAfconPairings(tournamentId);
+  }
+
+  saveAfconPairings(tournamentId) {
+    const tournamentIndex = this.data.tournaments.findIndex(
+      (t) => t.id == tournamentId
+    );
+    if (tournamentIndex === -1) return alert("Torneio não encontrado");
+
+    const tournament = this.data.tournaments[tournamentIndex];
+    const container = document.getElementById("afcon-pairings-container");
+    const pairingsObj = {};
+
+    const pairItems = container.querySelectorAll(".pairing-item");
+    pairItems.forEach((item) => {
+      const g = item.querySelector(".pair-home").dataset.group;
+      const round = item.querySelector(".pair-home").dataset.round;
+      const home = parseInt(item.querySelector(".pair-home").value);
+      const away = parseInt(item.querySelector(".pair-away").value);
+
+      if (!pairingsObj[g]) pairingsObj[g] = {};
+      if (!pairingsObj[g][round]) pairingsObj[g][round] = [];
+      // Armazenar como objeto para evitar arrays aninhados (Firestore não permite)
+      pairingsObj[g][round].push({ home: home, away: away });
+    });
+
+    for (const g of Object.keys(pairingsObj)) {
+      const groupTeams = tournament.groups[g];
+      for (const round in pairingsObj[g]) {
+        for (const pair of pairingsObj[g][round]) {
+          // Compatível com formato antigo (array) e novo (objeto)
+          const homeId = Array.isArray(pair) ? pair[0] : pair.home;
+          const awayId = Array.isArray(pair) ? pair[1] : pair.away;
+          if (!groupTeams.includes(homeId) || !groupTeams.includes(awayId)) {
+            return alert(
+              `Par inválido no Grupo ${g}, verifique os times selecionados.`
+            );
+          }
+        }
+      }
+    }
+
+    tournament.afconPairings = pairingsObj;
+    this.data.tournaments[tournamentIndex] = tournament;
+    this.saveData("tournaments");
+
+    document.getElementById("afcon-pairings-modal").style.display = "none";
+
+    // Gerar a estrutura com os dados manuais
+    const clubs = this.getUserData("clubs").filter(
+      (c) =>
+        Array.isArray(c.tournamentIds) &&
+        c.tournamentIds.includes(parseInt(tournamentId))
+    );
+    this.generateAfconStructure(tournamentId, clubs);
+  }
+
+  // ---------- FIM AFCON HELPERS ----------
+
+  renderNationalLeagueRounds(rounds, clubs) {
+    return rounds
+      .map(
+        (round) => `
+      <div class="round-card national-league">
+        <div class="round-header">
+          <h3>Rodada ${round.number}</h3>
+          <span class="round-date">${new Date(round.date).toLocaleDateString(
+            "pt-BR"
+          )}</span>
+        </div>
+        <div class="round-matches">
+          ${round.matches
+            .map((match) => {
+              const homeTeam = clubs.find((c) => c.id == match.homeTeamId);
+              const awayTeam = clubs.find((c) => c.id == match.awayTeamId);
+              return `
+              <div class="round-match">
+                <span class="team">${homeTeam?.name || "Time"}</span>
+                <span class="vs">-</span>
+                <span class="team">${awayTeam?.name || "Time"}</span>
+              </div>
+            `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `
+      )
+      .join("");
   }
 
   generateNationalLeague(tournamentId, clubs) {
@@ -2645,13 +3301,64 @@ class TournamentManager {
 
   // Obter times classificados da fase anterior
   getQualifiedTeams(tournamentId, currentPhase) {
-    // Implementação simplificada - retorna todos os clubes do torneio
-    // Em uma implementação completa, analisaria os resultados da fase anterior
-    return this.getUserData("clubs").filter(
+    // Implementação aprimorada: suporta Copa Africana (AFCON)
+    const tournament = this.data.tournaments.find((t) => t.id == tournamentId);
+    const clubs = this.getUserData("clubs").filter(
       (c) =>
         Array.isArray(c.tournamentIds) &&
         c.tournamentIds.includes(parseInt(tournamentId))
     );
+
+    if (!tournament) return [];
+
+    // AFCON: Oitavas = 6x2 (top2) + 4 melhores terceiros
+    if (tournament.type === "afcon" && currentPhase.includes("Oitavas")) {
+      const groups = tournament.groups || {};
+      const groupNames = Object.keys(groups);
+
+      if (groupNames.length === 0) return [];
+
+      // Pegar os 2 primeiros de cada grupo
+      let qualifiers = [];
+      groupNames.forEach((g) => {
+        const standings = this.calculateGroupStandings(tournamentId, g);
+        if (standings[0])
+          qualifiers.push(
+            this.getUserData("clubs").find((c) => c.id == standings[0].id)
+          );
+        if (standings[1])
+          qualifiers.push(
+            this.getUserData("clubs").find((c) => c.id == standings[1].id)
+          );
+      });
+
+      // Pegar os melhores terceiros
+      const thirds = [];
+      groupNames.forEach((g) => {
+        const standings = this.calculateGroupStandings(tournamentId, g);
+        if (standings[2]) thirds.push(standings[2]);
+      });
+
+      // Ordenar terceiros por critérios (pts, sg, gp)
+      thirds.sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDifference !== a.goalDifference)
+          return b.goalDifference - a.goalDifference;
+        return b.goalsFor - a.goalsFor;
+      });
+
+      for (let i = 0; i < Math.min(4, thirds.length); i++) {
+        qualifiers.push(
+          this.getUserData("clubs").find((c) => c.id == thirds[i].id)
+        );
+      }
+
+      if (qualifiers.length < 16) return [];
+      return qualifiers;
+    }
+
+    // Fallback: todos os clubes do torneio
+    return clubs;
   }
 
   // Salvar confrontos definidos manualmente
@@ -4911,6 +5618,139 @@ class TournamentManager {
         return b.goalDifference - a.goalDifference;
       return b.goalsFor - a.goalsFor;
     });
+
+    // Se o torneio possui grupos (salvos em tournament.groups) ou partidas com propriedade 'group', mostrar classificação por grupo
+    const hasGroups =
+      (tournament &&
+        tournament.groups &&
+        Object.keys(tournament.groups).length > 0) ||
+      matches.some((m) => m.group);
+
+    if (hasGroups) {
+      // Obter os nomes dos grupos
+      let groupNames = [];
+      if (tournament && tournament.groups) {
+        groupNames = Object.keys(tournament.groups).sort();
+      } else {
+        groupNames = Array.from(
+          new Set(matches.filter((m) => m.group).map((m) => m.group))
+        ).sort();
+      }
+
+      // Construir HTML das tabelas por grupo
+      let html = `<div class="groups-standings-grid">`;
+
+      groupNames.forEach((g) => {
+        const groupStandings = this.calculateGroupStandings(tournamentId, g);
+        html += `
+          <div class="group-standings">
+            <h3>Grupo ${g}</h3>
+            <table class="standings-table small">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Clube</th>
+                  <th>J</th>
+                  <th>V</th>
+                  <th>E</th>
+                  <th>D</th>
+                  <th>GP</th>
+                  <th>GC</th>
+                  <th>SG</th>
+                  <th>Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${groupStandings
+                  .map(
+                    (team, idx) => `
+                  <tr>
+                    <td>${idx + 1}</td>
+                    <td class="team-cell"><img src="${
+                      this.getUserData("clubs").find((c) => c.id == team.id)
+                        ?.logo || "https://via.placeholder.com/20"
+                    }" class="team-logo"/> ${
+                      this.getUserData("clubs").find((c) => c.id == team.id)
+                        ?.name || team.name
+                    }</td>
+                    <td>${team.matches}</td>
+                    <td>${team.wins}</td>
+                    <td>${team.draws}</td>
+                    <td>${team.losses}</td>
+                    <td>${team.goalsFor}</td>
+                    <td>${team.goalsAgainst}</td>
+                    <td>${team.goalDifference}</td>
+                    <td><strong>${team.points}</strong></td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      });
+
+      // Se for AFCON, mostrar também os 4 melhores terceiros
+      if (tournament && tournament.type === "afcon") {
+        let thirds = [];
+        groupNames.forEach((g) => {
+          const s = this.calculateGroupStandings(tournamentId, g);
+          if (s[2]) thirds.push(s[2]);
+        });
+
+        thirds.sort((a, b) => {
+          if (b.points !== a.points) return b.points - a.points;
+          if (b.goalDifference !== a.goalDifference)
+            return b.goalDifference - a.goalDifference;
+          return b.goalsFor - a.goalsFor;
+        });
+
+        html += `
+          <div class="best-thirds">
+            <h3>Melhores Terceiros (Top 4)</h3>
+            <table class="standings-table small">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Clube</th>
+                  <th>Pts</th>
+                  <th>SG</th>
+                  <th>GP</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${thirds
+                  .slice(0, 4)
+                  .map(
+                    (t, i) => `
+                  <tr>
+                    <td>${i + 1}</td>
+                    <td class="team-cell"><img src="${
+                      this.getUserData("clubs").find((c) => c.id == t.id)
+                        ?.logo || "https://via.placeholder.com/20"
+                    }" class="team-logo"/> ${
+                      this.getUserData("clubs").find((c) => c.id == t.id)
+                        ?.name || t.name
+                    }</td>
+                    <td><strong>${t.points}</strong></td>
+                    <td>${t.goalDifference}</td>
+                    <td>${t.goalsFor}</td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      html += `</div>`;
+
+      document.getElementById("standings-or-bracket").innerHTML = html;
+      return;
+    }
 
     const tbody = document.querySelector("#tournament-standings-table tbody");
     tbody.innerHTML = standings
