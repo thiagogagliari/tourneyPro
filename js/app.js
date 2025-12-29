@@ -210,7 +210,15 @@ class TournamentManager {
         this.data[type] = JSON.parse(JSON.stringify(toSave));
       }
 
-      await cloudStorage.saveData(type, toSave);
+      // Evitar múltiplas gravações concorrentes do mesmo tipo
+      this._saveInProgress = this._saveInProgress || {};
+      if (!this._saveInProgress[type]) {
+        this._saveInProgress[type] = cloudStorage.saveData(type, toSave);
+      }
+
+      await this._saveInProgress[type];
+      delete this._saveInProgress[type];
+
       console.log(`${type} salvo com sucesso`);
     } catch (error) {
       console.error(`Erro ao salvar ${type}:`, error);
@@ -2419,8 +2427,11 @@ class TournamentManager {
     alert("Estrutura da Liga Nacional gerada!");
   }
 
-  generateChampionsGroupStage(tournamentId, clubs) {
+  async generateChampionsGroupStage(tournamentId, clubs) {
     const baseDate = new Date();
+
+    // Acumular partidas para salvar em lote no final
+    const matchesToSave = [];
 
     // Gerar 8 rodadas com confrontos únicos
     for (let round = 1; round <= 8; round++) {
@@ -2452,15 +2463,29 @@ class TournamentManager {
 
       this.data.rounds.push(roundData);
 
+      // Adicionar partidas na memória e também na lista de salvamento
       matches.forEach((match) => {
-        this.createMatch({
+        const matchObj = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          userId: this.currentUser.id,
           homeTeamId: match.homeTeamId,
           awayTeamId: match.awayTeamId,
           tournamentId: tournamentId,
           round: round,
           date: roundDate.toISOString().split("T")[0] + "T20:00:00",
-        });
+          status: "scheduled",
+          createdAt: new Date().toISOString(),
+        };
+        this.data.matches.push(matchObj);
+        matchesToSave.push(matchObj);
       });
+    }
+
+    // Salvar todas as partidas de uma vez para evitar muitas gravações concorrentes
+    if (matchesToSave.length > 0) {
+      await this.saveData("matches");
+      this.loadMatches();
+      this.updateStats();
     }
   }
 
@@ -2579,16 +2604,21 @@ class TournamentManager {
 
       this.data.rounds.push(roundData);
 
-      // Criar partidas
+      // Criar partidas em memória (serão salvas junto com o restante no final da função)
       matches.forEach((match) => {
-        this.createMatch({
+        const matchObj = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          userId: this.currentUser.id,
           homeTeamId: match.homeTeamId,
           awayTeamId: match.awayTeamId,
           tournamentId: tournamentId,
           round: round,
           group: match.group,
           date: roundDate.toISOString().split("T")[0] + "T20:00:00",
-        });
+          status: "scheduled",
+          createdAt: new Date().toISOString(),
+        };
+        this.data.matches.push(matchObj);
       });
     }
 
@@ -2944,13 +2974,18 @@ class TournamentManager {
 
       this.data.rounds.push(roundData);
 
+      // Adicionar partidas na memória; serão persistidas pela chamada global de save
       matches.forEach((match) => {
-        this.createMatch({
+        this.data.matches.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          userId: this.currentUser.id,
           homeTeamId: match.homeTeamId,
           awayTeamId: match.awayTeamId,
           tournamentId: tournamentId,
           round: round,
           date: roundDate.toISOString().split("T")[0] + "T20:00:00",
+          status: "scheduled",
+          createdAt: new Date().toISOString(),
         });
       });
     }
@@ -3122,13 +3157,17 @@ class TournamentManager {
     // Criar partidas apenas para a primeira fase (ida e volta)
     if (clubs.length > 0) {
       matches.forEach((match) => {
-        // Jogo de ida
-        this.createMatch({
+        // Jogo de ida (adicionado em memória)
+        this.data.matches.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          userId: this.currentUser.id,
           homeTeamId: match.homeTeamId,
           awayTeamId: match.awayTeamId,
           tournamentId: tournamentId,
           round: phase.round,
           date: baseDate.toISOString().split("T")[0] + "T20:00:00",
+          status: "scheduled",
+          createdAt: new Date().toISOString(),
         });
 
         // Jogo de volta (invertendo mando de campo)
@@ -3136,12 +3175,16 @@ class TournamentManager {
           const returnDate = new Date(baseDate);
           returnDate.setDate(baseDate.getDate() + 7); // 1 semana depois
 
-          this.createMatch({
+          this.data.matches.push({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            userId: this.currentUser.id,
             homeTeamId: match.awayTeamId, // Inverter mando
             awayTeamId: match.homeTeamId, // Inverter mando
             tournamentId: tournamentId,
             round: phase.round + 1, // Próxima rodada (volta)
             date: returnDate.toISOString().split("T")[0] + "T20:00:00",
+            status: "scheduled",
+            createdAt: new Date().toISOString(),
           });
         }
       });
@@ -3396,15 +3439,20 @@ class TournamentManager {
         awayTeamId: round.isReturn ? matchup.homeTeamId : matchup.awayTeamId,
       }));
 
-      // Criar partidas
+      // Criar partidas na memória (serão salvas pela chamada global a saveData que segue abaixo)
       round.matches.forEach((match) => {
-        this.createMatch({
+        const matchObj = {
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          userId: this.currentUser.id,
           homeTeamId: match.homeTeamId,
           awayTeamId: match.awayTeamId,
           tournamentId: tournamentId,
           round: round.number,
           date: round.date + "T20:00:00",
-        });
+          status: "scheduled",
+          createdAt: new Date().toISOString(),
+        };
+        this.data.matches.push(matchObj);
       });
     });
 
@@ -3698,14 +3746,30 @@ class TournamentManager {
     this.data.rounds.push(round);
     await this.saveData("rounds");
 
+    // Criar partidas em lote para evitar chamadas assíncronas múltiplas que podem
+    // causar condições de corrida ou sobrescrita de dados (salvar tudo de uma vez)
+    const matchesToCreate = [];
     for (const match of data.matches) {
-      await this.createMatch({
+      const matchObj = {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        userId: this.currentUser.id,
         homeTeamId: match.homeTeamId,
         awayTeamId: match.awayTeamId,
         tournamentId: data.tournamentId,
         round: data.number,
         date: data.date + "T20:00:00",
-      });
+        status: "scheduled",
+        createdAt: new Date().toISOString(),
+      };
+      this.data.matches.push(matchObj);
+      matchesToCreate.push(matchObj);
+    }
+
+    // Salvar todas as partidas de uma única vez
+    if (matchesToCreate.length > 0) {
+      await this.saveData("matches");
+      this.loadMatches();
+      this.updateStats();
     }
 
     this.loadRounds();
@@ -5748,11 +5812,27 @@ class TournamentManager {
 
       html += `</div>`;
 
-      document.getElementById("standings-or-bracket").innerHTML = html;
+      const standingsContainer = document.getElementById(
+        "standings-or-bracket"
+      );
+      if (standingsContainer) {
+        standingsContainer.innerHTML = html;
+      } else {
+        console.warn(
+          "Elemento #standings-or-bracket não encontrado. Pulando renderização de grupos."
+        );
+      }
       return;
     }
 
     const tbody = document.querySelector("#tournament-standings-table tbody");
+    if (!tbody) {
+      console.warn(
+        "Elemento tbody de #tournament-standings-table não encontrado. Pulando renderização de tabela."
+      );
+      return;
+    }
+
     tbody.innerHTML = standings
       .map((team, index) => {
         let positionClass = "";
