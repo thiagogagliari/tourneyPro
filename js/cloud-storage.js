@@ -28,6 +28,14 @@ class CloudStorage {
         // Listener de autenticação
         this.auth.onAuthStateChanged((user) => {
           this.currentUser = user;
+          // Notificar a aplicação sobre mudança de autenticação
+          try {
+            window.dispatchEvent(
+              new CustomEvent("authChanged", { detail: user })
+            );
+          } catch (e) {
+            console.warn("Não foi possível disparar evento authChanged", e);
+          }
         });
       }
     } catch (error) {
@@ -261,6 +269,11 @@ class CloudStorage {
       await this.auth.signOut();
     }
     this.currentUser = null;
+    try {
+      window.dispatchEvent(new CustomEvent("authChanged", { detail: null }));
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   // Status da conexão

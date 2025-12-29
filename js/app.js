@@ -20,6 +20,10 @@ class TournamentManager {
 
     // Aguardar Firebase estar pronto
     await this.waitForFirebase();
+
+    // Registrar listener de autenticação para restaurar sessão quando o Firebase indicar usuario logado
+    this.setupAuthListener();
+
     await this.checkAuth();
   }
 
@@ -36,11 +40,83 @@ class TournamentManager {
   // Autenticação
   async checkAuth() {
     const savedUser = localStorage.getItem("currentUser");
-    if (savedUser && cloudStorage.currentUser) {
-      this.currentUser = JSON.parse(savedUser);
-      await this.showDashboard();
+    if (savedUser) {
+      // Aguarde um pequeno intervalo para o listener do Firebase fornecer currentUser
+      const maxWaitMs = 3000;
+      const interval = 100;
+      let waited = 0;
+      while (!cloudStorage.currentUser && waited < maxWaitMs) {
+        await new Promise((r) => setTimeout(r, interval));
+        waited += interval;
+      }
+
+      if (cloudStorage.currentUser) {
+        this.currentUser = JSON.parse(savedUser);
+        await this.showDashboard();
+        return;
+      }
+      // Se não houver user ainda, mostramos landing; o listener authChanged irá restaurar a sessão assim que possível
+    }
+
+    document.getElementById("landing-screen").classList.add("active");
+  }
+
+  // Registrar listener central para mudanças de autenticação (disparado por cloudStorage)
+  setupAuthListener() {
+    if (this._authListenerAdded) return;
+    this._authListenerAdded = true;
+
+    window.addEventListener("authChanged", async (e) => {
+      const cloudUser = e?.detail;
+      await this.handleAuthChanged(cloudUser);
+    });
+  }
+
+  // Quando o Firebase informa que há um usuário logado, sincronizamos o usuário local e abrimos o dashboard
+  async handleAuthChanged(cloudUser) {
+    if (cloudUser) {
+      // Se já estamos com usuário local, não precisamos processar
+      if (this.currentUser) return;
+
+      // Tentar restaurar o usuário salvo localmente
+      const saved = localStorage.getItem("currentUser");
+      if (saved) {
+        try {
+          this.currentUser = JSON.parse(saved);
+          await this.showDashboard();
+          return;
+        } catch (e) {
+          console.warn("Erro ao parsear currentUser salvo:", e);
+        }
+      }
+
+      // Se não havia usuário local, tentar encontrar por email nos users carregados da nuvem
+      try {
+        await this.loadCloudData();
+        let user = this.data.users.find((u) => u.email === cloudUser.email);
+        if (!user) {
+          user = {
+            id: Date.now(),
+            email: cloudUser.email,
+            username: cloudUser.email ? cloudUser.email.split("@")[0] : "user",
+            createdAt: new Date().toISOString(),
+          };
+          this.data.users.push(user);
+          await this.saveData("users");
+        }
+        this.currentUser = user;
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        await this.showDashboard();
+      } catch (e) {
+        console.error("Erro ao restaurar usuário a partir do cloudUser:", e);
+      }
     } else {
-      document.getElementById("landing-screen").classList.add("active");
+      // logout ocorrido
+      if (this.currentUser) {
+        this.currentUser = null;
+        localStorage.removeItem("currentUser");
+        this.showLogin();
+      }
     }
   }
 
@@ -51,6 +127,9 @@ class TournamentManager {
       if (result.success) {
         // Aguardar carregamento dos dados da nuvem
         await this.loadCloudData();
+
+        // Se o listener ainda não foi registrado, registrar agora (defensivo)
+        this.setupAuthListener();
 
         // Criar ou encontrar usuário local
         let user = this.data.users.find((u) => u.email === email);
@@ -222,8 +301,41 @@ class TournamentManager {
       console.log(`${type} salvo com sucesso`);
     } catch (error) {
       console.error(`Erro ao salvar ${type}:`, error);
+
+      // Registrar detalhe do payload e erro para investigação posterior
+      try {
+        this.data.__saveErrors = this.data.__saveErrors || [];
+        this.data.__saveErrors.push({
+          type,
+          timestamp: new Date().toISOString(),
+          error: error && error.message ? error.message : String(error),
+          payloadSnippet: (typeof toSave === 'string' ? toSave : JSON.stringify(toSave)).slice(0, 2000),
+        });
+        // Persistir localmente as últimas 50 ocorrências para recuperação remota se necessário
+        try {
+          localStorage.setItem('saveErrors', JSON.stringify(this.data.__saveErrors.slice(-50)));
+        } catch (e) {
+          // ignore storage errors
+        }
+      } catch (e) {
+        console.error('Erro ao registrar saveError:', e);
+      }
+
       alert(`Erro ao salvar ${type}: ${error.message}`);
     }
+  }
+
+  getSaveErrors() {
+    return (
+      this.data.__saveErrors ||
+      (function () {
+        try {
+          return JSON.parse(localStorage.getItem('saveErrors') || '[]');
+        } catch (e) {
+          return [];
+        }
+      })()
+    );
   }
 
   getUserData(type) {
@@ -2392,7 +2504,7 @@ class TournamentManager {
     }
   }
 
-  generateChampionsStructure(tournamentId, clubs) {
+  async generateChampionsStructure(tournamentId, clubs) {
     this.data.rounds = this.data.rounds.filter(
       (r) => r.tournamentId != tournamentId
     );
@@ -2400,17 +2512,17 @@ class TournamentManager {
       (m) => m.tournamentId != tournamentId
     );
 
-    this.generateChampionsGroupStage(tournamentId, clubs);
+    await this.generateChampionsGroupStage(tournamentId, clubs);
     this.generateKnockoutStructure_Original(tournamentId);
 
-    this.saveData("rounds");
-    this.saveData("matches");
+    await this.saveData("rounds");
+    await this.saveData("matches");
     this.loadRounds();
 
     alert("Estrutura da Liga dos Campeões gerada!");
   }
 
-  generateNationalStructure(tournamentId, clubs) {
+  async generateNationalStructure(tournamentId, clubs) {
     this.data.rounds = this.data.rounds.filter(
       (r) => r.tournamentId != tournamentId
     );
@@ -2418,10 +2530,10 @@ class TournamentManager {
       (m) => m.tournamentId != tournamentId
     );
 
-    this.generateNationalLeague(tournamentId, clubs);
+    await this.generateNationalLeague(tournamentId, clubs);
 
-    this.saveData("rounds");
-    this.saveData("matches");
+    await this.saveData("rounds");
+    await this.saveData("matches");
     this.loadRounds();
 
     alert("Estrutura da Liga Nacional gerada!");
@@ -2490,7 +2602,7 @@ class TournamentManager {
   }
 
   // Gerar estrutura da Copa Africana de Nações (AFCON)
-  generateAfconStructure(tournamentId, clubs) {
+  async generateAfconStructure(tournamentId, clubs) {
     // Limpar rodadas e partidas existentes do torneio
     this.data.rounds = this.data.rounds.filter(
       (r) => r.tournamentId != tournamentId
@@ -2651,8 +2763,8 @@ class TournamentManager {
       this.data.rounds.push(roundData);
     });
 
-    this.saveData("rounds");
-    this.saveData("matches");
+    await this.saveData("rounds");
+    await this.saveData("matches");
     this.loadRounds();
 
     alert(
@@ -2698,17 +2810,68 @@ class TournamentManager {
 
     document.getElementById("assign-groups-modal").style.display = "block";
 
-    // Conectar handler de salvar
+    // Setup selects: disable duplicates across all groups and manage save button state
     const saveBtn = document.getElementById("save-assigned-groups-btn");
+    const messageDiv = document.getElementById("assign-groups-message");
+    const allSelects = container.querySelectorAll(".group-slot");
+
+    const updateGroupSelectsState = () => {
+      const selected = Array.from(allSelects).map((s) => s.value).filter(Boolean);
+
+      // disable options already selected in other selects
+      allSelects.forEach((s) => {
+        const currentVal = s.value;
+        Array.from(s.options).forEach((opt) => {
+          if (opt.value === "") {
+            opt.disabled = false;
+            return;
+          }
+          opt.disabled = false;
+          if (opt.value !== currentVal && selected.includes(opt.value)) opt.disabled = true;
+        });
+      });
+
+      // validate completeness and duplicates across groups
+      const groups = container.querySelectorAll(".group-assign");
+      let allFilled = true;
+      const seen = [];
+      let duplicateFound = false;
+      groups.forEach((gDiv) => {
+        const selects = Array.from(gDiv.querySelectorAll(".group-slot"));
+        const ids = selects.map((s) => s.value).filter(Boolean);
+        if (ids.length !== 4) allFilled = false;
+        ids.forEach((id) => {
+          if (seen.includes(id)) duplicateFound = true;
+          seen.push(id);
+        });
+      });
+
+      if (duplicateFound) {
+        messageDiv.textContent = "Um clube foi atribuído mais de uma vez. Revise as seleções.";
+        saveBtn.disabled = true;
+      } else if (!allFilled) {
+        messageDiv.textContent = "Preencha os 4 clubes de cada grupo para habilitar salvar.";
+        saveBtn.disabled = true;
+      } else {
+        messageDiv.textContent = "";
+        saveBtn.disabled = false;
+      }
+    };
+
+    Array.from(allSelects).forEach((s) => s.addEventListener("change", updateGroupSelectsState));
+    updateGroupSelectsState();
     saveBtn.onclick = () => this.saveAssignedGroups(tournamentId);
   }
 
-  saveAssignedGroups(tournamentId) {
+  async saveAssignedGroups(tournamentId) {
     const container = document.getElementById("assign-groups-container");
     const tournamentIndex = this.data.tournaments.findIndex(
       (t) => t.id == tournamentId
     );
     if (tournamentIndex === -1) return alert("Torneio não encontrado");
+
+    const saveBtn = document.getElementById("save-assigned-groups-btn");
+    const messageDiv = document.getElementById("assign-groups-message");
 
     const groups = {};
     const groupDivs = container.querySelectorAll(".group-assign");
@@ -2717,24 +2880,45 @@ class TournamentManager {
       const gName = gDiv.querySelector(".group-slots").dataset.group;
       const selects = Array.from(gDiv.querySelectorAll(".group-slot"));
       const ids = selects.map((s) => parseInt(s.value)).filter(Boolean);
-      if (ids.length !== 4)
-        return alert(`Preencha os 4 clubes do Grupo ${gName}`);
+      if (ids.length !== 4) {
+        messageDiv.style.color = '#c00';
+        messageDiv.textContent = `Preencha os 4 clubes do Grupo ${gName}`;
+        return;
+      }
       // Check duplicates across groups
       const allAssigned = Object.values(groups).flat();
       for (const id of ids) {
-        if (allAssigned.includes(id))
-          return alert(
-            "Um clube foi atribuído a mais de um grupo. Revise as seleções."
-          );
+        if (allAssigned.includes(id)) {
+          messageDiv.style.color = '#c00';
+          messageDiv.textContent = 'Um clube foi atribuído a mais de um grupo. Revise as seleções.';
+          return;
+        }
       }
       groups[gName] = ids;
     }
 
     this.data.tournaments[tournamentIndex].groups = groups;
-    this.saveData("tournaments");
 
-    document.getElementById("assign-groups-modal").style.display = "none";
-    this.showDefineAfconPairingsModal(tournamentId);
+    // UI feedback
+    saveBtn.disabled = true;
+    messageDiv.style.color = '#000';
+    messageDiv.textContent = 'Salvando grupos...';
+
+    try {
+      await this.saveData("tournaments");
+      messageDiv.style.color = '#080';
+      messageDiv.textContent = 'Grupos salvos com sucesso!';
+
+      setTimeout(() => {
+        document.getElementById("assign-groups-modal").style.display = "none";
+        messageDiv.textContent = '';
+        this.showDefineAfconPairingsModal(tournamentId);
+      }, 600);
+    } catch (e) {
+      messageDiv.style.color = '#c00';
+      messageDiv.textContent = 'Erro ao salvar: ' + (e && e.message ? e.message : e);
+      saveBtn.disabled = false;
+    }
   }
 
   showDefineAfconPairingsModal(tournamentId) {
@@ -2821,11 +3005,54 @@ class TournamentManager {
     });
 
     document.getElementById("afcon-pairings-modal").style.display = "block";
-    document.getElementById("save-afcon-pairings-btn").onclick = () =>
-      this.saveAfconPairings(tournamentId);
+
+    // Setup pairing selects: ensure no duplicates per round and manage save button state
+    const messageDiv = document.getElementById('afcon-pairings-message');
+    const saveBtn = document.getElementById('save-afcon-pairings-btn');
+
+    const updatePairingSelectsState = () => {
+      let ok = true;
+      const groups = container.querySelectorAll('.group-pairings');
+      groups.forEach((gDiv) => {
+        const rounds = gDiv.querySelectorAll('.pairings-round');
+        rounds.forEach((rDiv) => {
+          const selects = Array.from(rDiv.querySelectorAll('select'));
+          const values = selects.map((s) => s.value).filter(Boolean);
+
+          // disable options used in other selects of the same round
+          selects.forEach((s) => {
+            const currentVal = s.value;
+            Array.from(s.options).forEach((opt) => {
+              if (opt.value === "") {
+                opt.disabled = false;
+                return;
+              }
+              opt.disabled = false;
+              if (opt.value !== currentVal && values.includes(opt.value)) opt.disabled = true;
+            });
+          });
+
+          if (values.length !== selects.length || new Set(values).size !== values.length) ok = false;
+        });
+      });
+
+      if (!ok) {
+        messageDiv.textContent = 'Cada rodada deve conter times diferentes e seleções completas.';
+        saveBtn.disabled = true;
+      } else {
+        messageDiv.textContent = '';
+        saveBtn.disabled = false;
+      }
+    };
+
+    const allPairSelects = container.querySelectorAll('.pair-home, .pair-away');
+    Array.from(allPairSelects).forEach((s) => s.addEventListener('change', updatePairingSelectsState));
+    updatePairingSelectsState();
+
+    saveBtn.onclick = () => this.saveAfconPairings(tournamentId);
   }
 
-  saveAfconPairings(tournamentId) {
+  async saveAfconPairings(tournamentId) {
     const tournamentIndex = this.data.tournaments.findIndex(
       (t) => t.id == tournamentId
     );
@@ -2833,6 +3060,8 @@ class TournamentManager {
 
     const tournament = this.data.tournaments[tournamentIndex];
     const container = document.getElementById("afcon-pairings-container");
+    const messageDiv = document.getElementById('afcon-pairings-message');
+    const saveBtn = document.getElementById('save-afcon-pairings-btn');
     const pairingsObj = {};
 
     const pairItems = container.querySelectorAll(".pairing-item");
@@ -2856,9 +3085,9 @@ class TournamentManager {
           const homeId = Array.isArray(pair) ? pair[0] : pair.home;
           const awayId = Array.isArray(pair) ? pair[1] : pair.away;
           if (!groupTeams.includes(homeId) || !groupTeams.includes(awayId)) {
-            return alert(
-              `Par inválido no Grupo ${g}, verifique os times selecionados.`
-            );
+            messageDiv.style.color = '#c00';
+            messageDiv.textContent = `Par inválido no Grupo ${g}, verifique os times selecionados.`;
+            return;
           }
         }
       }
@@ -2866,17 +3095,34 @@ class TournamentManager {
 
     tournament.afconPairings = pairingsObj;
     this.data.tournaments[tournamentIndex] = tournament;
-    this.saveData("tournaments");
 
-    document.getElementById("afcon-pairings-modal").style.display = "none";
+    // UI feedback
+    saveBtn.disabled = true;
+    messageDiv.style.color = '#000';
+    messageDiv.textContent = 'Salvando confrontos...';
 
-    // Gerar a estrutura com os dados manuais
-    const clubs = this.getUserData("clubs").filter(
-      (c) =>
-        Array.isArray(c.tournamentIds) &&
-        c.tournamentIds.includes(parseInt(tournamentId))
-    );
-    this.generateAfconStructure(tournamentId, clubs);
+    try {
+      await this.saveData("tournaments");
+      messageDiv.style.color = '#080';
+      messageDiv.textContent = 'Confrontos salvos com sucesso!';
+
+      // Gerar a estrutura com os dados manuais
+      const clubs = this.getUserData("clubs").filter(
+        (c) =>
+          Array.isArray(c.tournamentIds) &&
+          c.tournamentIds.includes(parseInt(tournamentId))
+      );
+      await this.generateAfconStructure(tournamentId, clubs);
+
+      setTimeout(() => {
+        document.getElementById("afcon-pairings-modal").style.display = "none";
+        messageDiv.textContent = '';
+      }, 600);
+    } catch (e) {
+      messageDiv.style.color = '#c00';
+      messageDiv.textContent = 'Erro ao salvar: ' + (e && e.message ? e.message : e);
+      saveBtn.disabled = false;
+    }
   }
 
   // ---------- FIM AFCON HELPERS ----------
@@ -2992,7 +3238,7 @@ class TournamentManager {
   }
 
   // Gerar estrutura completa do mata-mata
-  generateKnockoutStructure(tournamentId, clubs) {
+  async generateKnockoutStructure(tournamentId, clubs) {
     this.data.rounds = this.data.rounds.filter(
       (r) => r.tournamentId != tournamentId
     );
@@ -3056,8 +3302,8 @@ class TournamentManager {
       this.data.rounds.push(idaRound, voltaRound);
     }
 
-    this.saveData("rounds");
-    this.saveData("matches");
+    await this.saveData("rounds");
+    await this.saveData("matches");
     this.loadRounds();
 
     alert(

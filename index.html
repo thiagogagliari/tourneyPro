@@ -140,10 +140,20 @@
             autocomplete="email"
             required
           />
-          <input type="password" id="password" placeholder="Senha" autocomplete="current-password" required />
+          <input
+            type="password"
+            id="password"
+            placeholder="Senha"
+            autocomplete="current-password"
+            required
+          />
           <button type="submit">Entrar</button>
           <button type="button" id="register-btn">Criar Conta</button>
-          <button type="button" class="btn-public" onclick="window.location.href='public.html'">
+          <button
+            type="button"
+            class="btn-public"
+            onclick="window.location.href='public.html'"
+          >
             <i class="fas fa-eye"></i> Ver Torneios Públicos
           </button>
         </form>
@@ -473,9 +483,24 @@
           <div class="club-colors-section">
             <label>Cores do Clube:</label>
             <div class="color-inputs">
-              <input type="color" id="club-primary-color" value="#ffffff" title="Cor Primária">
-              <input type="color" id="club-secondary-color" value="#000000" title="Cor Secundária">
-              <input type="color" id="club-text-color" value="#000000" title="Cor do Texto">
+              <input
+                type="color"
+                id="club-primary-color"
+                value="#ffffff"
+                title="Cor Primária"
+              />
+              <input
+                type="color"
+                id="club-secondary-color"
+                value="#000000"
+                title="Cor Secundária"
+              />
+              <input
+                type="color"
+                id="club-text-color"
+                value="#000000"
+                title="Cor do Texto"
+              />
             </div>
           </div>
           <div class="tournaments-selection">
@@ -616,29 +641,78 @@
     </div>
 
     <!-- Modal: Atribuir Times aos Grupos (AFCON) -->
-    <div id="assign-groups-modal" class="modal" style="display:none">
+    <div id="assign-groups-modal" class="modal" style="display: none">
       <div class="modal-content large">
-        <span class="close" onclick="document.getElementById('assign-groups-modal').style.display='none'">&times;</span>
+        <span
+          class="close"
+          onclick="document.getElementById('assign-groups-modal').style.display='none'"
+          >&times;</span
+        >
         <h3>Atribuir Times aos Grupos - Copa Africana</h3>
         <p>Selecione manualmente 4 clubes para cada grupo (A-F).</p>
         <div id="assign-groups-container"></div>
-        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
-          <button class="btn-secondary" onclick="document.getElementById('assign-groups-modal').style.display='none'">Cancelar</button>
-          <button class="btn-primary" id="save-assigned-groups-btn">Salvar Grupos</button>
+        <div
+          id="assign-groups-message"
+          class="modal-message"
+          style="margin-top: 8px; color: #c00"
+        ></div>
+        <div
+          style="
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+          "
+        >
+          <button
+            class="btn-secondary"
+            onclick="document.getElementById('assign-groups-modal').style.display='none'"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" id="save-assigned-groups-btn">
+            Salvar Grupos
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Modal: Definir Confrontos dos Grupos (AFCON) -->
-    <div id="afcon-pairings-modal" class="modal" style="display:none">
+    <div id="afcon-pairings-modal" class="modal" style="display: none">
       <div class="modal-content large">
-        <span class="close" onclick="document.getElementById('afcon-pairings-modal').style.display='none'">&times;</span>
+        <span
+          class="close"
+          onclick="document.getElementById('afcon-pairings-modal').style.display='none'"
+          >&times;</span
+        >
         <h3>Definir Confrontos - Grupos AFCON</h3>
-        <p>Defina os confrontos por rodada para cada grupo. Se não definir, o padrão será utilizado.</p>
+        <p>
+          Defina os confrontos por rodada para cada grupo. Se não definir, o
+          padrão será utilizado.
+        </p>
         <div id="afcon-pairings-container"></div>
-        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
-          <button class="btn-secondary" onclick="document.getElementById('afcon-pairings-modal').style.display='none'">Cancelar</button>
-          <button class="btn-primary" id="save-afcon-pairings-btn">Salvar Confrontos</button>
+        <div
+          id="afcon-pairings-message"
+          class="modal-message"
+          style="margin-top: 8px; color: #c00"
+        ></div>
+        <div
+          style="
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+          "
+        >
+          <button
+            class="btn-secondary"
+            onclick="document.getElementById('afcon-pairings-modal').style.display='none'"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" id="save-afcon-pairings-btn">
+            Salvar Confrontos
+          </button>
         </div>
       </div>
     </div>
@@ -851,13 +925,19 @@
             <div class="tournament-statistics-grid">
               <div class="tournament-stats-card">
                 <h3>🏆 Top 3 Jogadores da Temporada</h3>
-                <div class="tournament-top-players" id="tournament-top-players-list">
+                <div
+                  class="tournament-top-players"
+                  id="tournament-top-players-list"
+                >
                   <div class="no-data">Nenhum jogador encontrado</div>
                 </div>
               </div>
-              
+
               <div class="tournament-stats-card">
-                <h3>Artilheiros - Temporada <span id="current-year-scorers"></span></h3>
+                <h3>
+                  Artilheiros - Temporada
+                  <span id="current-year-scorers"></span>
+                </h3>
                 <div
                   class="tournament-top-scorers"
                   id="tournament-top-scorers-list"
@@ -867,7 +947,10 @@
               </div>
 
               <div class="tournament-stats-card">
-                <h3>Assistências - Temporada <span id="current-year-assists"></span></h3>
+                <h3>
+                  Assistências - Temporada
+                  <span id="current-year-assists"></span>
+                </h3>
                 <div
                   class="tournament-top-assists"
                   id="tournament-top-assists-list"
@@ -888,7 +971,9 @@
           <!-- Equipe da Rodada -->
           <div id="tournament-roundteam" class="tournament-tab-content">
             <div class="round-team-container" id="round-team-container">
-              <div class="no-data">Selecione uma rodada finalizada para ver a equipe da rodada</div>
+              <div class="no-data">
+                Selecione uma rodada finalizada para ver a equipe da rodada
+              </div>
             </div>
           </div>
         </div>
@@ -1022,21 +1107,27 @@
           <div id="club-statistics" class="club-tab-content">
             <div class="club-statistics-grid">
               <div class="club-stats-card">
-                <h3>Artilheiros - Temporada <span id="current-year-club-scorers"></span></h3>
+                <h3>
+                  Artilheiros - Temporada
+                  <span id="current-year-club-scorers"></span>
+                </h3>
                 <div class="top-scorers-list" id="club-top-scorers">
                   <div class="no-data">Nenhum artilheiro encontrado</div>
                 </div>
               </div>
 
               <div class="club-stats-card">
-                <h3>Assistências - Temporada <span id="current-year-club-assists"></span></h3>
+                <h3>
+                  Assistências - Temporada
+                  <span id="current-year-club-assists"></span>
+                </h3>
                 <div class="top-assists-list" id="club-top-assists">
                   <div class="no-data">Nenhuma assistência encontrada</div>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <!-- Formação -->
           <div id="club-formation" class="club-tab-content">
             <div id="club-formation-field" class="formation-container">
@@ -1119,7 +1210,9 @@
             </div>
 
             <div class="player-info-card">
-              <h3>Estatísticas da Temporada <span id="current-year-player"></span></h3>
+              <h3>
+                Estatísticas da Temporada <span id="current-year-player"></span>
+              </h3>
               <div class="player-stats-summary">
                 <div class="stat-box">
                   <div class="stat-number" id="profile-matches">0</div>
@@ -1218,10 +1311,14 @@
         </div>
 
         <div class="match-details-body">
-          <div class="match-motm-section" id="match-motm-section" style="display: none;">
+          <div
+            class="match-motm-section"
+            id="match-motm-section"
+            style="display: none"
+          >
             <!-- Conteúdo será preenchido dinamicamente -->
           </div>
-          
+
           <div class="match-events-section">
             <h3>Eventos da Partida</h3>
             <div class="match-events-timeline" id="match-events-timeline">
@@ -1236,9 +1333,16 @@
     <div id="coach-profile-modal" class="coach-profile-modal">
       <div class="coach-profile-content">
         <div class="coach-header">
-          <button class="coach-close" onclick="app.closeCoachProfile()">&times;</button>
+          <button class="coach-close" onclick="app.closeCoachProfile()">
+            &times;
+          </button>
           <div class="coach-header-content">
-            <img id="coach-profile-photo" class="coach-photo-large" src="" alt="Treinador" />
+            <img
+              id="coach-profile-photo"
+              class="coach-photo-large"
+              src=""
+              alt="Treinador"
+            />
             <div class="coach-basic-info">
               <h2 id="coach-profile-name">Nome do Treinador</h2>
               <div class="coach-info-details">
@@ -1246,20 +1350,28 @@
                   <span>Idade:</span> <span id="coach-profile-age">-</span>
                 </div>
                 <div class="coach-detail-item">
-                  <span>Nascimento:</span> <span id="coach-profile-birthdate">-</span>
+                  <span>Nascimento:</span>
+                  <span id="coach-profile-birthdate">-</span>
                 </div>
                 <div class="coach-detail-item">
                   <span>Nacionalidade:</span>
                   <span class="nationality-flag">
-                    <img class="flag-icon" id="coach-profile-nationality-flag" src="" alt="Bandeira" />
+                    <img
+                      class="flag-icon"
+                      id="coach-profile-nationality-flag"
+                      src=""
+                      alt="Bandeira"
+                    />
                     <span id="coach-profile-nationality-text">-</span>
                   </span>
                 </div>
                 <div class="coach-detail-item">
-                  <span>Experiência:</span> <span id="coach-profile-experience">-</span>
+                  <span>Experiência:</span>
+                  <span id="coach-profile-experience">-</span>
                 </div>
                 <div class="coach-detail-item">
-                  <span>Formação:</span> <span id="coach-profile-formation">-</span>
+                  <span>Formação:</span>
+                  <span id="coach-profile-formation">-</span>
                 </div>
               </div>
             </div>
@@ -1296,7 +1408,10 @@
           <div class="coach-history-section">
             <div class="coach-info-card">
               <h3>Histórico de Clubes</h3>
-              <div class="club-history-timeline" id="coach-profile-club-history">
+              <div
+                class="club-history-timeline"
+                id="coach-profile-club-history"
+              >
                 <div class="no-matches">Nenhum histórico encontrado</div>
               </div>
             </div>
@@ -1309,7 +1424,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="coach-head-to-head">
             <div class="coach-info-card">
               <h3>🥊 Head to Head</h3>
@@ -1317,10 +1432,14 @@
                 <select id="h2h-opponent-select">
                   <option value="">Selecione um adversário</option>
                 </select>
-                <button class="btn-primary" onclick="app.loadCoachH2H()">Comparar</button>
+                <button class="btn-primary" onclick="app.loadCoachH2H()">
+                  Comparar
+                </button>
               </div>
               <div class="h2h-results" id="coach-h2h-results">
-                <div class="no-data">Selecione um adversário para ver o confronto direto</div>
+                <div class="no-data">
+                  Selecione um adversário para ver o confronto direto
+                </div>
               </div>
             </div>
           </div>
@@ -1332,7 +1451,9 @@
     <div id="match-history-modal" class="match-history-modal">
       <div class="match-history-content">
         <div class="history-header">
-          <button class="history-close" onclick="app.closeMatchHistory()">&times;</button>
+          <button class="history-close" onclick="app.closeMatchHistory()">
+            &times;
+          </button>
           <div class="history-teams">
             <div class="history-team">
               <img id="history-club1-logo" src="" alt="Clube 1" />
@@ -1384,10 +1505,14 @@
     <div id="history-options-modal" class="history-options-modal">
       <div class="history-options-content">
         <div class="options-header">
-          <button class="options-close" onclick="app.closeHistoryOptions()">&times;</button>
+          <button class="options-close" onclick="app.closeHistoryOptions()">
+            &times;
+          </button>
           <div class="options-club">
             <img id="history-options-club-logo" src="" alt="Clube" />
-            <h3>Histórico de <span id="history-options-club-name">Clube</span></h3>
+            <h3>
+              Histórico de <span id="history-options-club-name">Clube</span>
+            </h3>
           </div>
         </div>
         <div class="options-body">
@@ -1403,7 +1528,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    
+
     <!-- App Scripts -->
     <script src="js/cloud-storage.js"></script>
     <script src="js/global-data.js"></script>
