@@ -518,6 +518,27 @@ class PublicTournamentViewer {
                     }" alt="${player.name}" class="player-photo">
                     <div class="player-info">
                         <h4>${player.name}</h4>
+                        <div class="player-subinfo">
+                          <span class="player-position">${
+                            player.position || ""
+                          }</span>
+                          <span class="player-age">${
+                            player.birthdate
+                              ? this.calculateAge(player.birthdate) + " anos"
+                              : ""
+                          }</span>
+                          <span class="player-nationality"><img src="${this.getCountryFlag(
+                            player.nationality
+                          )}" class="flag-icon" alt="${
+        player.nationality
+      }" /> ${player.nationality || ""}</span>
+                          <span class="player-height">${
+                            player.height ? player.height + " cm" : ""
+                          }</span>
+                          <span class="player-number">${
+                            player.number || "?"
+                          }</span>
+                        </div>
                         <div class="player-club">${
                           club?.name || "Sem clube"
                         }</div>
@@ -1182,6 +1203,39 @@ class PublicTournamentViewer {
     });
 
     return scorers.filter((s) => s.goals > 0).sort((a, b) => b.goals - a.goals);
+  }
+
+  // Calculate age helper
+  calculateAge(birthdate) {
+    if (!birthdate) return null;
+    const today = new Date();
+    const birth = new Date(birthdate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  }
+
+  // Country flag helper
+  getCountryFlag(country) {
+    const flags = {
+      Brasil: "https://flagcdn.com/w20/br.png",
+      Argentina: "https://flagcdn.com/w20/ar.png",
+      Nigéria: "https://flagcdn.com/w20/ng.png",
+      Egito: "https://flagcdn.com/w20/eg.png",
+      Gana: "https://flagcdn.com/w20/gh.png",
+      Marrocos: "https://flagcdn.com/w20/ma.png",
+      Senegal: "https://flagcdn.com/w20/sn.png",
+      Camarões: "https://flagcdn.com/w20/cm.png",
+      Angola: "https://flagcdn.com/w20/ao.png",
+      "África do Sul": "https://flagcdn.com/w20/za.png",
+    };
+    return flags[country] || "";
   }
 
   formatDate(dateString) {

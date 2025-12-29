@@ -328,6 +328,11 @@
     margin-bottom: 0.25rem;
 }
 
+.player-subinfo { display:flex; gap:8px; align-items:center; color:rgba(255,255,255,0.8); font-size:0.9rem; margin-bottom:6px; flex-wrap:wrap; }
+.player-subinfo .flag-icon { width:16px; height:11px; margin-right:6px; border:1px solid rgba(255,255,255,0.12); }
+.player-subinfo span { display:inline-flex; align-items:center; gap:6px; }
+.player-card .player-subinfo { opacity:0.95; }
+
 .player-club {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.9rem;

@@ -13,7 +13,7 @@
 
 .player-profile-content {
     background: var(--bg-primary);
-    max-width: 900px;
+    max-width: 1100px;
     margin: 20px auto;
     border-radius: 12px;
     overflow: hidden;
@@ -21,17 +21,107 @@
 }
 
 .player-header {
-    background: linear-gradient(135deg, var(--primary-color), #667eea);
+    background: linear-gradient(135deg, #020c3b, #062093);
     padding: 30px;
     color: white;
     position: relative;
 }
 
-.player-header-content {
+/* Grid layout similar to sofascore profile */
+.player-profile-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+}
+
+.player-left {
+    padding: 20px;
     display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.player-rating-big {
+    text-align: center;
+}
+
+.rating-badge-large {
+    font-size: 3.4rem;
+    font-weight: 800;
+    width: 120px;
+    height: 120px;
+    line-height: 120px;
+    border-radius: 999px;
+    display: inline-block;
+    color: white;
+    background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.05));
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    margin-bottom: 8px;
+}
+
+.player-form {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.player-form .form-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.form-win { background: #2ecc71; }
+.form-draw { background: #f1c40f; }
+.form-loss { background: #e74c3c; }
+
+.player-basic-stats { display:flex; gap:10px; flex-wrap:wrap; }
+.stat-box.small { width: calc(50% - 5px); padding:12px; }
+.stat-box.small .stat-number { font-size: 1.6rem; font-weight:700; color:var(--primary-color); }
+
+.player-photo-large { background: #f3f3f3; display:block; }
+
+.player-right { padding: 20px; }
+
+.player-tabs { display:flex; gap:8px; margin-bottom:12px; }
+.tab-btn { padding:8px 12px; background:var(--bg-secondary); border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+.tab-btn.active { background:var(--primary-color); color:#fff; }
+
+.tab-contents { min-height:200px; }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+@media (max-width: 900px) {
+    .player-profile-grid { grid-template-columns: 1fr; }
+    .player-left { flex-direction:row; align-items:center; justify-content:space-between; }
+    .rating-badge-large { width:80px; height:80px; line-height:80px; font-size:2rem; }
+}
+.player-header-content {
     align-items: center;
     gap: 25px;
 }
+
+/* Compact personal info displayed in header */
+.player-personal-info { display:flex; gap:18px; align-items:center; margin-left: 20px; flex-wrap:wrap; }
+.player-personal-info .personal-item { display:flex; flex-direction:column; min-width:100px; }
+.player-personal-info .player-detail-label { font-size:0.75rem; color: rgba(255,255,255,0.85); }
+.player-personal-info .player-detail-value { font-size:0.95rem; font-weight:700; color: #ffffff; }
+@media (max-width: 900px) {
+  .player-personal-info { margin-left: 0; gap:10px; }
+  .player-personal-info .personal-item { min-width: auto; }
+}
+
+/* Subinfo abaixo do nome nos cartões */
+.player-subinfo { display:flex; gap:8px; align-items:center; color:var(--text-secondary); font-size:0.85rem; margin-top:6px; flex-wrap:wrap; }
+.player-subinfo .flag-icon { width:16px; height:11px; margin-right:6px; border:1px solid var(--border-light); }
+.player-subinfo span { display:inline-flex; align-items:center; gap:6px; }
+.player-card .player-subinfo { font-size:0.8rem; opacity:0.95; }
+.player-card img { width:48px; height:48px; border-radius:6px; object-fit:cover; }
+
+/* Ensure admin cards ("card") show subinfo inline */
+.card .player-subinfo { margin-top: 8px; font-size:0.95rem; color: var(--text-secondary); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
 .player-photo-large {
     width: 120px;
@@ -92,6 +182,7 @@
 
 .player-body {
     padding: 30px;
+    background-color: #062093;
 }
 
 .player-stats-grid {

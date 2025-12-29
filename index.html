@@ -454,6 +454,7 @@
             <option value="national">Liga Nacional (20 clubes)</option>
             <option value="knockout">Mata-mata (8, 16 ou 32 clubes)</option>
             <option value="afcon">Copa Africana de Nações (24 clubes)</option>
+            <option value="worldcup">FIFA World Cup (48 seleções)</option>
           </select>
           <input type="date" id="tournament-start" required />
           <textarea
@@ -711,6 +712,83 @@
             Cancelar
           </button>
           <button class="btn-primary" id="save-afcon-pairings-btn">
+            Salvar Confrontos
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Atribuir Times aos Grupos (World Cup) -->
+    <div id="assign-worldgroups-modal" class="modal" style="display: none">
+      <div class="modal-content large">
+        <span
+          class="close"
+          onclick="document.getElementById('assign-worldgroups-modal').style.display='none'"
+          >&times;</span
+        >
+        <h3>Atribuir Times aos Grupos - FIFA World Cup</h3>
+        <p>Selecione manualmente 4 seleções para cada grupo (A-L).</p>
+        <div id="assign-worldgroups-container"></div>
+        <div
+          id="assign-worldgroups-message"
+          class="modal-message"
+          style="margin-top: 8px; color: #c00"
+        ></div>
+        <div
+          style="
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+          "
+        >
+          <button
+            class="btn-secondary"
+            onclick="document.getElementById('assign-worldgroups-modal').style.display='none'"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" id="save-assigned-worldgroups-btn">
+            Salvar Grupos
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Definir Confrontos dos Grupos (World Cup) -->
+    <div id="worldcup-pairings-modal" class="modal" style="display: none">
+      <div class="modal-content large">
+        <span
+          class="close"
+          onclick="document.getElementById('worldcup-pairings-modal').style.display='none'"
+          >&times;</span
+        >
+        <h3>Definir Confrontos - Grupos FIFA World Cup</h3>
+        <p>
+          Defina os confrontos por rodada para cada grupo. Se não definir, o
+          padrão será utilizado.
+        </p>
+        <div id="worldcup-pairings-container"></div>
+        <div
+          id="worldcup-pairings-message"
+          class="modal-message"
+          style="margin-top: 8px; color: #c00"
+        ></div>
+        <div
+          style="
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+          "
+        >
+          <button
+            class="btn-secondary"
+            onclick="document.getElementById('worldcup-pairings-modal').style.display='none'"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" id="save-worldcup-pairings-btn">
             Salvar Confrontos
           </button>
         </div>
@@ -1146,12 +1224,6 @@
             &times;
           </button>
           <div class="player-header-content">
-            <img
-              id="profile-photo"
-              class="player-photo-large"
-              src=""
-              alt="Jogador"
-            />
             <div class="player-basic-info">
               <h2 id="profile-name">Nome do Jogador</h2>
               <div id="profile-position" class="player-position-badge">
@@ -1167,24 +1239,20 @@
                 <span id="profile-club-name">Nome do Clube</span>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div class="player-body">
-          <div class="player-stats-grid">
-            <div class="player-info-card">
-              <h3>Informações Pessoais</h3>
-              <div class="player-detail-item">
+            <!-- Personal info moved here -->
+            <div class="player-personal-info">
+              <div class="personal-item">
                 <span class="player-detail-label">Idade</span>
                 <span class="player-detail-value" id="profile-age">-</span>
               </div>
-              <div class="player-detail-item">
-                <span class="player-detail-label">Data de Nascimento</span>
+              <div class="personal-item">
+                <span class="player-detail-label">Nascimento</span>
                 <span class="player-detail-value" id="profile-birthdate"
                   >-</span
                 >
               </div>
-              <div class="player-detail-item">
+              <div class="personal-item">
                 <span class="player-detail-label">Nacionalidade</span>
                 <span
                   class="player-detail-value nationality-flag"
@@ -1199,63 +1267,128 @@
                   <span id="profile-nationality-text">-</span>
                 </span>
               </div>
-              <div class="player-detail-item">
+              <div class="personal-item">
                 <span class="player-detail-label">Altura</span>
                 <span class="player-detail-value" id="profile-height">-</span>
               </div>
-              <div class="player-detail-item">
+              <div class="personal-item">
                 <span class="player-detail-label">Número</span>
                 <span class="player-detail-value" id="profile-number">-</span>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div class="player-info-card">
-              <h3>
-                Estatísticas da Temporada <span id="current-year-player"></span>
-              </h3>
-              <div class="player-stats-summary">
-                <div class="stat-box">
+        <div class="player-body">
+          <div class="player-profile-grid">
+            <div class="player-left">
+              <div class="left-photo">
+                <img
+                  id="profile-photo"
+                  class="player-photo-large"
+                  src=""
+                  alt="Jogador"
+                />
+              </div>
+              <div class="player-rating-big">
+                <div id="profile-rating-big" class="rating-badge-large">-</div>
+                <div id="profile-form" class="player-form">&nbsp;</div>
+              </div>
+
+              <div class="player-basic-stats">
+                <div class="stat-box small">
                   <div class="stat-number" id="profile-matches">0</div>
                   <div class="stat-label">Jogos</div>
                 </div>
-                <div class="stat-box">
+                <div class="stat-box small">
                   <div class="stat-number" id="profile-goals">0</div>
                   <div class="stat-label">Gols</div>
                 </div>
-                <div class="stat-box">
+                <div class="stat-box small">
                   <div class="stat-number" id="profile-assists">0</div>
                   <div class="stat-label">Assistências</div>
                 </div>
-                <div class="stat-box">
+                <div class="stat-box small">
                   <div class="stat-number" id="profile-yellow-cards">0</div>
-                  <div class="stat-label">Cartões Amarelos</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-number" id="profile-red-cards">0</div>
-                  <div class="stat-label">Cartões Vermelhos</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-number" id="profile-rating">-</div>
-                  <div class="stat-label">Nota Média</div>
+                  <div class="stat-label">Amarelos</div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="club-history-section">
-            <div class="player-info-card">
-              <h3>Histórico de Clubes</h3>
-              <div class="club-history-timeline" id="profile-club-history">
-                <div class="no-matches">Nenhum histórico encontrado</div>
+            <div class="player-right">
+              <div class="player-tabs">
+                <button class="tab-btn active" data-tab="overview">
+                  Visão Geral
+                </button>
+                <button class="tab-btn" data-tab="stats">Estatísticas</button>
+                <button class="tab-btn" data-tab="matches">Partidas</button>
+                <button class="tab-btn" data-tab="career">Carreira</button>
               </div>
-            </div>
-          </div>
 
-          <div class="player-matches-history">
-            <div class="player-info-card">
-              <h3>Histórico de Partidas - Temporada Atual</h3>
-              <div class="matches-timeline" id="profile-matches-timeline">
-                <div class="no-matches">Nenhuma partida encontrada</div>
+              <div class="tab-contents">
+                <div id="profile-tab-overview" class="tab-content active">
+                  <div class="player-info-card">
+                    <h3>Informações Pessoais</h3>
+                    <p>
+                      As informações pessoais são exibidas no cabeçalho do
+                      perfil.
+                    </p>
+                  </div>
+                </div>
+
+                <div id="profile-tab-stats" class="tab-content">
+                  <div class="player-info-card">
+                    <h3>
+                      Estatísticas da Temporada
+                      <span id="current-year-player"></span>
+                    </h3>
+                    <div class="player-stats-summary">
+                      <div class="stat-box">
+                        <div class="stat-number" id="profile-goals">0</div>
+                        <div class="stat-label">Gols</div>
+                      </div>
+                      <div class="stat-box">
+                        <div class="stat-number" id="profile-assists">0</div>
+                        <div class="stat-label">Assistências</div>
+                      </div>
+                      <div class="stat-box">
+                        <div class="stat-number" id="profile-yellow-cards">
+                          0
+                        </div>
+                        <div class="stat-label">Cartões Amarelos</div>
+                      </div>
+                      <div class="stat-box">
+                        <div class="stat-number" id="profile-red-cards">0</div>
+                        <div class="stat-label">Cartões Vermelhos</div>
+                      </div>
+                      <div class="stat-box">
+                        <div class="stat-number" id="profile-rating">-</div>
+                        <div class="stat-label">Nota Média</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="profile-tab-matches" class="tab-content">
+                  <div class="player-info-card">
+                    <h3>Histórico de Partidas - Temporada Atual</h3>
+                    <div class="matches-timeline" id="profile-matches-timeline">
+                      <div class="no-matches">Nenhuma partida encontrada</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="profile-tab-career" class="tab-content">
+                  <div class="player-info-card">
+                    <h3>Histórico de Clubes</h3>
+                    <div
+                      class="club-history-timeline"
+                      id="profile-club-history"
+                    >
+                      <div class="no-matches">Nenhum histórico encontrado</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

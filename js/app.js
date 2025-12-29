@@ -309,16 +309,22 @@ class TournamentManager {
           type,
           timestamp: new Date().toISOString(),
           error: error && error.message ? error.message : String(error),
-          payloadSnippet: (typeof toSave === 'string' ? toSave : JSON.stringify(toSave)).slice(0, 2000),
+          payloadSnippet: (typeof toSave === "string"
+            ? toSave
+            : JSON.stringify(toSave)
+          ).slice(0, 2000),
         });
         // Persistir localmente as últimas 50 ocorrências para recuperação remota se necessário
         try {
-          localStorage.setItem('saveErrors', JSON.stringify(this.data.__saveErrors.slice(-50)));
+          localStorage.setItem(
+            "saveErrors",
+            JSON.stringify(this.data.__saveErrors.slice(-50))
+          );
         } catch (e) {
           // ignore storage errors
         }
       } catch (e) {
-        console.error('Erro ao registrar saveError:', e);
+        console.error("Erro ao registrar saveError:", e);
       }
 
       alert(`Erro ao salvar ${type}: ${error.message}`);
@@ -330,7 +336,7 @@ class TournamentManager {
       this.data.__saveErrors ||
       (function () {
         try {
-          return JSON.parse(localStorage.getItem('saveErrors') || '[]');
+          return JSON.parse(localStorage.getItem("saveErrors") || "[]");
         } catch (e) {
           return [];
         }
@@ -896,22 +902,27 @@ class TournamentManager {
         }" class="player-club-badge">
           </div>
           <h3>${player.name}</h3>
-          <p><strong>Posição:</strong> <span class="position-badge ${player.position.toLowerCase()}">${
-          player.position
-        }</span></p>
-          <p><strong>Idade:</strong> ${
-            this.calculateAge(player.birthdate) || "N/A"
-          } anos</p>
-          <p><strong>Nacionalidade:</strong> 
-            <span class="nationality-flag">
-              <img src="${this.getCountryFlag(
-                player.nationality
-              )}" class="flag-icon" alt="${
-          player.nationality
-        }" style="width: 16px; height: 12px; margin-right: 5px;">
-              ${player.nationality}
-            </span>
-          </p>
+          <div class="player-subinfo">
+            <span class="player-position"><span class="position-badge ${(
+              player.position || ""
+            ).toLowerCase()}">${player.position || ""}</span></span>
+            <span class="player-age">${
+              this.calculateAge(player.birthdate)
+                ? this.calculateAge(player.birthdate) + " anos"
+                : ""
+            }</span>
+            <span class="player-nationality"><img src="${this.getCountryFlag(
+              player.nationality
+            )}" class="flag-icon" alt="${player.nationality}" /> ${
+          player.nationality || ""
+        }</span>
+            <span class="player-height">${
+              player.height ? player.height + " cm" : ""
+            }</span>
+            <span class="player-number">${
+              player.number ? "#" + player.number : ""
+            }</span>
+          </div>
           <p><strong>Clube:</strong> ${club ? club.name : "Sem clube"}</p>
           <div style="display: flex; gap: 10px; margin-top: 15px;">
             <button class="btn-primary" onclick="app.showPlayerProfile(${
@@ -2816,7 +2827,9 @@ class TournamentManager {
     const allSelects = container.querySelectorAll(".group-slot");
 
     const updateGroupSelectsState = () => {
-      const selected = Array.from(allSelects).map((s) => s.value).filter(Boolean);
+      const selected = Array.from(allSelects)
+        .map((s) => s.value)
+        .filter(Boolean);
 
       // disable options already selected in other selects
       allSelects.forEach((s) => {
@@ -2827,7 +2840,8 @@ class TournamentManager {
             return;
           }
           opt.disabled = false;
-          if (opt.value !== currentVal && selected.includes(opt.value)) opt.disabled = true;
+          if (opt.value !== currentVal && selected.includes(opt.value))
+            opt.disabled = true;
         });
       });
 
@@ -2847,10 +2861,12 @@ class TournamentManager {
       });
 
       if (duplicateFound) {
-        messageDiv.textContent = "Um clube foi atribuído mais de uma vez. Revise as seleções.";
+        messageDiv.textContent =
+          "Um clube foi atribuído mais de uma vez. Revise as seleções.";
         saveBtn.disabled = true;
       } else if (!allFilled) {
-        messageDiv.textContent = "Preencha os 4 clubes de cada grupo para habilitar salvar.";
+        messageDiv.textContent =
+          "Preencha os 4 clubes de cada grupo para habilitar salvar.";
         saveBtn.disabled = true;
       } else {
         messageDiv.textContent = "";
@@ -2858,7 +2874,9 @@ class TournamentManager {
       }
     };
 
-    Array.from(allSelects).forEach((s) => s.addEventListener("change", updateGroupSelectsState));
+    Array.from(allSelects).forEach((s) =>
+      s.addEventListener("change", updateGroupSelectsState)
+    );
     updateGroupSelectsState();
     saveBtn.onclick = () => this.saveAssignedGroups(tournamentId);
   }
@@ -2881,7 +2899,7 @@ class TournamentManager {
       const selects = Array.from(gDiv.querySelectorAll(".group-slot"));
       const ids = selects.map((s) => parseInt(s.value)).filter(Boolean);
       if (ids.length !== 4) {
-        messageDiv.style.color = '#c00';
+        messageDiv.style.color = "#c00";
         messageDiv.textContent = `Preencha os 4 clubes do Grupo ${gName}`;
         return;
       }
@@ -2889,8 +2907,9 @@ class TournamentManager {
       const allAssigned = Object.values(groups).flat();
       for (const id of ids) {
         if (allAssigned.includes(id)) {
-          messageDiv.style.color = '#c00';
-          messageDiv.textContent = 'Um clube foi atribuído a mais de um grupo. Revise as seleções.';
+          messageDiv.style.color = "#c00";
+          messageDiv.textContent =
+            "Um clube foi atribuído a mais de um grupo. Revise as seleções.";
           return;
         }
       }
@@ -2901,22 +2920,23 @@ class TournamentManager {
 
     // UI feedback
     saveBtn.disabled = true;
-    messageDiv.style.color = '#000';
-    messageDiv.textContent = 'Salvando grupos...';
+    messageDiv.style.color = "#000";
+    messageDiv.textContent = "Salvando grupos...";
 
     try {
       await this.saveData("tournaments");
-      messageDiv.style.color = '#080';
-      messageDiv.textContent = 'Grupos salvos com sucesso!';
+      messageDiv.style.color = "#080";
+      messageDiv.textContent = "Grupos salvos com sucesso!";
 
       setTimeout(() => {
         document.getElementById("assign-groups-modal").style.display = "none";
-        messageDiv.textContent = '';
+        messageDiv.textContent = "";
         this.showDefineAfconPairingsModal(tournamentId);
       }, 600);
     } catch (e) {
-      messageDiv.style.color = '#c00';
-      messageDiv.textContent = 'Erro ao salvar: ' + (e && e.message ? e.message : e);
+      messageDiv.style.color = "#c00";
+      messageDiv.textContent =
+        "Erro ao salvar: " + (e && e.message ? e.message : e);
       saveBtn.disabled = false;
     }
   }
@@ -3007,16 +3027,16 @@ class TournamentManager {
     document.getElementById("afcon-pairings-modal").style.display = "block";
 
     // Setup pairing selects: ensure no duplicates per round and manage save button state
-    const messageDiv = document.getElementById('afcon-pairings-message');
-    const saveBtn = document.getElementById('save-afcon-pairings-btn');
+    const messageDiv = document.getElementById("afcon-pairings-message");
+    const saveBtn = document.getElementById("save-afcon-pairings-btn");
 
     const updatePairingSelectsState = () => {
       let ok = true;
-      const groups = container.querySelectorAll('.group-pairings');
+      const groups = container.querySelectorAll(".group-pairings");
       groups.forEach((gDiv) => {
-        const rounds = gDiv.querySelectorAll('.pairings-round');
+        const rounds = gDiv.querySelectorAll(".pairings-round");
         rounds.forEach((rDiv) => {
-          const selects = Array.from(rDiv.querySelectorAll('select'));
+          const selects = Array.from(rDiv.querySelectorAll("select"));
           const values = selects.map((s) => s.value).filter(Boolean);
 
           // disable options used in other selects of the same round
@@ -3028,25 +3048,33 @@ class TournamentManager {
                 return;
               }
               opt.disabled = false;
-              if (opt.value !== currentVal && values.includes(opt.value)) opt.disabled = true;
+              if (opt.value !== currentVal && values.includes(opt.value))
+                opt.disabled = true;
             });
           });
 
-          if (values.length !== selects.length || new Set(values).size !== values.length) ok = false;
+          if (
+            values.length !== selects.length ||
+            new Set(values).size !== values.length
+          )
+            ok = false;
         });
       });
 
       if (!ok) {
-        messageDiv.textContent = 'Cada rodada deve conter times diferentes e seleções completas.';
+        messageDiv.textContent =
+          "Cada rodada deve conter times diferentes e seleções completas.";
         saveBtn.disabled = true;
       } else {
-        messageDiv.textContent = '';
+        messageDiv.textContent = "";
         saveBtn.disabled = false;
       }
     };
 
-    const allPairSelects = container.querySelectorAll('.pair-home, .pair-away');
-    Array.from(allPairSelects).forEach((s) => s.addEventListener('change', updatePairingSelectsState));
+    const allPairSelects = container.querySelectorAll(".pair-home, .pair-away");
+    Array.from(allPairSelects).forEach((s) =>
+      s.addEventListener("change", updatePairingSelectsState)
+    );
     updatePairingSelectsState();
 
     saveBtn.onclick = () => this.saveAfconPairings(tournamentId);
@@ -3060,8 +3088,8 @@ class TournamentManager {
 
     const tournament = this.data.tournaments[tournamentIndex];
     const container = document.getElementById("afcon-pairings-container");
-    const messageDiv = document.getElementById('afcon-pairings-message');
-    const saveBtn = document.getElementById('save-afcon-pairings-btn');
+    const messageDiv = document.getElementById("afcon-pairings-message");
+    const saveBtn = document.getElementById("save-afcon-pairings-btn");
     const pairingsObj = {};
 
     const pairItems = container.querySelectorAll(".pairing-item");
@@ -3085,7 +3113,7 @@ class TournamentManager {
           const homeId = Array.isArray(pair) ? pair[0] : pair.home;
           const awayId = Array.isArray(pair) ? pair[1] : pair.away;
           if (!groupTeams.includes(homeId) || !groupTeams.includes(awayId)) {
-            messageDiv.style.color = '#c00';
+            messageDiv.style.color = "#c00";
             messageDiv.textContent = `Par inválido no Grupo ${g}, verifique os times selecionados.`;
             return;
           }
@@ -3098,13 +3126,13 @@ class TournamentManager {
 
     // UI feedback
     saveBtn.disabled = true;
-    messageDiv.style.color = '#000';
-    messageDiv.textContent = 'Salvando confrontos...';
+    messageDiv.style.color = "#000";
+    messageDiv.textContent = "Salvando confrontos...";
 
     try {
       await this.saveData("tournaments");
-      messageDiv.style.color = '#080';
-      messageDiv.textContent = 'Confrontos salvos com sucesso!';
+      messageDiv.style.color = "#080";
+      messageDiv.textContent = "Confrontos salvos com sucesso!";
 
       // Gerar a estrutura com os dados manuais
       const clubs = this.getUserData("clubs").filter(
@@ -3116,11 +3144,12 @@ class TournamentManager {
 
       setTimeout(() => {
         document.getElementById("afcon-pairings-modal").style.display = "none";
-        messageDiv.textContent = '';
+        messageDiv.textContent = "";
       }, 600);
     } catch (e) {
-      messageDiv.style.color = '#c00';
-      messageDiv.textContent = 'Erro ao salvar: ' + (e && e.message ? e.message : e);
+      messageDiv.style.color = "#c00";
+      messageDiv.textContent =
+        "Erro ao salvar: " + (e && e.message ? e.message : e);
       saveBtn.disabled = false;
     }
   }
@@ -4308,6 +4337,85 @@ class TournamentManager {
     return flags[country] || "https://flagcdn.com/w20/xx.png";
   }
 
+  // Obter estatísticas de temporada do jogador (filtradas pelo ano)
+  getPlayerSeasonStats(player, seasonYear = new Date().getFullYear()) {
+    const finishedMatches = this.getUserData("matches").filter((m) => {
+      if (m.status !== "finished") return false;
+      if (!seasonYear) return true; // null -> don't filter by year
+
+      // Try to extract year from date, fallback to m.year
+      let matchYear = null;
+      if (m.date) {
+        const d = new Date(m.date);
+        if (!isNaN(d)) matchYear = d.getFullYear();
+      }
+      if (!matchYear && m.year) matchYear = m.year;
+
+      return matchYear === seasonYear;
+    });
+
+    const stats = {
+      matches: 0,
+      goals: 0,
+      assists: 0,
+      yellowCards: 0,
+      redCards: 0,
+      matchHistory: [],
+      totalRating: 0,
+      averageRating: 0,
+    };
+
+    finishedMatches.forEach((match) => {
+      let playerInMatch = false;
+      let playerInCurrentClub = false;
+      const matchEvents = [];
+      const homeTeam = this.data.clubs.find((c) => c.id == match.homeTeamId);
+      const awayTeam = this.data.clubs.find((c) => c.id == match.awayTeamId);
+
+      if (match.events) {
+        match.events.forEach((event) => {
+          if (event.playerId == player.id || event.player === player.name) {
+            playerInMatch = true;
+            matchEvents.push(event);
+
+            // Contabilizar eventos do jogador independentemente de como o time está representado
+            switch (event.type) {
+              case "Gol":
+                stats.goals++;
+                break;
+              case "Assistência":
+                stats.assists++;
+                break;
+              case "Cartão Amarelo":
+                stats.yellowCards++;
+                break;
+              case "Cartão Vermelho":
+                stats.redCards++;
+                break;
+            }
+          }
+        });
+      }
+
+      if (playerInMatch && playerInCurrentClub) {
+        stats.matches++;
+        stats.matchHistory.push({
+          date: match.date,
+          homeTeam: homeTeam,
+          awayTeam: awayTeam,
+          score: `${match.homeScore} - ${match.awayScore}`,
+          events: match.events
+            ? match.events.filter(
+                (e) => e.playerId == player.id || e.player === player.name
+              )
+            : [],
+        });
+      }
+    });
+
+    return stats;
+  }
+
   // Perfil do Jogador
   showPlayerProfile(playerId) {
     const player = this.data.players.find((p) => p.id === playerId);
@@ -4377,7 +4485,11 @@ class TournamentManager {
           homeTeam: homeTeam,
           awayTeam: awayTeam,
           score: `${match.homeScore} - ${match.awayScore}`,
-          events: matchEvents,
+          events: match.events
+            ? match.events.filter(
+                (e) => e.playerId == player.id || e.player === player.name
+              )
+            : [],
         });
       }
     });
@@ -4442,8 +4554,83 @@ class TournamentManager {
       ratingElement.className = "stat-number";
     }
 
+    // Atualizar badge grande
+    const ratingBig = document.getElementById("profile-rating-big");
+    if (ratingBig) {
+      if (playerStats.matches > 0) {
+        ratingBig.textContent = automaticRating.toFixed(1);
+        ratingBig.className = `rating-badge-large ${this.getRatingClass(
+          automaticRating
+        )}`;
+      } else {
+        ratingBig.textContent = "-";
+        ratingBig.className = "rating-badge-large";
+      }
+    }
+
+    // Form recente (últimos 5 jogos): win/draw/loss
+    const formContainer = document.getElementById("profile-form");
+    if (formContainer) {
+      const ordered = [...playerStats.matchHistory].sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      );
+      const lastFive = ordered.slice(0, 5);
+      formContainer.innerHTML = "";
+      lastFive.forEach((m) => {
+        // determinar resultado para o clube do jogador
+        const playerClubId = player.clubId;
+        let teamIsHome = m.homeTeam && m.homeTeam.id == playerClubId;
+        let goalsFor = teamIsHome
+          ? parseInt(m.score.split("-")[0]) || 0
+          : parseInt(m.score.split("-")[1]) || 0;
+        let goalsAgainst = teamIsHome
+          ? parseInt(m.score.split("-")[1]) || 0
+          : parseInt(m.score.split("-")[0]) || 0;
+        let cls = "";
+        let title = "";
+        if (goalsFor > goalsAgainst) {
+          cls = "form-win";
+          title = "Vitória";
+        } else if (goalsFor == goalsAgainst) {
+          cls = "form-draw";
+          title = "Empate";
+        } else {
+          cls = "form-loss";
+          title = "Derrota";
+        }
+        const dot = document.createElement("span");
+        dot.className = "form-dot " + cls;
+        dot.title = `${new Date(m.date).toLocaleDateString(
+          "pt-BR"
+        )}: ${title} (${m.score})`;
+        formContainer.appendChild(dot);
+      });
+      if (lastFive.length === 0)
+        formContainer.innerHTML = '<div class="no-matches">Sem partidas</div>';
+    }
+
     this.loadPlayerClubHistory(player);
     this.loadPlayerMatches(playerStats.matchHistory);
+
+    // Inicializar abas do profile (na primeira vez)
+    if (!this._playerTabsSetup) {
+      this._playerTabsSetup = true;
+      const tabs = document.querySelectorAll(".player-tabs .tab-btn");
+      tabs.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const t = btn.dataset.tab;
+          document
+            .querySelectorAll(".player-tabs .tab-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          document
+            .querySelectorAll(".tab-content")
+            .forEach((tc) => tc.classList.remove("active"));
+          const el = document.getElementById("profile-tab-" + t);
+          if (el) el.classList.add("active");
+        });
+      });
+    }
 
     document.getElementById("player-profile-modal").style.display = "block";
   }
@@ -5027,7 +5214,7 @@ class TournamentManager {
       (m) => m.homeTeamId == club.id || m.awayTeamId == club.id
     );
 
-    // Calcular estatísticas do clube
+    // Calcular estatísticas do clube (todas as partidas)
     const clubStats = {
       matches: clubMatches.length,
       wins: 0,
@@ -5098,7 +5285,13 @@ class TournamentManager {
 
     this.loadClubSquad(clubPlayers);
     this.loadClubMatches(clubMatches, club);
-    this.loadClubStatistics(clubPlayers, clubMatches);
+
+    // Estatísticas referentes à temporada atual (filtradas por ano)
+    const currentYear = new Date().getFullYear();
+    const seasonMatches = clubMatches.filter(
+      (m) => new Date(m.date).getFullYear() === currentYear
+    );
+    this.loadClubStatistics(clubPlayers, seasonMatches);
 
     // Salvar clubId no modal para uso posterior
     document.getElementById("club-profile-modal").dataset.clubId = clubId;
@@ -5612,9 +5805,27 @@ class TournamentManager {
                 }; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">${this.formatPlayerName(
                   player.name
                 )}</span>
-                <span class="player-number" style="background: rgba(255,255,255,0.2); color: ${
+                <div class="player-subinfo" style="color: ${
                   clubColors.text
-                };">${player.number || "?"}</span>
+                }; opacity:0.95;">
+                  <span class="player-position">${player.position || ""}</span>
+                  <span class="player-age">${
+                    player.age
+                      ? this.calculateAge(player.birthdate) + " anos"
+                      : ""
+                  }</span>
+                  <span class="player-nationality"><img src="${this.getCountryFlag(
+                    player.nationality
+                  )}" class="flag-icon" alt="${player.nationality}" /> ${
+                  player.nationality || ""
+                }</span>
+                  <span class="player-height">${
+                    player.height ? player.height + " cm" : ""
+                  }</span>
+                  <span class="player-number" style="background: rgba(255,255,255,0.2); color: ${
+                    clubColors.text
+                  };">${player.number || "?"}</span>
+                </div>
               </div>
               <button class="remove-player" onclick="app.removeFromLineup('${positionType}', ${actualIndex})">&times;</button>
             </div>
@@ -5756,7 +5967,21 @@ class TournamentManager {
         }" alt="${player.name}">
         <div class="player-info">
           <span class="player-name">${player.name}</span>
-          <span class="player-number">${player.number || "?"}</span>
+          <div class="player-subinfo">
+            <span class="player-position">${player.position || ""}</span>
+            <span class="player-age">${
+              player.age ? this.calculateAge(player.birthdate) + " anos" : ""
+            }</span>
+            <span class="player-nationality"><img src="${this.getCountryFlag(
+              player.nationality
+            )}" class="flag-icon" alt="${player.nationality}" /> ${
+      player.nationality || ""
+    }</span>
+            <span class="player-height">${
+              player.height ? player.height + " cm" : ""
+            }</span>
+            <span class="player-number">${player.number || "?"}</span>
+          </div>
         </div>
         <button class="remove-player" onclick="app.removeFromLineup('${position}', ${index})">&times;</button>
       </div>
