@@ -1244,7 +1244,7 @@ class PublicTournamentViewer {
     return date.toLocaleDateString("pt-BR");
   }
 }
-
+s
 // Initialize when page loads
 let publicViewer;
 document.addEventListener("DOMContentLoaded", () => {
