@@ -5594,7 +5594,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  flex-direction: row-reverse;
+  flex-direction: row;
   gap: 10px;
 }
 
