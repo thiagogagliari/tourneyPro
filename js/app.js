@@ -4325,6 +4325,8 @@ class TournamentManager {
       "Nova Caledônia": "https://flagcdn.com/w20/nc.png",
       Bahamas: "https://flagcdn.com/w20/bs.png",
       Congo: "https://flagcdn.com/w20/cg.png",
+      Tanzânia: "https://flagcdn.com/w20/tz.png",
+      Uganda: "https://flagcdn.com/w20/ug.png",
       UEFA: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZP1mQZa3mJngyadCmDM6KFijvemaeL21h8w&s",
       CONMEBOL:
         "https://www.vhv.rs/dpng/d/417-4177504_conmebol-logo-png-conmebol-logo-transparent-png.png",
